@@ -37,6 +37,13 @@
    #define VOID 49
    #define VOLATILE 50
    #define WHILE 51
+   #define PLUS 52
+   #define MINUS 53
+   #define MULT 54
+   #define DIV 55
+   #define GREATER 56
+   #define LESS 57
+   #define EQUAL 58
      
 %}
 
@@ -88,11 +95,21 @@ operators [+|-|*|/|&|\(|\)|\[|\]|>|<|>=|<=|&&|==|!=]
 <string_literal>{double_quotes}    {yymore(); printf("\nString: %s at line number: %d.", yytext, yylineno); BEGIN(INITIAL);}
 <string_literal>\n                 {printf("\nUnterminated string: %s at line number: %d.", yytext, yylineno);}
 <string_literal>[^\\]               {yymore();}
-                      
-[+|-]?{digit}*\.?{digit}*(E[+|-]?{digit}+*\.?{digit}*)?											{printf("\nConstant: %s , line number: %d.",yytext,yylineno);}
-[+|-]?{digit}*\.?{digit}*E.?											{printf("\nError No exponent provided: %s , line number: %d.",yytext,yylineno);}
+      
+
+
+"+" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(PLUS);}
+"-" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(MINUS);}
+"*" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(MULT);}
+"/" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(DIV);}
+">" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(GREATER);}
+"<" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(LESS);}
+"=" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(EQUAL);}  
+
+{digit}*\.?{digit}*(E[+|-]?{digit}+*\.?{digit}*)?											{printf("\nConstant: %s , line number: %d.",yytext,yylineno);}
+{digit}*\.?{digit}*E.?											{printf("\nError No exponent provided: %s , line number: %d.",yytext,yylineno);}
 \'.\'											{printf("\nConstant: %s , line number: %d.",yytext,yylineno);}
-{operators} 										{printf("\nOperator: %s , line number: %d.",yytext,yylineno);} 
+
 
 "auto"                          {printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(AUTO);}   
 "break"       									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(BREAK);}
