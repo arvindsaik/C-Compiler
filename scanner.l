@@ -105,7 +105,7 @@ operators [+|-|*|/|&|\(|\)|\[|\]|>|<|>=|<=|&&|==|!=]
 ">" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(GREATER);}
 "<" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(LESS);}
 "=" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(EQUAL);}  
-
+                                            
 {digit}*\.?{digit}*(E[+|-]?{digit}+*\.?{digit}*)?											{printf("\nConstant: %s , line number: %d.",yytext,yylineno);}
 {digit}*\.?{digit}*E.?											{printf("\nError No exponent provided: %s , line number: %d.",yytext,yylineno);}
 \'.\'											{printf("\nConstant: %s , line number: %d.",yytext,yylineno);}
@@ -144,6 +144,11 @@ operators [+|-|*|/|&|\(|\)|\[|\]|>|<|>=|<=|&&|==|!=]
 "volatile"        							{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(VOLATILE);}
 "while"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(WHILE);}
 {identifier}  									{printf("\nIdentifier: %s , line number: %d.", yytext, yylineno);}
+
+                      
+{identifier}+\[{digit}*\]				 {printf("\nArray declaration: %s, Line Number: %d", yytext, yylineno);}
+\*+[ ]*{identifier} 						 {printf("\nPointer declaration: %s, Line Number: %d", yytext, yylineno);}
+ 
 .
 %%
 int main()
@@ -155,11 +160,8 @@ int main()
   while(newtoken){
 	newtoken = yylex();
   }
-	
   return 0;
-
 }
-
 int yywrap()
 {
 return 1;
