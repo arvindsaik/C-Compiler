@@ -8,8 +8,12 @@
 
 identifier [a-zA-Z_]([a-zA-Z0-9])*
 digit [0-9]
-escape_sequence [\a|\n|\b|\t|\f|\r|\v|\\|\"|\'|\?]
+
+escape_sequence [a|n|b|t|f|r|v|\|"|'|?]
 next_line [n]
+audible_bell [a]
+backspace [b]
+
 backslash [\]
 double_quotes ["]
 %%
@@ -44,8 +48,10 @@ double_quotes ["]
 
 
 <INITIAL>{double_quotes}           { BEGIN(string_literal); yymore();}
-<string_literal>"\\"+{next_line}               {yymore(); printf("\nEscape Sequence \\n at line number: %d.", yylineno);}
+<string_literal>"\\"+{escape_sequence} {yymore(); printf("\nEscape Sequence encountered at line number: %d.", yylineno);}
+<string_literal>"\\"+[^a|n|b|t|f|r|v|\|"|'|?] {printf("\nUnrecognized escape seqence at line number: %d.", yylineno);}
 <string_literal>{double_quotes}    {yymore(); printf("\nString: %s at line number: %d.", yytext, yylineno); BEGIN(INITIAL);}
+<string_literal>\n                 {printf("\nUnterminated string: %s at line number: %d.", yytext, yylineno);}
 <string_literal>[^\\]               {yymore();}
 
 
