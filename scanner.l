@@ -1,8 +1,21 @@
 %x comment
 %x string_literal
 %{
+   #define n_buckets 20
    int line_num = 1;
    int nested_comment_stack=0;
+
+   struct table_entry
+   {
+      void *key, *value;
+      table_entry *next;
+   };
+
+   struct table_entry *s_head[n_buckets];
+   struct table_entry *c_head[n_buckets];
+
+   void install_symbol();
+   void install_constant();
 
    #define ERROR_TOKEN 10
    #define AUTO 20
@@ -19,7 +32,7 @@
    #define EXTERN 31
    #define FLOAT 32
    #define FOR 32
-   #define GOTO 34 
+   #define GOTO 34
    #define IF 35
    #define INT 36
    #define LONG 37
@@ -44,7 +57,7 @@
    #define GREATER 56
    #define LESS 57
    #define EQUAL 58
-     
+
 %}
 
 identifier [a-zA-Z_]([a-zA-Z0-9])*
@@ -95,7 +108,7 @@ operators [+|-|*|/|&|\(|\)|\[|\]|>|<|>=|<=|&&|==|!=]
 <string_literal>{double_quotes}    {yymore(); printf("\nString: %s at line number: %d.", yytext, yylineno); BEGIN(INITIAL);}
 <string_literal>\n                 {printf("\nUnterminated string: %s at line number: %d.", yytext, yylineno);}
 <string_literal>[^\\]               {yymore();}
-      
+
 
 
 "+" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(PLUS);}
@@ -104,23 +117,23 @@ operators [+|-|*|/|&|\(|\)|\[|\]|>|<|>=|<=|&&|==|!=]
 "/" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(DIV);}
 ">" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(GREATER);}
 "<" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(LESS);}
-"=" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(EQUAL);}  
-                                            
+"=" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(EQUAL);}
+
 {digit}*\.?{digit}*(E[+|-]?{digit}+*\.?{digit}*)?											{printf("\nConstant: %s , line number: %d.",yytext,yylineno);}
 {digit}*\.?{digit}*E.?											{printf("\nError No exponent provided: %s , line number: %d.",yytext,yylineno);}
 \'.\'											{printf("\nConstant: %s , line number: %d.",yytext,yylineno);}
 
 
-"auto"                          {printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(AUTO);}   
+"auto"                          {printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(AUTO);}
 "break"       									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(BREAK);}
 "case"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(CASE);}
 "char"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(CHAR);}
 "const"         								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(CONST);}
-"continue" 											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(CONTINUE);}       
-"default"  											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(DEFAULT);}      
-"do"       											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(DO);} 
-"double"   											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(DOUBLE);}     
-"else"     											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(ELSE);}   
+"continue" 											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(CONTINUE);}
+"default"  											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(DEFAULT);}
+"do"       											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(DO);}
+"double"   											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(DOUBLE);}
+"else"     											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(ELSE);}
 "enum"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(ENUM);}
 "extern"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(EXTERN);}
 "float"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(FLOAT);}
@@ -145,18 +158,63 @@ operators [+|-|*|/|&|\(|\)|\[|\]|>|<|>=|<=|&&|==|!=]
 "while"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(WHILE);}
 {identifier}  									{printf("\nIdentifier: %s , line number: %d.", yytext, yylineno);}
 
-                      
+
 {identifier}+\[{digit}*\]				 {printf("\nArray declaration: %s, Line Number: %d", yytext, yylineno);}
 \*+[ ]*{identifier} 						 {printf("\nPointer declaration: %s, Line Number: %d", yytext, yylineno);}
- 
+
 .
 %%
+
+struct table_entry *create_node()
+{
+  struct table_entry *temp = (struct table_entry *)malloc(sizeof(struct table_entry));
+  if(temp==NULL)
+  {
+    printf("\nCould not allocate memory for the symbol table.");
+    exit(1);
+  }
+  temp->next = NULL;
+  return temp;
+}
+
+struct table_entry *insert(struct table_entry *head, void *key, void *value)
+{
+  struct table_entry *temp = create_node();
+  temp->key = key;
+  temp->value = value;
+  temp->next = head;
+
+  head = temp;
+  return head;
+}
+
+struct table_entry *search(struct table_entry *head, void *key)
+{
+  struct table_entry *temp = head;
+  while(temp!=NULL)
+  {
+    if(strcmp((char *)temp->key, (char *)key)==0)
+      return temp;
+    temp = temp->next;
+  }
+  return temp;
+}
+
+void install_symbol()
+{
+  int index = 1;
+
+  char *key = (char *)malloc(sizeof(char)*yyleng);
+  char *value = (char *)malloc(sizeof(char)*yyleng);
+}
+
+
 int main()
 {
   FILE *fp;
   fp = fopen("sample.c", "r");
   yyin = fp;
-  int newtoken = 1; 
+  int newtoken = 1;
   while(newtoken){
 	newtoken = yylex();
   }
