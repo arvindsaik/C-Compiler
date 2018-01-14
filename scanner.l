@@ -8,7 +8,7 @@
    struct table_entry
    {
       void *key, *value;
-      table_entry *next;
+      struct table_entry *next;
    };
 
    struct table_entry *s_head[n_buckets];
@@ -16,47 +16,6 @@
 
    void install_symbol();
    void install_constant();
-
-   #define ERROR_TOKEN 10
-   #define AUTO 20
- 	 #define BREAK 21
-   #define CASE 22
-   #define CHAR 23
-   #define CONST 24
-   #define CONTINUE 25
-   #define DEFAULT 26
-   #define DO 27
-   #define DOUBLE 28
-   #define ELSE 29
-   #define ENUM 30
-   #define EXTERN 31
-   #define FLOAT 32
-   #define FOR 32
-   #define GOTO 34
-   #define IF 35
-   #define INT 36
-   #define LONG 37
-   #define REGISTER 38
-   #define RETURN 39
-   #define SHORT 40
-   #define SIGNED 41
-   #define SIZEOF 42
-   #define STATIC 43
-   #define STRUCT 44
-   #define SWITCH 45
-   #define TYPEDEF 46
-   #define UNION 47
-   #define UNSIGNED 48
-   #define VOID 49
-   #define VOLATILE 50
-   #define WHILE 51
-   #define PLUS 52
-   #define MINUS 53
-   #define MULT 54
-   #define DIV 55
-   #define GREATER 56
-   #define LESS 57
-   #define EQUAL 58
 
 %}
 
@@ -70,11 +29,11 @@ backspace [b]
 
 backslash [\]
 double_quotes ["]
-operators [+|-|*|/|&|\(|\)|\[|\]|>|<|>=|<=|&&|==|!=]
 %%
 
 \n {yylineno++;}
 
+#include[ ]*<[^>]+> {printf("\nPreprocessor directive : %s, line number : %d",yytext,yylineno);}
 
 "/*"                    {BEGIN(comment); nested_comment_stack=1; yymore();}
 <comment><<EOF>>        {printf("\nMulti-line Comment: \""); yyless(yyleng-2); ECHO; printf("\", not terminted at line no: %d.", yylineno); yyterminate();}
@@ -110,58 +69,49 @@ operators [+|-|*|/|&|\(|\)|\[|\]|>|<|>=|<=|&&|==|!=]
 <string_literal>[^\\]               {yymore();}
 
 
-
-"+" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(PLUS);}
-"-" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(MINUS);}
-"*" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(MULT);}
-"/" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(DIV);}
-">" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(GREATER);}
-"<" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(LESS);}
-"=" {printf("\nOperator: %s , line number: %d.",yytext,yylineno); return(EQUAL);}
-
 {digit}*\.?{digit}*(E[+|-]?{digit}+*\.?{digit}*)?											{printf("\nConstant: %s , line number: %d.",yytext,yylineno);}
 {digit}*\.?{digit}*E.?											{printf("\nError No exponent provided: %s , line number: %d.",yytext,yylineno);}
 \'.\'											{printf("\nConstant: %s , line number: %d.",yytext,yylineno);}
 
 
-"auto"                          {printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(AUTO);}
-"break"       									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(BREAK);}
-"case"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(CASE);}
-"char"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(CHAR);}
-"const"         								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(CONST);}
-"continue" 											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(CONTINUE);}
-"default"  											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(DEFAULT);}
-"do"       											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(DO);}
-"double"   											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(DOUBLE);}
-"else"     											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(ELSE);}
-"enum"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(ENUM);}
-"extern"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(EXTERN);}
-"float"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(FLOAT);}
-"for"        										{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(FOR);}
-"goto"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(GOTO);}
-"if"        										{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(IF);}
-"int"        										{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(INT);}
-"long"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(LONG);}
-"register"        							{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(REGISTER);}
-"return"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(RETURN);}
-"short"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(SHORT);}
-"signed"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(SIGNED);}
-"sizeof"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(SIZEOF);}
-"static"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(STATIC);}
-"struct"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(STRUCT);}
-"switch"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(SWITCH);}
-"typedef"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(TYPEDEF);}
-"union"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(UNION);}
-"unsigned"       						 		{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(UNSIGNED);}
-"void"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(VOID);}
-"volatile"        							{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(VOLATILE);}
-"while"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); return(WHILE);}
+"auto"                          {printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"break"       									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"case"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"char"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"const"         								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"continue" 											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"default"  											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"do"       											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"double"   											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"else"     											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"enum"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"extern"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"float"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"for"        										{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"goto"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"if"        										{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"int"        										{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"long"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"register"        							{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"return"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"short"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"signed"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"sizeof"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"static"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"struct"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"switch"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"typedef"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"union"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"unsigned"       						 		{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"void"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"volatile"        							{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
+"while"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); }
 {identifier}  									{printf("\nIdentifier: %s , line number: %d.", yytext, yylineno);}
 
 
 {identifier}+\[{digit}*\]				 {printf("\nArray declaration: %s, Line Number: %d", yytext, yylineno);}
 \*+[ ]*{identifier} 						 {printf("\nPointer declaration: %s, Line Number: %d", yytext, yylineno);}
-
+(\+|-|\*|\/|\&|\(|\)|\[|\]|\>|\<|!=|\+\+|--|\%|>=|<=|==|&&|\|\||!|\+=|-=|\/=|\*=|\%=|\&=|\|=|\^=)  {printf("\nOperator: %s , line number: %d.",yytext,yylineno); }
 .
 %%
 
@@ -207,6 +157,19 @@ void install_symbol()
   char *key = (char *)malloc(sizeof(char)*yyleng);
   char *value = (char *)malloc(sizeof(char)*yyleng);
 }
+
+
+unsigned long hash(unsigned char *str)
+{
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *str++)
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+    return hash%1000;
+}
+
 
 
 int main()
