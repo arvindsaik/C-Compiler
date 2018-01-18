@@ -36,7 +36,8 @@ double_quotes ["]
 {white_space}*
 
 #include[ ]*<[^>]+> {printf("\n\t\t\t%s\t\t\tPreprocessor Directive\t\t\t%d",yytext,yylineno);}
-
+printf {printf("\n\t\t\tprintf\t\t\t\t\tFunction\t\t\t\t%d", yylineno);strcpy(token, "function");install_symbol();}
+scanf {printf("\n\t\t\tscanf\t\t\t\t\tFunction\t\t\t\t%d", yylineno);strcpy(token, "function");install_symbol();}
 "/*"                    {BEGIN(comment); nested_comment_stack=1; yymore();}
 <comment><<EOF>>        {printf("\nMulti-line Comment: \""); yyless(yyleng-2); ECHO; printf("\", not terminted at line no: %d.", yylineno); yyterminate();}
 <comment>"/*"           {nested_comment_stack++; yymore();}
@@ -66,22 +67,22 @@ double_quotes ["]
 <INITIAL>{double_quotes}           { BEGIN(string_literal); yymore();}
 <string_literal>"\\"+{escape_sequence} {yymore(); printf("\nEscape Sequence , line number line number: %d.", yylineno);}
 <string_literal>"\\"+[^a|n|b|t|f|r|v|\|"|'|?] {printf("\nUnrecognized escape seqence at line number: %d.", yylineno);}
-<string_literal>{double_quotes}    {yymore(); printf("\nString: %s at line number: %d.", yytext, yylineno);
-                                    strcpy(token, "String Literal");  install_constant(); BEGIN(INITIAL);}
-<string_literal>\n                 {printf("\nUnterminated string: %s at line number: %d.", yytext, yylineno);yylineno++;}
+<string_literal>{double_quotes}    {printf("\n\t\t\t%s\t\t\t\t String Constant\t\t\t\t%d.",yytext,yylineno);
+                                    strcpy(token, "String Constant");  install_constant(); BEGIN(INITIAL);}
+<string_literal>\n                 {printf("\nError : Unterminated string: %s at line number: %d.", yytext, yylineno);yylineno++;}
 <string_literal>[^\\]               {yymore();}
 
-
+{digit}+  	{printf("\n\t\t\t%s\t\t\t\t\tInteger Constant\t\t\t\t%d.",yytext,yylineno); strcpy(token, "INT Constant");  install_constant();}
 {digit}*\.?{digit}*(E[+|-]?{digit}+*\.?{digit}*)?											{printf("\n\t\t\t%s\t\t\t\t\tFP Constant\t\t\t\t%d.",yytext,yylineno);
                                                                       strcpy(token, "FP Constant");  install_constant();}
 {digit}*\.?{digit}*E.?											{printf("\nError No exponent provided: %s , line number: %d.",yytext,yylineno);}
-\'.\'											{printf("\nConstant: %s , line number: %d.",yytext,yylineno);}
+\'.\'											{printf("\n\t\t\t%s\t\t\t\t\tChar Constant\t\t\t\t%d.",yytext,yylineno); strcpy(token, "Char Constant");  install_constant();}
 
 ^{white_space}*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}+{identifier}{white_space}*\([^)]*\){white_space}*  {
                                                                                                     if(strstr(yytext, "main")!=NULL)
                                                                                                     {
                                                                                                       printf("\n\t\t\tmain\t\t\t\t\tMain Function\t\t\t\t%d", yylineno);
-                                                                                                      strcpy(token, "Main");
+                                                                                                      strcpy(token, "function");
                                                                                                       install_symbol();
                                                                                                     }
                                                                                                     else
@@ -132,7 +133,7 @@ double_quotes ["]
 
 {identifier}+\[{digit}*\]				 {printf("\nArray declaration: %s, Line Number: %d", yytext, yylineno);}
 \*+[ ]*{identifier} 						 {printf("\nPointer declaration: %s, Line Number: %d", yytext, yylineno);}
-(\+|-|\*|\/|\&|\(|\)|\[|\]|\>|\<|!=|\+\+|--|\%|>=|<=|==|&&|\|\||!|\+=|-=|\/=|\*=|\%=|\&=|\|=|\^=)  {printf("\n\t\t\t%s\t\t\t\t\tOperator\t\t\t\t%d.",yytext,yylineno); }
+(\+|-|\*|\/|\&|\[|\]|\>|\<|!=|\+\+|--|\%|>=|<=|==|&&|\|\||!|\+=|-=|\/=|\*=|\%=|\&=|\|=|\^=|\.|\-\>)  {printf("\n\t\t\t%s\t\t\t\t\tOperator\t\t\t\t%d.",yytext,yylineno); }
 [,]                            {printf("\n\t\t\t%s\t\t\t\t\tSeparator\t\t\t\t%d", yytext, yylineno);}
 [;]                              {printf("\n\t\t\t%s\t\t\t\t\tDelimiter\t\t\t\t%d", yytext, yylineno);}
 .                                {printf("\n\t\t\t%s\t\t\t\t\tInvalid Character\t\t\t%d.", yytext, yylineno);}
