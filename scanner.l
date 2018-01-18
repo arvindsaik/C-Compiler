@@ -1,7 +1,7 @@
 %x comment
 %x string_literal
 %{
-   #define n_buckets 20
+   #define n_buckets 1000
    int line_num = 1;
    int nested_comment_stack=0;
 
@@ -9,6 +9,7 @@
    {
       void *key, *value;
       struct table_entry *next;
+      unsigned int line;
    };
 
    struct table_entry *s_head[n_buckets];
@@ -112,7 +113,7 @@ double_quotes ["]
 {identifier}+\[{digit}*\]				 {printf("\nArray declaration: %s, Line Number: %d", yytext, yylineno);}
 \*+[ ]*{identifier} 						 {printf("\nPointer declaration: %s, Line Number: %d", yytext, yylineno);}
 (\+|-|\*|\/|\&|\(|\)|\[|\]|\>|\<|!=|\+\+|--|\%|>=|<=|==|&&|\|\||!|\+=|-=|\/=|\*=|\%=|\&=|\|=|\^=)  {printf("\nOperator: %s , line number: %d.",yytext,yylineno); }
-.
+.                                {printf("\nInvalid Character: %s, Line: %d.", yytext, yylineno);}
 %%
 
 struct table_entry *create_node()
@@ -127,12 +128,13 @@ struct table_entry *create_node()
   return temp;
 }
 
-struct table_entry *insert(struct table_entry *head, void *key, void *value)
+struct table_entry *insert(struct table_entry *head, void *key, void *value, unsigned int line)
 {
   struct table_entry *temp = create_node();
   temp->key = key;
   temp->value = value;
   temp->next = head;
+  temp->line = line;
 
   head = temp;
   return head;
@@ -152,14 +154,34 @@ struct table_entry *search(struct table_entry *head, void *key)
 
 void install_symbol()
 {
-  int index = 1;
-
   char *key = (char *)malloc(sizeof(char)*yyleng);
   char *value = (char *)malloc(sizeof(char)*yyleng);
+
+  unsigned int index = hash(key);
+  strcpy(key, yytext);
+  strcpy(value, token);
+
+  struct table *temp = search(s_head[index], key);
+  if(temp==NULL)
+    (void *)insert(s_head[index], key, val, yylineno);
+}
+
+void install_constant()
+{
+  char *key = (char *)malloc(sizeof(char)*yyleng);
+  char *value = (char *)malloc(sizeof(char)*yyleng);
+
+  unsigned int index = hash(key);
+  strcpy(key, yytext);
+  strcpy(value, token);
+
+  struct table *temp = search(c_head[index], key);
+  if(temp==NULL)
+    (void *)insert(c_head[index], key, val, yylineno);
 }
 
 
-unsigned long hash(unsigned char *str)
+unsigned int hash(unsigned char *str)
 {
     unsigned long hash = 5381;
     int c;
