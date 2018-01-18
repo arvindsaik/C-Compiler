@@ -19,6 +19,7 @@
    void install_symbol();
    void install_constant();
 
+
 %}
 
 identifier [a-zA-Z_]([a-zA-Z0-9])*
@@ -28,18 +29,19 @@ escape_sequence [a|n|b|t|f|r|v|\|"|'|?]
 white_space [ \t]
 backslash [\]
 double_quotes ["]
+
 %%
 
 \n {yylineno++;}
 {white_space}*
 
-#include[ ]*<[^>]+> {printf("\nPreprocessor directive : %s, line number : %d",yytext,yylineno);}
+#include[ ]*<[^>]+> {printf("\n\t\t\t%s\t\t\tPreprocessor Directive\t\t\t%d",yytext,yylineno);}
 
 "/*"                    {BEGIN(comment); nested_comment_stack=1; yymore();}
 <comment><<EOF>>        {printf("\nMulti-line Comment: \""); yyless(yyleng-2); ECHO; printf("\", not terminted at line no: %d.", yylineno); yyterminate();}
 <comment>"/*"           {nested_comment_stack++; yymore();}
 <comment>.              {yymore();}
-<comment>\n             {yymore();}
+<comment>\n             {yymore();yylineno++;}
 <comment>"*/"           {nested_comment_stack--;
                         if(nested_comment_stack<0)
                         {
@@ -48,7 +50,7 @@ double_quotes ["]
                         }
                         else if(nested_comment_stack==0)
                         {
-                          printf("\nMulti-line comment : \"%s\" at line number: %d.", yytext, yylineno);
+                          /*printf("\nMulti-line comment : \"%s\" at line number: %d.", yytext, yylineno);*/
                           BEGIN(INITIAL);
                         }
                         else
@@ -66,57 +68,74 @@ double_quotes ["]
 <string_literal>"\\"+[^a|n|b|t|f|r|v|\|"|'|?] {printf("\nUnrecognized escape seqence at line number: %d.", yylineno);}
 <string_literal>{double_quotes}    {yymore(); printf("\nString: %s at line number: %d.", yytext, yylineno);
                                     strcpy(token, "String Literal");  install_constant(); BEGIN(INITIAL);}
-<string_literal>\n                 {printf("\nUnterminated string: %s at line number: %d.", yytext, yylineno);}
+<string_literal>\n                 {printf("\nUnterminated string: %s at line number: %d.", yytext, yylineno);yylineno++;}
 <string_literal>[^\\]               {yymore();}
 
 
-{digit}*\.?{digit}*(E[+|-]?{digit}+*\.?{digit}*)?											{printf("\nFloating point Constant: %s , line number: %d.",yytext,yylineno);
+{digit}*\.?{digit}*(E[+|-]?{digit}+*\.?{digit}*)?											{printf("\n\t\t\t%s\t\t\t\t\tFP Constant\t\t\t\t%d.",yytext,yylineno);
                                                                       strcpy(token, "FP Constant");  install_constant();}
 {digit}*\.?{digit}*E.?											{printf("\nError No exponent provided: %s , line number: %d.",yytext,yylineno);}
 \'.\'											{printf("\nConstant: %s , line number: %d.",yytext,yylineno);}
 
+^{white_space}*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}+{identifier}{white_space}*\([^)]*\){white_space}*  {
+                                                                                                    if(strstr(yytext, "main")!=NULL)
+                                                                                                    {
+                                                                                                      printf("\n\t\t\tmain\t\t\t\t\tMain Function\t\t\t\t%d", yylineno);
+                                                                                                      strcpy(token, "Main");
+                                                                                                      install_symbol();
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                      printf("\n\t\t\t%s\t\t\t\tUser Defined Function\t\t\t%d", yytext, yylineno);
+                                                                                                      strcpy(token, "User-defined Function");
+                                                                                                      install_symbol();
+                                                                                                    }
+                                                                                                }
 
-"auto"                          {printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"break"       									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"case"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"char"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"const"         								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"continue" 											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"default"  											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"do"       											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"double"   											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"else"     											{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"enum"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"extern"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"float"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"for"        										{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"goto"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"if"        										{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"int"        										{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"long"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"register"        							{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"return"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"short"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"signed"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"sizeof"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"static"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"struct"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"switch"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"typedef"        								{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"union"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"unsigned"       						 		{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"void"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"volatile"        							{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"while"        									{printf("\nKeyword: %s , line number: %d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-{identifier}  									{printf("\nIdentifier: %s , line number: %d.", yytext, yylineno);strcpy(token,"Identifier"); install_symbol();}
+
+"auto"                          {printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
+"break"       									{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"case"        									{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"char"        									{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"const"         								{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"continue" 											{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"default"  											{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"do"       											{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"double"   											{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"else"     											{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"enum"        									{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"extern"        								{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"float"        									{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"for"        										{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"goto"        									{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"if"        										{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"int"        										{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"long"        									{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"register"        							{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"return"        								{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"short"        									{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"signed"        								{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"sizeof"        								{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"static"        								{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"struct"        								{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"switch"        								{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"typedef"        								{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"union"        									{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"unsigned"       						 		{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"void"        									{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"volatile"        							{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"while"        									{printf("\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+{identifier}  									{printf("\n\t\t\t%s\t\t\t\t\tIdentifier\t\t\t\t%d.", yytext, yylineno); strcpy(token,"Identifier"); install_symbol();}
+
+
 
 
 {identifier}+\[{digit}*\]				 {printf("\nArray declaration: %s, Line Number: %d", yytext, yylineno);}
 \*+[ ]*{identifier} 						 {printf("\nPointer declaration: %s, Line Number: %d", yytext, yylineno);}
-(\+|-|\*|\/|\&|\(|\)|\[|\]|\>|\<|!=|\+\+|--|\%|>=|<=|==|&&|\|\||!|\+=|-=|\/=|\*=|\%=|\&=|\|=|\^=)  {printf("\nOperator: %s , line number: %d.",yytext,yylineno); }
-[,]                            {printf("\nSeparator: %s, Line Number: %d", yytext, yylineno);}
-[;]                              {printf("\nDelimiter: %s, Line Number: %d", yytext, yylineno);}
-.                                {printf("\nInvalid Character: %s, Line: %d.", yytext, yylineno);}
+(\+|-|\*|\/|\&|\(|\)|\[|\]|\>|\<|!=|\+\+|--|\%|>=|<=|==|&&|\|\||!|\+=|-=|\/=|\*=|\%=|\&=|\|=|\^=)  {printf("\n\t\t\t%s\t\t\t\t\tOperator\t\t\t\t%d.",yytext,yylineno); }
+[,]                            {printf("\n\t\t\t%s\t\t\t\t\tSeparator\t\t\t\t%d", yytext, yylineno);}
+[;]                              {printf("\n\t\t\t%s\t\t\t\t\tDelimiter\t\t\t\t%d", yytext, yylineno);}
+.                                {printf("\n\t\t\t%s\t\t\t\t\tInvalid Character\t\t\t%d.", yytext, yylineno);}
 %%
 
 unsigned int get_hash(char *str)
@@ -189,7 +208,6 @@ void install_constant()
 
   strcpy(key, yytext);
   strcpy(value, token);
-  printf("\n%s, %s\n", key, value);
   unsigned int index = get_hash(key);
 
   struct table_entry *temp = search(c_head[index], key);
@@ -202,7 +220,7 @@ void print_symbol_table()
 {
   int i;
   printf("\n\n\n\t\t\t\t\t\tSYMBOL TABLE\n\t\t\t\t\t\t=============\n");
-  printf("\n\t\t\tToken\t\t\tToken Type\t\t\tLine Number\n");
+  printf("\n\t\t\t\tToken\t\t\t\tToken Type\t\t\t\tLine Number\n");
   for(int i=0;i<n_buckets;i++)
   {
       if(s_head[i]!=NULL)
@@ -210,7 +228,7 @@ void print_symbol_table()
         struct table_entry *temp = s_head[i];
         while(temp!=NULL)
         {
-          printf("\n\t\t\t%s\t\t\t<%s>\t\t\t%d", (char *)temp->key, (char *)temp->value, temp->line);
+          printf("\n\t\t\t\t%s\t\t\t\t<%s>\t\t\t\t%d", (char *)temp->key, (char *)temp->value, temp->line);
           temp = temp->next;
         }
       }
@@ -222,7 +240,7 @@ void print_constant_table()
 {
   int i;
   printf("\n\n\n\t\t\t\t\t\tCONSTANT TABLE\n\t\t\t\t\t\t=============\n");
-  printf("\n\t\t\tToken\t\t\tToken Type\t\t\tLine Number\n");
+  printf("\n\t\t\t\tToken\t\t\t\tToken Type\t\t\t\tLine Number\n");
   for(int i=0;i<n_buckets;i++)
   {
       if(c_head[i]!=NULL)
@@ -230,7 +248,7 @@ void print_constant_table()
         struct table_entry *temp = c_head[i];
         while(temp!=NULL)
         {
-          printf("\n\t\t\t%s\t\t\t<%s>\t\t\t%d", (char *)temp->key, (char *)temp->value, temp->line);
+          printf("\n\t\t\t\t%s\t\t\t\t<%s>\t\t\t\t%d", (char *)temp->key, (char *)temp->value, temp->line);
           temp = temp->next;
         }
       }
@@ -244,6 +262,9 @@ int main()
   FILE *fp;
   fp = fopen("sample.c", "r");
   yyin = fp;
+  printf("\n===========================================================================================================================================================");
+  printf("\n\t\t\tTOKEN\t\t\t\tTOKEN TYPE\t\t\t\tLINE NUMBER");
+  printf("\n===========================================================================================================================================================");
   int newtoken = 1;
   while(newtoken){
 	newtoken = yylex();
