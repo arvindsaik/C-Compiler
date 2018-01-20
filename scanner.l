@@ -45,6 +45,9 @@ white_space [ \t]
 backslash [\]
 double_quotes ["]
 
+var [ \t]*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}+{identifier}[ \t]*
+
+
 %%
 
 \n {yylineno++;}
@@ -75,7 +78,7 @@ scanf {printf("%s\n%40s%40s%40d", KBLU,"scanf", "Pre-defined function", yylineno
 
 "*/"                    {printf("\n Uninitialised comment at line number: %d.", yylineno); yyterminate();}
 
-"//".*                  {printf("\nSingle-line comment : \"%s\" at line number: %d.", yytext, yylineno);}
+"//".*                  {/*printf("\nSingle-line comment : \"%s\" at line number: %d.", yytext, yylineno);*/}
 
 
 
@@ -86,7 +89,7 @@ scanf {printf("%s\n%40s%40s%40d", KBLU,"scanf", "Pre-defined function", yylineno
 <string_literal>{double_quotes}    				{printf("%s\n%40s%40s%40d",KBLU, yytext, "String Constant",yylineno);
                                                			 strcpy(token, "String Constant");  install_constant(); BEGIN(INITIAL);}
                                                   
-<string_literal>\n                 				{printf("\nError : Unterminated string: %s at line number: %d.", yytext, yylineno);yylineno++; BEGIN(INITIAL);}
+<string_literal>\n                 				{printf("\n\tError : Unterminated string: %s at line number: %d.", yytext, yylineno);yylineno++; BEGIN(INITIAL);}
 <string_literal>[^\\]               				{yymore();}
 
 {digit}+	{printf("%s\n%40s%40s%40d", KBLU, yytext, "Integer Constant", yylineno); strcpy(token, "INT Constant");  install_constant();}
@@ -94,7 +97,7 @@ scanf {printf("%s\n%40s%40s%40d", KBLU,"scanf", "Pre-defined function", yylineno
 {digit}*\.?{digit}*E.?	{printf("%s\nError No exponent provided: %s , line number: %d.", KBLU, yytext,yylineno);}
 \'.\'	{printf("%s\n%40s%40s%40d", KBLU, yytext, "Character Constant",yylineno); strcpy(token, "Char Constant");  install_constant();}
 
-^{white_space}*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}+{identifier}{white_space}*\([^)]*\){white_space}*  {
+^{white_space}*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}+{identifier}{white_space}*\((({var},)*{var})?\){white_space}*  {
                                                                                                     if(strstr(yytext, "main")!=NULL)
                                                                                                     {
                                                                                                       printf("%s\n%40s%40s%40d", KBLU, "main", "Main Function", yylineno);
@@ -110,6 +113,10 @@ scanf {printf("%s\n%40s%40s%40d", KBLU,"scanf", "Pre-defined function", yylineno
                                                                                                     install_symbol();
                                                                                                 }
 
+
+^{white_space}*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}+{identifier}{white_space}*\([^)]*\){white_space}*     {
+                                                                                                  printf("%s\n%40s%40s%40d", KRED, yytext, "Invalid Function", yylineno);
+                                                                                                            }
 
 "auto"                      {printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno); strcpy(token,"Keyword");  install_symbol();}
 "break"       							{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
@@ -208,6 +215,7 @@ scanf {printf("%s\n%40s%40s%40d", KBLU,"scanf", "Pre-defined function", yylineno
 (\+|-|\*|\/|\&|\[|\]|\>|\<|!=|\+\+|--|\%|>=|<=|==|&&|\|\||!|\+=|-=|\/=|\*=|\%=|\&=|\|=|\^=|\.|\-\>|=|\{|\}|\))  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); }
 [,]                            	 {printf("%s\n%40s%40s%40d", KBLU, yytext, "Separator", yylineno);}
 [;]                              {printf("%s\n%40s%40s%40d", KBLU, yytext, "Delimiter",yylineno);}
+\'.                              {printf("%s\n\tUnterminated CHARACTER LITERAL: %s, \tline no:%d\n",KRED, yytext, yylineno);}
 .                                {printf("%s\n%40s%40s%40d", KRED, yytext, "Invalid Character", yylineno);}
 %%
 
@@ -351,11 +359,11 @@ int main()
   }
   if(ptop!=-1)
   {
-    printf("\n\n\t\t\'(\' has not been matched at line number %d.", pstack[ptop]);
+    printf("%s\n\n\t\t\'(\' has not been matched at line number %d.", KRED, pstack[ptop]);
   }
   if(ctop!=-1)
   {
-    printf("\n\n\t\t\'{\' has not been matched at line number %d.", cstack[ctop]);
+    printf("%s\n\n\t\t\'{\' has not been matched at line number %d.", KRED, cstack[ctop]);
   }
   print_symbol_table();
   print_constant_table();
