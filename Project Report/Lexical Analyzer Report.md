@@ -722,7 +722,7 @@ int main(){
     not end 
 ```
 
-#### Output 4
+#### Output 5
 
 ![Tokens Identified](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case5(a).png)
 ![Symbol and Constant Table](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case5(b).png)
