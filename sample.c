@@ -13,6 +13,7 @@ int main(){
     long int var2;
     long long int var3;
     int var4;
+    int $cd;
     signed short int var5;
     signed long int var6;
     signed long long int var7;
@@ -23,7 +24,7 @@ int main(){
     unsigned int var8;
 
     /* test for various character types supported */
-    char var9 = 'b';
+    char var9 != 'b';
     signed char var10;
     signed char var11;
     float var12 = 9.56;

@@ -34,6 +34,7 @@
 
 identifier [a-zA-Z_]([a-zA-Z0-9])*
 digit [0-9]
+BID		([0-9]|!|@|#|$|%)+([a-zA-Z0-9])+
 
 escape_sequence [a|n|b|t|f|r|v|\|"|'|?]
 white_space [ \t]
@@ -135,13 +136,18 @@ scanf {printf("%s\n\t\t\tscanf\t\t\t\t\tPre-defined Function\t\t\t\t%d", KBLU, y
 "void"        		  				{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
 "volatile"     							{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
 "while"    									{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
+
+
+\*+[ ]*{identifier} 		          {printf("%s\n\t\t\t%s\t\t\t\t\tPointer declaration\t\t\t\t%d", KBLU, yytext, yylineno);}
+
 {identifier}  							{printf("%s\n\t\t\t%s\t\t\t\t\tIdentifier\t\t\t\t%d.", KBLU, yytext, yylineno); strcpy(token,"Identifier"); install_symbol();}
 
+
+{BID}			{printf("%s\n\t\t\t%s\t\t\t\t\tInvalid Identifier\t\t\t\t%d.", KRED, yytext, yylineno); }
 
 
 
 {identifier}+\[{digit}*\]        {printf("%s\nArray declaration: %s, Line Number: %d", KBLU, yytext, yylineno);}
-\*+[ ]*{identifier} 		          {printf("%s\nPointer declaration: %s, Line Number: %d", KBLU, yytext, yylineno);}
 (\+|-|\*|\/|\&|\[|\]|\>|\<|!=|\+\+|--|\%|>=|<=|==|&&|\|\||!|\+=|-=|\/=|\*=|\%=|\&=|\|=|\^=|\.|\-\>)  {printf("%s\n\t\t\t%s\t\t\t\t\tOperator\t\t\t\t%d.", KBLU, yytext,yylineno); }
 [,]                            	 {printf("%s\n\t\t\t%s\t\t\t\t\tSeparator\t\t\t\t%d", KBLU, yytext, yylineno);}
 [;]                              {printf("%s\n\t\t\t%s\t\t\t\t\tDelimiter\t\t\t\t%d", KBLU, yytext, yylineno);}
@@ -229,10 +235,10 @@ void install_constant()
 void print_symbol_table()
 {
   int i;
-  printf("%s\n=========================================================================================================================================", KMAG);
-  printf("%s\n\t\t\t\t\t\t\t\tSYMBOL TABLE", KMAG);
-  printf("%s\n=========================================================================================================================================", KMAG);  
-  printf("%s\n\t\t\t\tToken\t\t\t\tToken Type\t\t\t\tLine Number\n", KCYN);
+  printf("%s\n==============================================================================================================================================================", KBLU);
+  printf("%s\n\t\t\t\t\t\t\t\t\t\tSYMBOL TABLE", KRED);
+  printf("%s\n==============================================================================================================================================================", KBLU);  
+  printf("%s\n\t\t\t\tToken\t\t\t\t\t\tToken Type\t\t\t\tLine Number\n", KCYN);
   for(int i=0;i<n_buckets;i++)
   {
       if(s_head[i]!=NULL)
@@ -240,7 +246,7 @@ void print_symbol_table()
         struct table_entry *temp = s_head[i];
         while(temp!=NULL)
         {
-          printf("%s\n\t\t\t\t%s\t\t\t\t<%s>\t\t\t\t%d", KWHT, (char *)temp->key, (char *)temp->value, temp->line);
+          printf("%s\n\t\t\t\t%s\t\t\t\t\t\t<%s>\t\t\t\t%d", KWHT, (char *)temp->key, (char *)temp->value, temp->line);
           temp = temp->next;
         }
       }
@@ -251,10 +257,10 @@ void print_symbol_table()
 void print_constant_table()
 {
   int i;
-  printf("%s\n=========================================================================================================================================", KMAG);
-  printf("%s\n\t\t\t\t\t\t\tCONSTANT TABLE", KMAG);
-  printf("%s\n=========================================================================================================================================", KMAG);  
-  printf("%s\n\t\t\t\tToken\t\t\t\tToken Type\t\t\t\tLine Number\n", KCYN);
+  printf("%s\n==============================================================================================================================================================", KBLU);
+  printf("%s\n\t\t\t\t\t\t\t\t\tCONSTANT TABLE", KRED);
+  printf("%s\n==============================================================================================================================================================", KBLU);  
+  printf("%s\n\t\t\t\tToken\t\t\t\t\t\tToken Type\t\t\t\tLine Number\n", KCYN);
   for(int i=0;i<n_buckets;i++)
   {
       if(c_head[i]!=NULL)
@@ -262,7 +268,7 @@ void print_constant_table()
         struct table_entry *temp = c_head[i];
         while(temp!=NULL)
         {
-          printf("%s\n\t\t\t\t%s\t\t\t\t<%s>\t\t\t\t%d", KWHT, (char *)temp->key, (char *)temp->value, temp->line);
+          printf("%s\n\t\t\t\t%s\t\t\t\t\t\t<%s>\t\t\t\t%d", KWHT, (char *)temp->key, (char *)temp->value, temp->line);
           temp = temp->next;
         }
       }
