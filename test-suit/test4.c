@@ -3,8 +3,7 @@
 /* 1 ) Test case for string not terminated 
 2 ) Test for unbalanced paranthesis; 
 3 ) Test for stray characters
-4 ) Missing ;
-5 ) Multiline comment not terminated 
+4 ) Multiline comment not terminated 
 */
 
 int main(){
@@ -17,7 +16,7 @@ int main(){
     a = ((b+c*a);
 
     ```
-    a = 3
+    a = 3;
 
     return 0;
 }

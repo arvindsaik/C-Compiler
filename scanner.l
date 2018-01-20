@@ -13,7 +13,10 @@
     #define KWHT  "\x1B[37m"
 
    #define n_buckets 1000
-   int stack[100];
+   int pstack[100];
+   int ptop=-1;
+   int cstack[100];
+   int ctop=-1;
    int line_num = 1;
    int nested_comment_stack=0;
    char token[100];
@@ -82,6 +85,7 @@ scanf {printf("%s\n%40s%40s%40d", KBLU,"scanf", "Pre-defined function", yylineno
 <string_literal>"\\"+[^a|n|b|t|f|r|v|\|"|'|?] 			{printf("\nUnrecognized escape seqence at line number: %d.", yylineno);}
 <string_literal>{double_quotes}    				{printf("%s\n%40s%40s%40d",KBLU, yytext, "String Constant",yylineno);
                                                			 strcpy(token, "String Constant");  install_constant(); BEGIN(INITIAL);}
+                                                  
 <string_literal>\n                 				{printf("\nError : Unterminated string: %s at line number: %d.", yytext, yylineno);yylineno++; BEGIN(INITIAL);}
 <string_literal>[^\\]               				{yymore();}
 
@@ -151,7 +155,57 @@ scanf {printf("%s\n%40s%40s%40d", KBLU,"scanf", "Pre-defined function", yylineno
 ^{white_space}*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}+\*+[ ]*{identifier} 		          {printf("%s\n%40s%40s%40d", KBLU, yytext, "Pointer Declration", yylineno);}
 {identifier}+\[{digit}*\]        {printf("%s\n%40s%40s%40d", KBLU, yytext, "Array Declaration", yylineno);}
 
-(\+|-|\*|\/|\&|\[|\]|\>|\<|!=|\+\+|--|\%|>=|<=|==|&&|\|\||!|\+=|-=|\/=|\*=|\%=|\&=|\|=|\^=|\.|\-\>|=|\{|\(|\)|\}|\))  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); }
+[\(]        {if(ptop==-1)
+              {
+                ptop=0;
+                pstack[ptop] = yylineno;
+              }
+              else
+              {
+                ptop++;
+                pstack[ptop] = yylineno;
+              }
+              printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno);
+            }
+
+[\)]      {
+            if(ptop==0)
+             {
+               ptop=-1;
+             } 
+             else
+             {
+                ptop--;
+             }
+              printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno);
+          }
+
+[\{]        {if(ctop==-1)
+              {
+                ctop=0;
+                cstack[ctop] = yylineno;
+              }
+              else
+              {
+                ctop++;
+                cstack[ctop] = yylineno;
+              }
+              printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno);
+            }
+
+[\}]      {
+            if(ctop==0)
+             {
+               ctop=-1;
+             } 
+             else
+             {
+                ctop--;
+             }
+              printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno);
+          }
+
+(\+|-|\*|\/|\&|\[|\]|\>|\<|!=|\+\+|--|\%|>=|<=|==|&&|\|\||!|\+=|-=|\/=|\*=|\%=|\&=|\|=|\^=|\.|\-\>|=|\{|\}|\))  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); }
 [,]                            	 {printf("%s\n%40s%40s%40d", KBLU, yytext, "Separator", yylineno);}
 [;]                              {printf("%s\n%40s%40s%40d", KBLU, yytext, "Delimiter",yylineno);}
 .                                {printf("%s\n%40s%40s%40d", KRED, yytext, "Invalid Character", yylineno);}
@@ -294,6 +348,14 @@ int main()
   int newtoken = 1;
   while(newtoken){
 	newtoken = yylex();
+  }
+  if(ptop!=-1)
+  {
+    printf("\n\n\t\t\'(\' has not been matched at line number %d.", pstack[ptop]);
+  }
+  if(ctop!=-1)
+  {
+    printf("\n\n\t\t\'{\' has not been matched at line number %d.", cstack[ctop]);
   }
   print_symbol_table();
   print_constant_table();
