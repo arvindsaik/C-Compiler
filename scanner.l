@@ -46,9 +46,9 @@ double_quotes ["]
 \n {yylineno++;}
 {white_space}*
 
-#include[ ]*<[^>]+> {printf("%s\n\t\t\t%s\t\t\tPreprocessor Directive\t\t\t%d", KBLU, yytext,yylineno);}
-printf {printf("%s\n\t\t\tprintf\t\t\t\t\tPre-defined Function\t\t\t\t%d", KBLU, yylineno);strcpy(token, "function");install_symbol();}
-scanf {printf("%s\n\t\t\tscanf\t\t\t\t\tPre-defined Function\t\t\t\t%d", KBLU, yylineno);strcpy(token, "function");install_symbol();}
+#include[ ]*<[^>]+> {printf("%s\n%40s%40s%40d", KBLU, yytext,"Preprocessor-directive", yylineno);}
+printf {printf("%s\n%40s%40s%40d", KBLU,"printf", "Pre-defined function", yylineno);strcpy(token, "function");install_symbol();}
+scanf {printf("%s\n%40s%40s%40d", KBLU,"scanf", "Pre-defined function", yylineno);strcpy(token, "function");install_symbol();}
 "/*"                    {BEGIN(comment); nested_comment_stack=1; yymore();}
 <comment><<EOF>>        {printf("\nMulti-line Comment: \""); yyless(yyleng-2); ECHO; printf("\", not terminted at line no: %d.", yylineno); yyterminate();}
 <comment>"/*"           {nested_comment_stack++; yymore();}
@@ -76,82 +76,81 @@ scanf {printf("%s\n\t\t\tscanf\t\t\t\t\tPre-defined Function\t\t\t\t%d", KBLU, y
 
 
 <INITIAL>{double_quotes}           		 		{ BEGIN(string_literal); yymore();}
-<string_literal>"\\"+{escape_sequence} 				{yymore(); printf("\nEscape Sequence , line number line number: %d.", yylineno);}
+<string_literal>"\\"+{escape_sequence} 				{printf("%s\n%40s%c%39s%40d", KBLU,  "\\", yytext[yyleng-1],"Escape Sequence", yylineno); 
+                                                yymore();}
 <string_literal>"\\"+[^a|n|b|t|f|r|v|\|"|'|?] 			{printf("\nUnrecognized escape seqence at line number: %d.", yylineno);}
-<string_literal>{double_quotes}    				{printf("\n\t\t\t%s\t\t\t\t String Constant\t\t\t\t%d.",yytext,yylineno);
+<string_literal>{double_quotes}    				{printf("%s\n%40s%40s%40d",KBLU, yytext, "String Constant",yylineno);
                                                			 strcpy(token, "String Constant");  install_constant(); BEGIN(INITIAL);}
 <string_literal>\n                 				{printf("\nError : Unterminated string: %s at line number: %d.", yytext, yylineno);yylineno++;}
 <string_literal>[^\\]               				{yymore();}
 
-{digit}+	{printf("%s\n\t\t\t%s\t\t\t\t\tInteger Constant\t\t\t%d.", KBLU, yytext,yylineno); strcpy(token, "INT Constant");  install_constant();}
-{digit}*\.?{digit}*(E[+|-]?{digit}+*\.?{digit}*)?	{printf("%s\n\t\t\t%s\t\t\t\t\tFP Constant\t\t\t\t%d.", KBLU, yytext,yylineno); strcpy(token, "FP Constant");  install_constant();}
+{digit}+	{printf("%s\n%40s%40s%40d", KBLU, yytext, "Integer Constant", yylineno); strcpy(token, "INT Constant");  install_constant();}
+{digit}*\.?{digit}*(E[+|-]?{digit}+*\.?{digit}*)?	{printf("%s\n%40s%40s%40d", KBLU, yytext, "Floating Point Constant",yylineno); strcpy(token, "FP Constant");  install_constant();}
 {digit}*\.?{digit}*E.?	{printf("%s\nError No exponent provided: %s , line number: %d.", KBLU, yytext,yylineno);}
-\'.\'	{printf("%s\n\t\t\t%s\t\t\t\t\tChar Constant\t\t\t\t%d.", KBLU, yytext,yylineno); strcpy(token, "Char Constant");  install_constant();}
+\'.\'	{printf("%s\n%40s%40s%40d", KBLU, yytext, "Character Constant",yylineno); strcpy(token, "Char Constant");  install_constant();}
 
 ^{white_space}*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}+{identifier}{white_space}*\([^)]*\){white_space}*  {
                                                                                                     if(strstr(yytext, "main")!=NULL)
                                                                                                     {
-                                                                                                      printf("%s\n\t\t\tmain\t\t\t\t\tMain Function\t\t\t\t%d", KBLU, yylineno);
-                                                                                                      strcpy(token, "function");
-                                                                                                      install_symbol();
+                                                                                                      printf("%s\n%40s%40s%40d", KBLU, "main", "Main Function", yylineno);
+                                                                                                      strcpy(token, "Main function");
                                                                                                     }
                                                                                                     else
                                                                                                     {
-                                                                                                      printf("%s\n\t\t\t%s\t\t\t\tUser Defined Function\t\t\t%d", KBLU, yytext, yylineno);
-                                                                                                      strcpy(token, "User-defined Function");
-                                                                                                      install_symbol();
+                                                                                                      printf("%s\n%40s%40s%40d", KBLU,  yytext, "User-defined function", yylineno);
+                                                                                                      strcpy(token, "User Defined function");
                                                                                                     }
                                                                                                 }
 
 
-"auto"                      {printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno); strcpy(token,"Keyword");  install_symbol();}
-"break"       							{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"case"        		  				{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"char"        							{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"const"      								{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"continue" 									{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"default"  									{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"do"       									{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"double"   									{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"else"     									{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"enum"        							{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"extern"        						{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"float"        							{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"for"        								{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"goto"     									{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"if"       									{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"int"      									{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"long"     									{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"register"        					{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"return"        						{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"short"       							{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"signed"     								{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"sizeof"     								{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"static"     								{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"struct"        						{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"switch"        						{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"typedef"      							{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"union"    									{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"unsigned"       						{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"void"        		  				{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"volatile"     							{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-"while"    									{printf("%s\n\t\t\t%s\t\t\t\t\tKeyword\t\t\t\t\t%d.", KBLU, yytext, yylineno);  strcpy(token,"Keyword");  install_symbol();}
-
-
-\*+[ ]*{identifier} 		          {printf("%s\n\t\t\t%s\t\t\t\t\tPointer declaration\t\t\t\t%d", KBLU, yytext, yylineno);}
-
-{identifier}  							{printf("%s\n\t\t\t%s\t\t\t\t\tIdentifier\t\t\t\t%d.", KBLU, yytext, yylineno); strcpy(token,"Identifier"); install_symbol();}
-
-
-{BID}			{printf("%s\n\t\t\t%s\t\t\t\t\tInvalid Identifier\t\t\t\t%d.", KRED, yytext, yylineno); }
+"auto"                      {printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno); strcpy(token,"Keyword");  install_symbol();}
+"break"       							{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"case"        		  				{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"char"        							{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"const"      								{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"continue" 									{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"default"  									{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"do"       									{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"double"   									{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"else"     									{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"enum"        							{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"extern"        						{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"float"        							{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"for"        								{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"goto"     									{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"if"       									{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"int"      									{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"long"     									{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"register"        					{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"return"        						{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"short"       							{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"signed"     								{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"sizeof"     								{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"static"     								{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"struct"        						{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"switch"        						{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"typedef"      							{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"union"    									{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"unsigned"       						{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"void"        		  				{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"volatile"     							{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
+"while"    									{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword");  install_symbol();}
 
 
 
-{identifier}+\[{digit}*\]        {printf("%s\nArray declaration: %s, Line Number: %d", KBLU, yytext, yylineno);}
-(\+|-|\*|\/|\&|\[|\]|\>|\<|!=|\+\+|--|\%|>=|<=|==|&&|\|\||!|\+=|-=|\/=|\*=|\%=|\&=|\|=|\^=|\.|\-\>)  {printf("%s\n\t\t\t%s\t\t\t\t\tOperator\t\t\t\t%d.", KBLU, yytext,yylineno); }
-[,]                            	 {printf("%s\n\t\t\t%s\t\t\t\t\tSeparator\t\t\t\t%d", KBLU, yytext, yylineno);}
-[;]                              {printf("%s\n\t\t\t%s\t\t\t\t\tDelimiter\t\t\t\t%d", KBLU, yytext, yylineno);}
-.                                {printf("%s\n\t\t\t%s\t\t\t\t\tInvalid Character\t\t\t%d.", KRED, yytext, yylineno);}
+{identifier}  							{printf("%s\n%40s%40s%40d", KBLU,  yytext, "Identifier", yylineno); strcpy(token,"Identifier"); install_symbol();}
+
+
+{BID}			{printf("%s\n%40s%40s%40d", KRED, yytext, "Invalid Identifier", yylineno); }
+
+
+\*+[ ]*{identifier} 		          {printf("%s\n%40s%40s%40d", KBLU, yytext, "Pointer Declration", yylineno);}
+{identifier}+\[{digit}*\]        {printf("%s\n%40s%40s%40d", KBLU, yytext, "Array Declaration", yylineno);}
+
+(\+|-|\*|\/|\&|\[|\]|\>|\<|!=|\+\+|--|\%|>=|<=|==|&&|\|\||!|\+=|-=|\/=|\*=|\%=|\&=|\|=|\^=|\.|\-\>|=|\{|\(|\)|\}|\))  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); }
+[,]                            	 {printf("%s\n%40s%40s%40d", KBLU, yytext, "Separator", yylineno);}
+[;]                              {printf("%s\n%40s%40s%40d", KBLU, yytext, "Delimiter",yylineno);}
+.                                {printf("%s\n%40s%40s%40d", KRED, yytext, "Invalid Character", yylineno);}
 %%
 
 unsigned int get_hash(char *str)
@@ -235,10 +234,11 @@ void install_constant()
 void print_symbol_table()
 {
   int i;
-  printf("%s\n==============================================================================================================================================================", KBLU);
-  printf("%s\n\t\t\t\t\t\t\t\t\t\tSYMBOL TABLE", KRED);
-  printf("%s\n==============================================================================================================================================================", KBLU);  
-  printf("%s\n\t\t\t\tToken\t\t\t\t\t\tToken Type\t\t\t\tLine Number\n", KCYN);
+  char a[100]="<";
+  printf("%s\n==============================================================================================================================================================", KRED);
+  printf("%s\n\t\t\t\t\t\t\t\t\tSYMBOL TABLE", KBLU);
+  printf("%s\n==============================================================================================================================================================", KRED);  
+  printf("%s\n%40s%40s%40s", KCYN, "TOKEN", "TOKEN TYPE", "LINE NUMBER");
   for(int i=0;i<n_buckets;i++)
   {
       if(s_head[i]!=NULL)
@@ -246,7 +246,8 @@ void print_symbol_table()
         struct table_entry *temp = s_head[i];
         while(temp!=NULL)
         {
-          printf("%s\n\t\t\t\t%s\t\t\t\t\t\t<%s>\t\t\t\t%d", KWHT, (char *)temp->key, (char *)temp->value, temp->line);
+          printf("%s\n%40s%40s>%40d", KWHT, (char *)temp->key, strcat(a, (char *)temp->value), temp->line);
+          strcpy(a, "<");
           temp = temp->next;
         }
       }
@@ -255,12 +256,12 @@ void print_symbol_table()
 }
 
 void print_constant_table()
-{
-  int i;
-  printf("%s\n==============================================================================================================================================================", KBLU);
-  printf("%s\n\t\t\t\t\t\t\t\t\tCONSTANT TABLE", KRED);
-  printf("%s\n==============================================================================================================================================================", KBLU);  
-  printf("%s\n\t\t\t\tToken\t\t\t\t\t\tToken Type\t\t\t\tLine Number\n", KCYN);
+{int i;
+  char a[100]="<";
+  printf("%s\n==============================================================================================================================================================", KRED);
+  printf("%s\n\t\t\t\t\t\t\t\t\tCONSTANT TABLE", KBLU);
+  printf("%s\n==============================================================================================================================================================", KRED);  
+  printf("%s\n%40s%40s%40s", KCYN, "TOKEN", "TOKEN TYPE", "LINE NUMBER");
   for(int i=0;i<n_buckets;i++)
   {
       if(c_head[i]!=NULL)
@@ -268,7 +269,8 @@ void print_constant_table()
         struct table_entry *temp = c_head[i];
         while(temp!=NULL)
         {
-          printf("%s\n\t\t\t\t%s\t\t\t\t\t\t<%s>\t\t\t\t%d", KWHT, (char *)temp->key, (char *)temp->value, temp->line);
+          printf("%s\n%40s%40s>%40d", KWHT, (char *)temp->key, strcat(a, (char *)temp->value), temp->line);
+          strcpy(a, "<");
           temp = temp->next;
         }
       }
@@ -283,7 +285,7 @@ int main()
   fp = fopen("sample.c", "r");
   yyin = fp;
   printf("\n===========================================================================================================================================================");
-  printf("\n\t\t\tTOKEN\t\t\t\tTOKEN TYPE\t\t\t\tLINE NUMBER");
+  printf("\n%40s%40s%40s", "TOKEN", "TOKEN TYPE", "LINE NUMBER");
   printf("\n===========================================================================================================================================================");
   int newtoken = 1;
   while(newtoken){
