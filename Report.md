@@ -429,6 +429,9 @@ int main(){
 
 #### Output 1
 
+![Tokens Identified](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case1a.png)
+![Symbol and Constant Table](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case1b.png)
+
 #### Test case 2
 
 ```
