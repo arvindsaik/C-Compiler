@@ -1,3 +1,92 @@
+# Lexical Scanner
+
+## Team Members : Arvind Sai K (15CO207) and Derik Clive (15CO213)
+
+### Pipeline for execution of a program
+
+The following image shows the typical flow for an execution of a program starting from the raw source code stage.
+
+![](https://www.tutorialspoint.com/compiler_design/images/language_processing_system.jpg)
+
+### What is a compiler?
+
+A compiler is computer software that transforms computer code written in one programming language (the source language) into another programming language (the target language). Compilers are a type of translator that support digital devices, primarily computers. The name compiler is primarily used for programs that translate source code from a high-level programming language to a lower level language (e.g., assembly language, object code, or machine code) to create an executable program.
+
+### Introduction to compilers
+
+Up to this point we have treated a compiler as a single box that maps a source program into a semantically equivalent target program. If we open up this box a little, we see that there are two parts to this mapping: analysis and synthesis.
+
+The analysis part breaks up the source program into constituent pieces and
+imposes a grammatical structure on them. It then uses this structure to cre-
+ate an intermediate representation of the source program. If the analysis part
+detects that the source program is either syntactically ill formed or semanti-
+cally unsound, then it must provide informative messages, so the user can take
+corrective action. The analysis part also collects information about the source
+program and stores it in a data structure called a symbol table, which is passed
+along with the intermediate representation to the synthesis part.
+
+The synthesis part constructs the desired target program from the interme-
+diate representation and the information in the symbol table. The analysis part
+is often called the front end of the compiler; the synthesis part is the back end.
+
+If we examine the compilation process in more detail, we see that it operates
+as a sequence of phases, each of which transforms one representation of the
+source program to another. A typical decomposition of a compiler into phases
+is shown in figure below. In practice, several phases may be grouped together,
+and the intermediate representations between the grouped phases need not be
+constructed explicitly. The symbol table, which stores information about the
+entire source program, is used by all phases of the compiler.
+
+Some compilers have a machine-independent optimization phase between
+the front end and the back end. The purpose of this optimization phase is to
+perform transformations on the intermediate representation, so that the back
+end can produce a better target program than it would have otherwise pro-
+duced from an unoptimized intermediate representation. Since optimization is
+optional, one or the other of the two optimization phases shown in figure below may
+be missing.
+
+![](https://image.slidesharecdn.com/phasescompiler-141221115333-conversion-gate01/95/phases-of-a-compiler-3-638.jpg?cb=1419162903)
+
+
+### Analysis phase in compilers
+
+#### Lexical Analysis
+The first phase of scanner works as a text scanner. This phase scans the source code as a stream of characters and converts it into meaningful lexemes. Lexical analyzer represents these lexemes in the form of tokens as below.
+
+``` <token-name, attribute-value> ```
+#### Syntax Analysis
+The next phase is called the syntax analysis or parsing. It takes the token produced by lexical analysis as input and generates a parse tree (or syntax tree). In this phase, token arrangements are checked against the source code grammar, i.e. the parser checks if the expression made by the tokens is syntactically correct.
+
+#### Semantic Analysis
+Semantic analysis checks whether the parse tree constructed follows the rules of language. For example, assignment of values is between compatible data types, and adding string to an integer. Also, the semantic analyzer keeps track of identifiers, their types and expressions; whether identifiers are declared before use or not etc. The semantic analyzer produces an annotated syntax tree as an output.
+
+#### Intermediate Code Generation
+After semantic analysis the compiler generates an intermediate code of the source code for the target machine. It represents a program for some abstract machine. It is in between the high-level language and the machine language. This intermediate code should be generated in such a way that it makes it easier to be translated into the target machine code.
+
+### Synthesis phase in compilers
+
+#### Code Optimization
+The next phase does code optimization of the intermediate code. Optimization can be assumed as something that removes unnecessary code lines, and arranges the sequence of statements in order to speed up the program execution without wasting resources (CPU, memory).
+
+#### Code Generation
+In this phase, the code generator takes the optimized representation of the intermediate code and maps it to the target machine language. The code generator translates the intermediate code into a sequence of (generally) re-locatable machine code. Sequence of instructions of machine code performs the task as the intermediate code would do.
+
+### Symbol Table (Common to all the above phases)
+It is a data-structure maintained throughout all the phases of a compiler. All the identifier's names along with their types are stored here. The symbol table makes it easier for the compiler to quickly search the identifier record and retrieve it. The symbol table is also used for scope management.
+
+### Details of the lexical analysis phase
+
+As the first phase of a compiler, the main task of the lexical analyzer is to read the input characters of the source program, group them into lexemes, and produce as output a sequence of tokens for each lexeme in the source program. The stream of tokens is sent to the parser for syntax analysis. It is common for the lexical analyzer to interact with the symbol table as well. When the lexical analyzer discovers a lexeme constituting an identifier, it needs to enter that lexeme into the symbol table. In some cases, information regarding the kind of identifier may be read from the symbol table by the lexical analyzer to assist it in determining the proper token it must pass to the parser. 
+
+Since the lexical analyzer is the part of the compiler that reads the source text, it may perform certain other tasks besides identification of lexemes. One such task is stripping out comments and whitespace (blank, newline, tab, and perhaps other characters that are used to separate tokens in the input). Another task is correlating error messages generated by the compiler with the source program. For instance, the lexical analyzer may keep track of the number of newline characters seen, so it can associate a line number with each error message. In some compilers, the lexical analyzer makes a copy of the source program with the error messages inserted at the appropriate positions. If the source program uses a macro-preprocessor, the expansion of macros may also be performed by the lexical analyzer. 
+
+Lexical analyzers are divided into a cascade of two processes: 
+1. Scanning consists of the simple processes that do not require tokenization of the input, such as deletion of comments and compaction of consecutive whitespace characters into one. 
+2. Lexical analysis proper is the more complex portion, where the scanner produces the sequence of tokens as output.
+
+### Lex code for lexical analyser
+
+```
 %x comment
 %x string_literal
 %{
@@ -63,16 +152,6 @@ scanf {printf("\n\t\t\tscanf\t\t\t\t\tFunction\t\t\t\t%d", yylineno);strcpy(toke
 
 
 
-<<<<<<< HEAD
-<INITIAL>{double_quotes}           { BEGIN(string_literal); yymore();}
-<string_literal>"\\"+{escape_sequence} {yymore(); printf("\nEscape Sequence , line number line number: %d.", yylineno);}
-<string_literal>"\\"+[^a|n|b|t|f|r|v|\|"|'|?] {printf("\nUnrecognized escape seqence at line number: %d.", yylineno);}
-<string_literal>{double_quotes}    {printf("\nString: %s at line number: %d.", yytext, yylineno);
-                                    strcpy(token, "String Literal");  install_constant(); BEGIN(INITIAL);}
-<string_literal>\n                 {printf("\nUnterminated string: %s at line number: %d.", yytext, yylineno);yylineno++;}
-<string_literal>[^\\]               {yymore();}
-
-=======
 <INITIAL>{double_quotes}           		 		{ BEGIN(string_literal); yymore();}
 <string_literal>"\\"+{escape_sequence} 				{yymore(); printf("\nEscape Sequence , line number line number: %d.", yylineno);}
 <string_literal>"\\"+[^a|n|b|t|f|r|v|\|"|'|?] 			{printf("\nUnrecognized escape seqence at line number: %d.", yylineno);}
@@ -80,7 +159,6 @@ scanf {printf("\n\t\t\tscanf\t\t\t\t\tFunction\t\t\t\t%d", yylineno);strcpy(toke
                                                			 strcpy(token, "String Constant");  install_constant(); BEGIN(INITIAL);}
 <string_literal>\n                 				{printf("\nError : Unterminated string: %s at line number: %d.", yytext, yylineno);yylineno++;}
 <string_literal>[^\\]               				{yymore();}
->>>>>>> 22595917c8a4b16ea0ac4f26aa25416a2781ba02
 
 {digit}+	{printf("\n\t\t\t%s\t\t\t\t\tInteger Constant\t\t\t\t%d.",yytext,yylineno); strcpy(token, "INT Constant");  install_constant();}
 {digit}*\.?{digit}*(E[+|-]?{digit}+*\.?{digit}*)?	{printf("\n\t\t\t%s\t\t\t\t\tFP Constant\t\t\t\t%d.",yytext,yylineno); strcpy(token, "FP Constant");  install_constant();}
@@ -287,3 +365,165 @@ int yywrap()
 {
   return 1;
 }
+```
+### Test cases
+
+#### Test case 1
+
+```
+#include <stdio.h>
+
+/* 1 ) Test for identifying int and char data types and their corresponding sub-types
+like short , long , signed, unsigned.
+2 ) Test for identifying while and nested while constructs  */
+
+int main(){
+    /* test for various integer types supported */
+    short int var1;
+    long int var2;
+    long long int var3;
+    int var4;
+    signed short int var5;
+    signed long int var6;
+    signed long long int var7;
+    signed int var8;
+    unsigned short int var5;
+    unsigned long int var6;
+    unsigned long long int var7;
+    unsigned int var8;
+    
+    /* test for various character types supported */
+    char var9;
+    signed char var10;
+    signed char var11;
+
+    /* test for while and nested while */ 
+    var1 = 0;
+    while(var1 < 20){
+        var2 = 0;
+        while(var2 < 40){
+            var3 = 0;
+            var2 = var2 + 1;
+        }
+        var1 = var1 + 1;
+    }
+
+    var1 = 0;
+    while(var1 < 20){
+        var2 = 0;
+        var1 = var1 + 1;
+    }
+
+    return 0;
+}
+```
+
+#### Output 1
+
+#### Test case 2
+
+```
+#include <stdio.h>
+
+/* 1 ) Test case for identifying function with single argument 
+2 ) Test for identifiers and constants supported 
+3 ) Test for strings and special symbols supported
+*/
+
+
+/* Test case for identifying function with single argument */
+int power2(int c){
+    int d = c*c;
+    return d;
+}
+char add1(char c){
+    return (c+1);
+}
+void starter(int a){
+    printf("you wanted to print %d",a);
+}
+int main(){
+    /* test for identifiers and constants supported */
+    short int sum = 10;
+    long int total = 20;
+    sum = 10*10 + 20;
+    
+    /* test for strings and special symbols supported */
+    char a[100] = "hello";
+    printf("Hello world");
+
+    int ab[2] = {10,20};
+    int b = 3;
+    b = (10 + b)*2 - 3;
+
+    int res1 = power2(10);
+    char res2 = add1('d');
+    starter(20);
+    return 0;
+}
+```
+
+#### Output 2
+
+#### Test case 3
+
+```
+#include <stdio.h>
+
+/* 1 ) Test case for identifying escape sequences 
+2 ) Test for some valid multiline comments 
+3 ) Test for pointers
+*/
+
+int main(){
+    /* Test case for identifying escape sequences */
+    printf("testing \t escape \n sequences \n");
+    
+    /* Test for some valid multiline comments  */
+    
+    /* Nested /*
+    Multiline comm
+    ents work */
+
+    /* Test for pointers */
+    char c = 'a';
+    char * temp = &c;
+    return 0;
+}
+```
+
+#### Output 3
+
+#### Test case 4
+
+```
+#include <stdio.h>
+
+/* 1 ) Test case for string not terminated 
+2 ) Test for unbalanced paranthesis; 
+3 ) Test for stray characters
+4 ) Missing ;
+5 ) Multiline comment not terminated 
+*/
+
+int main(){
+    printf("hi there);
+
+    int a = 0;
+    int b = 3;
+    int c = 5;
+
+    a = ((b+c*a);
+
+    ```
+    a = 3
+
+    return 0;
+}
+
+/*
+    this comment does 
+    not end 
+```
+
+#### Output 4
