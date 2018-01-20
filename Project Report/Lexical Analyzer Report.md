@@ -470,6 +470,11 @@ int yywrap()
 
 #### Test case 1
 
+1 ) Test for identifying int and char data types and their corresponding sub-types
+like short , long , signed, unsigned.
+
+2 ) Test for identifying while and nested while constructs 
+
 ```
 #include <stdio.h>
 
@@ -530,6 +535,12 @@ int main(){
 
 #### Test case 2
 
+1 ) Test case for identifying function with single argument 
+
+2 ) Test for identifiers and constants supported 
+
+3 ) Test for strings and special symbols supported
+
 ```
 #include <stdio.h>
 
@@ -578,6 +589,12 @@ int main(){
 
 #### Test case 3
 
+1 ) Test case for identifying escape sequences 
+
+2 ) Test for some valid multiline comments 
+
+3 ) Test for pointers
+
 ```
 #include <stdio.h>
 
@@ -608,6 +625,14 @@ int main(){
 ![Tokens Identified](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case3.png)
 
 #### Test case 4
+
+1 ) Test case for string not terminated 
+
+2 ) Test for unbalanced paranthesis; 
+
+3 ) Test for stray characters
+
+4 ) Multiline comment not terminated 
 
 ```
 #include <stdio.h>
@@ -644,6 +669,12 @@ int main(){
 ![Symbol and Constant Table](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case4(b).png)
 
 #### Test case 5
+
+1 ) Test for '{' not terminated
+
+2 ) Test for unterminated character constant 
+
+3 ) Test for invalid functions
 
 ```
 #include <stdio.h>
