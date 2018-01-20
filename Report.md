@@ -477,6 +477,9 @@ int main(){
 
 #### Output 2
 
+![Tokens Identified](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case2a.png)
+![Symbol and Constant Table](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case2b.png)
+
 #### Test case 3
 
 ```
@@ -505,6 +508,8 @@ int main(){
 ```
 
 #### Output 3
+
+![Tokens Identified](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case3.png)
 
 #### Test case 4
 
@@ -539,3 +544,6 @@ int main(){
 ```
 
 #### Output 4
+
+![Tokens Identified](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case4(a).png)
+![Symbol and Constant Table](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case4(b).png)
