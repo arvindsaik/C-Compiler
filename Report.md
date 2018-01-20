@@ -366,3 +366,164 @@ int yywrap()
   return 1;
 }
 ```
+### Test cases
+
+#### Test case 1
+
+```
+#include <stdio.h>
+
+/* 1 ) Test for identifying int and char data types and their corresponding sub-types
+like short , long , signed, unsigned.
+2 ) Test for identifying while and nested while constructs  */
+
+int main(){
+    /* test for various integer types supported */
+    short int var1;
+    long int var2;
+    long long int var3;
+    int var4;
+    signed short int var5;
+    signed long int var6;
+    signed long long int var7;
+    signed int var8;
+    unsigned short int var5;
+    unsigned long int var6;
+    unsigned long long int var7;
+    unsigned int var8;
+    
+    /* test for various character types supported */
+    char var9;
+    signed char var10;
+    signed char var11;
+
+    /* test for while and nested while */ 
+    var1 = 0;
+    while(var1 < 20){
+        var2 = 0;
+        while(var2 < 40){
+            var3 = 0;
+            var2 = var2 + 1;
+        }
+        var1 = var1 + 1;
+    }
+
+    var1 = 0;
+    while(var1 < 20){
+        var2 = 0;
+        var1 = var1 + 1;
+    }
+
+    return 0;
+}
+```
+
+#### Output 1
+
+#### Test case 2
+
+```
+#include <stdio.h>
+
+/* 1 ) Test case for identifying function with single argument 
+2 ) Test for identifiers and constants supported 
+3 ) Test for strings and special symbols supported
+*/
+
+
+/* Test case for identifying function with single argument */
+int power2(int c){
+    int d = c*c;
+    return d;
+}
+char add1(char c){
+    return (c+1);
+}
+void starter(int a){
+    printf("you wanted to print %d",a);
+}
+int main(){
+    /* test for identifiers and constants supported */
+    short int sum = 10;
+    long int total = 20;
+    sum = 10*10 + 20;
+    
+    /* test for strings and special symbols supported */
+    char a[100] = "hello";
+    printf("Hello world");
+
+    int ab[2] = {10,20};
+    int b = 3;
+    b = (10 + b)*2 - 3;
+
+    int res1 = power2(10);
+    char res2 = add1('d');
+    starter(20);
+    return 0;
+}
+```
+
+#### Output 2
+
+#### Test case 3
+
+```
+#include <stdio.h>
+
+/* 1 ) Test case for identifying escape sequences 
+2 ) Test for some valid multiline comments 
+3 ) Test for pointers
+*/
+
+int main(){
+    /* Test case for identifying escape sequences */
+    printf("testing \t escape \n sequences \n");
+    
+    /* Test for some valid multiline comments  */
+    
+    /* Nested /*
+    Multiline comm
+    ents work */
+
+    /* Test for pointers */
+    char c = 'a';
+    char * temp = &c;
+    return 0;
+}
+```
+
+#### Output 3
+
+#### Test case 4
+
+```
+#include <stdio.h>
+
+/* 1 ) Test case for string not terminated 
+2 ) Test for unbalanced paranthesis; 
+3 ) Test for stray characters
+4 ) Missing ;
+5 ) Multiline comment not terminated 
+*/
+
+int main(){
+    printf("hi there);
+
+    int a = 0;
+    int b = 3;
+    int c = 5;
+
+    a = ((b+c*a);
+
+    ```
+    a = 3
+
+    return 0;
+}
+
+/*
+    this comment does 
+    not end 
+```
+
+#### Output 4
