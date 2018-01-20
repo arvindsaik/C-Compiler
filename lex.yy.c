@@ -1267,7 +1267,7 @@ YY_RULE_SETUP
 case 14:
 YY_RULE_SETUP
 #line 69 "scanner.l"
-{yymore(); printf("\nString: %s at line number: %d.", yytext, yylineno);
+{printf("\nString: %s at line number: %d.", yytext, yylineno);
                                     strcpy(token, "String Literal");  install_constant(); BEGIN(INITIAL);}
 	YY_BREAK
 case 15:

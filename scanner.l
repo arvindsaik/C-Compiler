@@ -66,7 +66,7 @@ double_quotes ["]
 <INITIAL>{double_quotes}           { BEGIN(string_literal); yymore();}
 <string_literal>"\\"+{escape_sequence} {yymore(); printf("\nEscape Sequence , line number line number: %d.", yylineno);}
 <string_literal>"\\"+[^a|n|b|t|f|r|v|\|"|'|?] {printf("\nUnrecognized escape seqence at line number: %d.", yylineno);}
-<string_literal>{double_quotes}    {yymore(); printf("\nString: %s at line number: %d.", yytext, yylineno);
+<string_literal>{double_quotes}    {printf("\nString: %s at line number: %d.", yytext, yylineno);
                                     strcpy(token, "String Literal");  install_constant(); BEGIN(INITIAL);}
 <string_literal>\n                 {printf("\nUnterminated string: %s at line number: %d.", yytext, yylineno);yylineno++;}
 <string_literal>[^\\]               {yymore();}

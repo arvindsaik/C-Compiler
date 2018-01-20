@@ -20,6 +20,8 @@ int main(){
     signed long int var7;
     signed int var8;
     short int var5;
+    char *a = "jgjgh";
+    printf("\ndone\n");
     unsigned long int var6;
     unsigned long long int var7;
     unsigned int var8;
