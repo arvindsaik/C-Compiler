@@ -530,8 +530,8 @@ int main(){
 
 #### Output 1
 
-![Tokens Identified](test_case1a.png)
-![Symbol and Constant Table](test_case1b.png)
+![Tokens Identified](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case1a.png)
+![Symbol and Constant Table](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case1b.png)
 
 #### Test case 2
 
@@ -584,8 +584,8 @@ int main(){
 
 #### Output 2
 
-![Tokens Identified](test_case2a.png)
-![Symbol and Constant Table](test_case2b.png)
+![Tokens Identified](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case2a.png)
+![Symbol and Constant Table](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case2b.png)
 
 #### Test case 3
 
@@ -622,7 +622,7 @@ int main(){
 
 #### Output 3
 
-![Tokens Identified](test_case3.png)
+![Tokens Identified](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case3.png)
 
 #### Test case 4
 
@@ -665,8 +665,8 @@ int main(){
 
 #### Output 4
 
-![Tokens Identified](test_case4(a).png)
-![Symbol and Constant Table](test_case4(b).png)
+![Tokens Identified](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case4(a).png)
+![Symbol and Constant Table](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case4(b).png)
 
 #### Test case 5
 
@@ -724,5 +724,5 @@ int main(){
 
 #### Output 5
 
-![Tokens Identified](test_case5(a).png)
-![Symbol and Constant Table](test_case5(b).png)
+![Tokens Identified](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case5(a).png)
+![Symbol and Constant Table](https://github.com/arvindsaik/Lexical-Scanner/blob/master/outputs/lex/test_case5(b).png)
