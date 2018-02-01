@@ -212,7 +212,74 @@ scanf {printf("%s\n%40s%40s%40d", KBLU,"scanf", "Pre-defined function", yylineno
               printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno);
           }
 
-(\+|-|\*|\/|\&|\[|\]|\>|\<|!=|\+\+|--|\%|>=|<=|==|&&|\|\||!|\+=|-=|\/=|\*=|\%=|\&=|\|=|\^=|\.|\-\>|=|\{|\}|\))  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); }
+
+(\+)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(ADD_OP); }
+
+(\-)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(SUB_OP); }
+
+(\*)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(MUL_OP); }
+
+(\/)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(DIV_OP); }
+
+(\&)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(AND_OP); }
+
+(\-)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(SUB_OP); }
+
+(\>)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(GREAT_OP); }
+
+(\<)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(LESS_OP); }
+
+(\!\=)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(NE_OP); }
+
+(\+\+)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(INC_OP); }
+
+(\-\-)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(DEC_OP); }
+
+(\%)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(MOD_OP); }
+
+(\>\=)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(GE_OP); }
+
+(\<\=)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(LE_OP); }
+
+(\=\=)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(EQ_OP); }
+
+(\&\&)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\|\|)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\!)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\+\=)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\-\=)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\/\=)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\*\=)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\%\=)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\&\=)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\|\=)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\^\=)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\-\>)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\=)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\{)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\})  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\()  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\))  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+(\-)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(IDENTIFIER); }
+
+
 [,]                            	 {printf("%s\n%40s%40s%40d", KBLU, yytext, "Separator", yylineno);}
 [;]                              {printf("%s\n%40s%40s%40d", KBLU, yytext, "Delimiter",yylineno);}
 \'.                              {printf("%s\n\tUnterminated CHARACTER LITERAL: %s, \tline no:%d\n",KRED, yytext, yylineno);}
