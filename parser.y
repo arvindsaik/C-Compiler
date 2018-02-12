@@ -1,17 +1,9 @@
-
-{
-	#include<stdio.h>
-	int yylex(void);
-	int yyerror(const char *s);
-	int success = 1;
-%}
-
-%token IDENTIFIER CONSTANT STRING_LITERAL 
+%token IDENTIFIER CONSTANT STRING_LITERAL INTEGER 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN VOLATILE VOID UNSIGNED UNION TYPEDEF 
-%token SWITCH STRUCT STATIC SIZEOF SIGNED SHORT RETURN REGISTER LONG INT FLOAT EXTERN ENUM DOUBLE CONST CHAR AUTO 
+%token STRUCT STATIC SIZEOF SIGNED SHORT REGISTER LONG INT FLOAT EXTERN ENUM DOUBLE CONST CHAR AUTO 
 %token PTR_OP INC_OP DEC_OP LESS_OP GREAT_OP LE_OP GE_OP EQ_OP NE_OP
-%token AND_OP OR_OP XOR_OP MUL_OP DIV_OP ADD_OP SUB_OP MOD_OP
-%token MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
+%token AND_OP OR_OP NOT_OP XOR_OP MUL_OP DIV_OP ADD_OP SUB_OP MOD_OP
+%token MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN EQ_ASSIGN
 %token SUB_ASSIGN AND_ASSIGN
 %token XOR_ASSIGN OR_ASSIGN
 
@@ -19,6 +11,15 @@
 %left '+' '-'
 %left '*' '/'
 %nonassoc UNARY
+
+
+%{
+	#include<stdio.h>
+	int yylex(void);
+	int yyerror(const char *s);
+	int success = 1;
+%}
+
 %%
 
 statement
@@ -26,7 +27,7 @@ statement
 	| expression_statement
 	| selection_statement
 	| iteration_statement
-	| variable_declarations
+	| variable_declaration
 	;		
 
 iteration_statement
@@ -46,12 +47,12 @@ expression_statement
 compound_statement
 	: '{' '}'
 	| '{' statement_list '}'
-	| '{' variable_declarations '}'
-	| '{' variable_declarations statement_list '}'
+	| '{' variable_declaration '}'
+	| '{' variable_declaration statement_list '}'
 	;
 
 assignment_statement 
-	: IDENTIFIER assignment_operators expression
+	: IDENTIFIER EQ_ASSIGN expression
 	| expression
 	;
 
@@ -89,7 +90,7 @@ assigment_operators
 	| SUB_ASSIGN	// -=
 	;
 
-variable_decalaration
+variable_declaration
 	: data_type IDENTIFIER 
 	;
 
@@ -116,7 +117,7 @@ int main()
 	return 0;
 }
 
-int yywrap()
+int yyerror(const char *s)
 {
 	return 1;
 }
