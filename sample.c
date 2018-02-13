@@ -1,32 +1,24 @@
-// #include <stdio.h>
 
-/* No errors just testing if-else, if-else ladder */
+#include <stdio.h>
 
-// int main(){
-   int a = 1;
-   int b = 2;
-   int c = 3;
-//    int max;
-//    if(a >= b){
-//        if(a >= c){
-//            max = a;
-//        }
-//        else{
-//            max = c;
-//        }
-//    }
-//    else{
-//        if(b >= c){
-//            max = b;
-//        }
-//        else{
-//            max = c;
-//        }
-//    }
+/*
+Unmatched else
+*/
 
-//    if(max > 2){
-//        printf("Good! \n");
-//    }
+int main(){
+    int a = 1;
+    int b = 2;
+    int c;
+    
+    if( a > 2){
+        c = a;
+    }
+    else{
+        c = -a;
+    }
+    else{
+        c = 2a;
+    }
 
-//    return 0;
-// }
+    return 0;
+}
