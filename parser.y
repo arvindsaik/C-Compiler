@@ -15,6 +15,7 @@
 
 %{
 	#include<stdio.h>
+	#include "lib.h"
 	int yylex(void);
 	int yyerror(const char *s);
 	int success = 1;
