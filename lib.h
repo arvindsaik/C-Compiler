@@ -94,7 +94,7 @@ void install_constant()
   unsigned int index = get_hash(key);
 
   struct table_entry *temp = search(c_head[index], key);
-  if(temp==NULL);
+  if(temp==NULL)
     insert(c_head, index, key, value);
 }
 

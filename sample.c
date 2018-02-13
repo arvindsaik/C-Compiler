@@ -1,43 +1,32 @@
-#include <stdio.h>
+// #include <stdio.h>
 
-/* 1 ) Test for '{' not terminated
-2 ) Test for unterminated character constant 
-3 ) Test for invalid functions
-*/
+/* No errors just testing if-else, if-else ladder */
 
-int func1(int a) //Valid function
-{
-    return 0;
-}
+// int main(){
+   int a = 1;
+   int b = 2;
+   int c = 3;
+//    int max;
+//    if(a >= b){
+//        if(a >= c){
+//            max = a;
+//        }
+//        else{
+//            max = c;
+//        }
+//    }
+//    else{
+//        if(b >= c){
+//            max = b;
+//        }
+//        else{
+//            max = c;
+//        }
+//    }
 
-void func2(int a, float int b) //Valid Function
-{
-    int var1;
-}
+//    if(max > 2){
+//        printf("Good! \n");
+//    }
 
-void func3(int a int b) //Invalid Function
-{
-    int var2;
-}
-
-void func4(short int a, b) //Invalid Function
-{
-    int var3
-}
-
-int main(){
-   
-   char a = 'a;
-   {
-       int var5;
-       {
-           int var4;
-       }
-
-    return 0;
-
-}
-
-/*
-    this comment does 
-    not end 
+//    return 0;
+// }

@@ -12,13 +12,12 @@
 %left '*' '/'
 %nonassoc UNARY
 
-
 %{
 	#include<stdio.h>
-	#include "lib.h"
 	int yylex(void);
 	int yyerror(const char *s);
 	int success = 1;
+	FILE *yyin;
 %}
 
 %%
@@ -28,7 +27,7 @@ statement
 	| expression_statement
 	| selection_statement
 	| iteration_statement
-	| variable_declaration
+	| variable_declaration statement
 	;		
 
 iteration_statement
@@ -64,13 +63,13 @@ statement_list
 
 
 expression 
-	: expression '+' INTEGER
-	| expression '-' INTEGER
-	| expression '*' INTEGER
-	| expression '/' INTEGER	
+	: expression '+' CONSTANT
+	| expression '-' CONSTANT
+	| expression '*' CONSTANT
+	| expression '/' CONSTANT	
 	| unary expression %prec UNARY
 	| '(' expression ')'
-	| INTEGER
+	| CONSTANT
 	;
 
 unary
@@ -92,7 +91,8 @@ assigment_operators
 	;
 
 variable_declaration
-	: data_type IDENTIFIER 
+	: data_type IDENTIFIER ';'
+	| data_type expression_statement
 	;
 
 data_type
@@ -114,11 +114,15 @@ data_type
 
 int main()
 {
+	FILE *fp;
+	fp = fopen("sample.c", "r");
+	yyin = fp; 
 	yyparse();
 	return 0;
 }
 
 int yyerror(const char *s)
 {
+	printf("\nParsing Unsuccessful: %s", s);
 	return 1;
 }

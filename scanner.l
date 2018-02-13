@@ -71,31 +71,12 @@ scanf {printf("%s\n%40s%40s%40d", KBLU,"scanf", "Pre-defined function", yylineno
 <string_literal>\n                 				{printf("\n\tError : Unterminated string: %s at line number: %d.", yytext, yylineno);yylineno++; BEGIN(INITIAL);}
 <string_literal>[^\\]               				{yymore();}
 
-{digit}+	{printf("%s\n%40s%40s%40d", KBLU, yytext, "Integer Constant", yylineno); strcpy(token, "INT Constant");  }
-{digit}*\.?{digit}*(E[+|-]?{digit}+*\.?{digit}*)?	{printf("%s\n%40s%40s%40d", KBLU, yytext, "Floating Point Constant",yylineno); strcpy(token, "FP Constant");  }
-{digit}*\.?{digit}*E.?	{printf("%s\nError No exponent provided: %s , line number: %d.", KBLU, yytext,yylineno);}
-\'.\'	{printf("%s\n%40s%40s%40d", KBLU, yytext, "Character Constant",yylineno); strcpy(token, "Char Constant");  }
-
-^{white_space}*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}+{identifier}{white_space}*\((({var},)*{var})?\){white_space}*  {
-                                                                                                    if(strstr(yytext, "main")!=NULL)
-                                                                                                    {
-                                                                                                      printf("%s\n%40s%40s%40d", KBLU, "main", "Main Function", yylineno);
-                                                                                                      strcpy(token, "Main function");
-                                                                                                      
-                                                                                                    }
-                                                                                                    else
-                                                                                                    {
-                                                                                                      printf("%s\n%40s%40s%40d", KBLU,  yytext, "User-defined function", yylineno);
-                                                                                                      strcpy(token, "User Defined function");
-                                                                                                      
-                                                                                                    }
-                                                                                                    
-                                                                                                }
+{digit}+	{printf("%s\n%40s%40s%40d", KBLU, yytext, "Integer Constant", yylineno); strcpy(token, "INT Constant");  return CONSTANT;}
+{digit}*\.?{digit}*(E[+|-]?{digit}+*\.?{digit}*)?	{printf("%s\n%40s%40s%40d", KBLU, yytext, "Floating Point Constant",yylineno); strcpy(token, "FP Constant"); return CONSTANT; }
+{digit}*\.?{digit}*E.?	{printf("%s\nError No exponent provided: %s , line number: %d.", KBLU, yytext,yylineno); return CONSTANT;}
+\'.\'	{printf("%s\n%40s%40s%40d", KBLU, yytext, "Character Constant",yylineno); strcpy(token, "Char Constant");  return CONSTANT;}
 
 
-^{white_space}*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}+{identifier}{white_space}*\([^)]*\){white_space}*     {
-                                                                                                  printf("%s\n%40s%40s%40d", KRED, yytext, "Invalid Function", yylineno);
-                                                                                                            }
 
 "auto"                      {printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno); strcpy(token,"Keyword"); return AUTO; }
 "break"       							{printf("%s\n%40s%40s%40d", KBLU, yytext, "Keyword", yylineno);  strcpy(token,"Keyword"); return BREAK;  }
@@ -138,59 +119,6 @@ scanf {printf("%s\n%40s%40s%40d", KBLU,"scanf", "Pre-defined function", yylineno
 
 {BID}			{printf("%s\n%40s%40s%40d", KRED, yytext, "Invalid Identifier", yylineno); }
 
-
-^{white_space}*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}+\*+[ ]*{identifier} 		          {printf("%s\n%40s%40s%40d", KBLU, yytext, "Pointer Declration", yylineno);}
-{identifier}+\[{digit}*\]        {printf("%s\n%40s%40s%40d", KBLU, yytext, "Array Declaration", yylineno);}
-
-[\(]        {if(ptop==-1)
-              {
-                ptop=0;
-                pstack[ptop] = yylineno;
-              }
-              else
-              {
-                ptop++;
-                pstack[ptop] = yylineno;
-              }
-              printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno);
-            }
-
-[\)]      {
-            if(ptop==0)
-             {
-               ptop=-1;
-             } 
-             else
-             {
-                ptop--;
-             }
-              printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno);
-          }
-
-[\{]        {if(ctop==-1)
-              {
-                ctop=0;
-                cstack[ctop] = yylineno;
-              }
-              else
-              {
-                ctop++;
-                cstack[ctop] = yylineno;
-              }
-              printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno);
-            }
-
-[\}]      {
-            if(ctop==0)
-             {
-               ctop=-1;
-             } 
-             else
-             {
-                ctop--;
-             }
-              printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno);
-          }
 
 
 (\+)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(ADD_OP); }
@@ -245,6 +173,11 @@ scanf {printf("%s\n%40s%40s%40d", KBLU,"scanf", "Pre-defined function", yylineno
 
 (\=)  {printf("%s\n%40s%40s%40d", KBLU, yytext, "Operator",yylineno); return(EQ_ASSIGN); }
 
+
+[\)]                              {return ')';}
+[\(]                              {return '(';}
+[}]                              {return '}';}
+[{]                              {return '{';}
 
 [,]                            	 {printf("%s\n%40s%40s%40d", KBLU, yytext, "Separator", yylineno); return ',';}
 [;]                              {printf("%s\n%40s%40s%40d", KBLU, yytext, "Delimiter",yylineno); return ';';}
