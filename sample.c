@@ -10,15 +10,13 @@ int main(){
     int b = 2;
     int c;
     
-    if( a > 2){
+    if( a > 2)
         c = a;
-    }
-    else{
+    if( b > 3 )
+        b = 2;
+    else
         c = -a;
-    }
-    else{
-        c = 2a;
-    }
+    
 
     return 0;
 }

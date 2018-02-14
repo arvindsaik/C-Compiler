@@ -2,7 +2,15 @@
 double val;
 char lval[100];
 }
+%nonassoc UNARY
+%nonassoc NO_ELSE
+%nonassoc ELSE
 
+%left '<' '>' '=' GE_OP LE_OP EQ_OP NE_OP
+%left  '+'  '-'
+%left  '*'  '/' '%'
+%left  '|'
+%left  '&'
 
 %token IF ELSE WHILE FOR CONTINUE BREAK RETURN 
 %token SIZEOF    
@@ -12,21 +20,13 @@ char lval[100];
 %token SUB_ASSIGN AND_ASSIGN
 %token XOR_ASSIGN OR_ASSIGN
 
-%token <lval> INT FLOAT CHAR STRUCT UNION UNSIGNED SIGNED VOID LONG SHORT
+%token <lval> INT FLOAT CHAR UNSIGNED SIGNED VOID LONG SHORT
 %token <lval> IDENTIFIER
 %token <val> CONST_INT CONST_FLOAT
 %token <lval> STRING_LITERAL CONST_CHAR
 %type <lval> data_type declaration_specifiers
 
 %start start_state
-
-
-
-
-
-%left '+' '-'
-%left '*' '/'
-%nonassoc UNARY
 
 
 %{
@@ -43,6 +43,10 @@ char lval[100];
 
 %%
 
+start_state
+	: global_declaration
+	| start_state global_declaration
+	;
 
 statement
 	: compound_statement
@@ -75,7 +79,7 @@ expression_statement
 	;
 
 selection_statement
-	: IF '(' expression ')' statement
+	: IF '(' expression ')' statement %prec NO_ELSE
 	| IF '(' expression ')' statement ELSE statement
 	;
 
@@ -97,11 +101,6 @@ function_definition
 	| declaration_specifiers declarator compound_statement
 	| declarator declaration_list compound_statement
 	| declarator compound_statement
-	;
-
-start_state
-	: global_declaration
-	| start_state global_declaration
 	;
 
 global_declaration
@@ -248,13 +247,13 @@ constant_expression
 	;
 
 declaration
-//	: declaration_specifiers ';'
 	: declaration_specifiers init_declarator_list ';' 
+	| error
 	;
 
 declaration_specifiers
-	: data_type		{strcpy(type, $1);}
-	| data_type declaration_specifiers {strcpy(temp, $1); strcat(temp, " "); strcat(temp, type); strcpy(type, temp);}
+	: data_type declaration_specifiers	{ strcpy(temp, $1); strcat(temp, " "); strcat(temp, type); strcpy(type, temp); }
+	| data_type	{ strcpy(type, $1); }
 	;
 
 data_type
@@ -266,8 +265,6 @@ data_type
 	| FLOAT {strcpy($$, "float");}
 	| SIGNED {strcpy($$, "signed");}
 	| UNSIGNED {strcpy($$, "unsigned");}
-	| STRUCT {strcpy($$, "struct");}
-	| UNION {strcpy($$, "union");}
 	;
 
 init_declarator_list

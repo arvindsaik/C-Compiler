@@ -65,7 +65,7 @@ var [ \t]*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}
 <string_literal>"\\"+{escape_sequence} 				{ 
                                                 yymore();}
 <string_literal>"\\"+[^a|n|b|t|f|r|v|\|"|'|?] 			{}
-<string_literal>{double_quotes}    				{strcpy(yylval.lval, yytext);;   BEGIN(INITIAL);}
+<string_literal>{double_quotes}    				{strcpy(yylval.lval, yytext);;   BEGIN(INITIAL); return(STRING_LITERAL);}
                                                   
 <string_literal>\n                 				{yylineno++; BEGIN(INITIAL);}
 <string_literal>[^\\]               				{yymore();}
@@ -85,8 +85,6 @@ var [ \t]*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}
 "for"        								{   return FOR;  }
 "if"       									{   return IF;  }
 "int"      									{   strcpy(yylval.lval, yytext); return INT;  }
-"struct"                    {   strcpy(yylval.lval, yytext); return STRUCT;  }
-"union"                    {   strcpy(yylval.lval, yytext); return UNION;  }
 "long"     									{   return LONG;  }
 "return"        						{   return RETURN;  }
 "short"       							{   return SHORT;  }
@@ -99,7 +97,7 @@ var [ \t]*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}
 
 
 
-{identifier}  							{ strcpy(yylval.lval, yytext); return IDENTIFIER; }
+{identifier}  							{strcpy(yylval.lval, yytext); return IDENTIFIER; }
 
 
 {BID}			{ }
@@ -174,9 +172,10 @@ var [ \t]*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}
 [\(]                              {return '(';}
 [}]                              {return '}';}
 [{]                              {return '{';}
-
-[;]                              { return ';';}
-[,]                            	 { return ',';}
+[\[]							 {return '[';}
+[\]]							 {return ']';}
+[;]                              {return ';';}
+[\,]                             {return ',';}
 [:]                              { return ':';}
 \'.                              {}
 .                                {}
