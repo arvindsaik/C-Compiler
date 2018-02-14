@@ -1,27 +1,103 @@
-%token IDENTIFIER CONSTANT STRING_LITERAL 
-%token IF ELSE WHILE FOR CONTINUE BREAK RETURN VOID UNSIGNED 
-%token SIZEOF SIGNED SHORT LONG INT FLOAT CHAR 
+%union{
+double val;
+char lval[100];
+}
+
+
+%token IF ELSE WHILE FOR CONTINUE BREAK RETURN 
+%token SIZEOF    
 %token INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP NOT_OP XOR_OP MUL_OP DIV_OP ADD_OP SUB_OP MOD_OP 
 %token MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN DEF
 %token SUB_ASSIGN AND_ASSIGN
 %token XOR_ASSIGN OR_ASSIGN
 
+%token <lval> INT FLOAT CHAR STRUCT UNION UNSIGNED SIGNED VOID LONG SHORT
+%token <lval> IDENTIFIER
+%token <val> CONST_INT CONST_FLOAT
+%token <lval> STRING_LITERAL CONST_CHAR
+%type <lval> data_type declaration_specifiers
+
 %start start_state
+
+
+
+
 
 %left '+' '-'
 %left '*' '/'
 %nonassoc UNARY
 
+
 %{
 	#include<stdio.h>
+	#include<string.h>
+	#include "lib.h"  
 	int yylex(void);
 	int yyerror(const char *s);
 	int success = 1;
+	char type[20], temp[20];
+	char token[100];
 	FILE *yyin;
 %}
 
 %%
+
+
+statement
+	: compound_statement
+	| expression_statement
+	| iteration_statement
+	| jump_statement
+	| selection_statement
+	;
+
+compound_statement
+	: '{' '}'
+	| '{' statement_list '}'
+	| '{' declaration_list '}'
+	| '{' declaration_list statement_list '}'
+	;
+
+declaration_list
+	: declaration
+	| declaration_list declaration
+	;
+
+statement_list
+	: statement
+	| statement_list statement
+	;
+
+expression_statement
+	: ';'
+	| expression ';'
+	;
+
+selection_statement
+	: IF '(' expression ')' statement
+	| IF '(' expression ')' statement ELSE statement
+	;
+
+iteration_statement
+	: WHILE '(' expression ')' statement
+	| FOR '(' expression_statement expression_statement ')' statement
+	| FOR '(' expression_statement expression_statement expression ')' statement
+	;
+
+jump_statement
+	: CONTINUE ';'
+	| BREAK ';'
+	| RETURN ';'
+	| RETURN expression ';'
+	;
+
+function_definition
+	: declaration_specifiers declarator declaration_list compound_statement
+	| declaration_specifiers declarator compound_statement
+	| declarator declaration_list compound_statement
+	| declarator compound_statement
+	;
 
 start_state
 	: global_declaration
@@ -35,8 +111,10 @@ global_declaration
 
 primary_expression
 	: IDENTIFIER
-	| CONSTANT
-	| STRING_LITERAL
+	| CONST_FLOAT	{char a[100]; sprintf(a, "%f", (float)$1); install_constant(a, "FP_CONST");}
+	| CONST_INT		{char a[100]; sprintf(a, "%d", (int)$1); install_constant(a, "INT_CONST");}
+	| CONST_CHAR	{install_constant($1, "CHAR_CONST");}
+	| STRING_LITERAL	{install_constant($1, "STR_CONST");}
 	| '(' expression ')'
 	;
 
@@ -170,55 +248,51 @@ constant_expression
 	;
 
 declaration
-	: declaration_specifiers ';'
-	| declaration_specifiers init_declarator_list ';'
+//	: declaration_specifiers ';'
+	: declaration_specifiers init_declarator_list ';' 
 	;
 
 declaration_specifiers
-	: type_specifier
-	| type_specifier declaration_specifiers
+	: data_type		{strcpy(type, $1);}
+	| data_type declaration_specifiers {strcpy(temp, $1); strcat(temp, " "); strcat(temp, type); strcpy(type, temp);}
+	;
+
+data_type
+	: VOID {strcpy($$, "void");}
+	| CHAR {strcpy($$, "char");}
+	| SHORT {strcpy($$, "short");}
+	| INT {strcpy($$, "int");}
+	| LONG {strcpy($$, "long");}
+	| FLOAT {strcpy($$, "float");}
+	| SIGNED {strcpy($$, "signed");}
+	| UNSIGNED {strcpy($$, "unsigned");}
+	| STRUCT {strcpy($$, "struct");}
+	| UNION {strcpy($$, "union");}
 	;
 
 init_declarator_list
-	: init_declarator
-	| init_declarator_list ',' init_declarator
+	: init_declarator	
+	| init_declarator_list ',' init_declarator 
 	;
 
 init_declarator
-	: declarator
-	| declarator '=' initializer
+	: declarator					{}
+	| declarator '=' initializer	{}
 	;
-
-
-type_specifier
-	: VOID
-	| CHAR
-	| SHORT
-	| INT
-	| LONG
-	| FLOAT
-	| SIGNED
-	| UNSIGNED
-	;
-
 
 specifier_qualifier_list
-	: type_specifier specifier_qualifier_list
-	| type_specifier
+	: declaration_specifiers specifier_qualifier_list
+	| declaration_specifiers
 	;
 
 declarator
-	: direct_declarator
-	;
-
-direct_declarator
-	: IDENTIFIER
+	: IDENTIFIER	{strcpy(token, $1); install_symbol(token, type);}
 	| '(' declarator ')'
-	| direct_declarator '[' constant_expression ']'
-	| direct_declarator '[' ']'
-	| direct_declarator '(' parameter_type_list ')'
-	| direct_declarator '(' identifier_list ')'
-	| direct_declarator '(' ')'
+	| declarator '[' constant_expression ']'
+	| declarator '[' ']'
+	| declarator '(' parameter_type_list ')'
+	| declarator '(' identifier_list ')'
+	| declarator '(' ')'
 	;
 
 parameter_type_list
@@ -273,65 +347,6 @@ initializer_list
 	| initializer_list ',' initializer
 	;
 
-statement
-	: compound_statement
-	| expression_statement
-	| iteration_statement
-	| jump_statement
-	| selection_statement
-	;
-
-
-compound_statement
-	: '{' '}'
-	| '{' statement_list '}'
-	| '{' declaration_list '}'
-	| '{' declaration_list statement_list '}'
-	;
-
-declaration_list
-	: declaration
-	| declaration_list declaration
-	;
-
-statement_list
-	: statement
-	| statement_list statement
-	;
-
-expression_statement
-	: ';'
-	| expression ';'
-	;
-
-selection_statement
-	: IF '(' expression ')' statement
-	| IF '(' expression ')' statement ELSE statement
-	;
-
-iteration_statement
-	: WHILE '(' expression ')' statement
-	| FOR '(' expression_statement expression_statement ')' statement
-	| FOR '(' expression_statement expression_statement expression ')' statement
-	;
-
-
-jump_statement
-	: CONTINUE ';'
-	| BREAK ';'
-	| RETURN ';'
-	| RETURN expression ';'
-	;
-
-
-
-function_definition
-	: declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement
-	| declarator declaration_list compound_statement
-	| declarator compound_statement
-	;
-
 %%
 
 
@@ -341,6 +356,8 @@ int main()
 	fp = fopen("sample.c", "r");
 	yyin = fp; 
 	yyparse();
+	print_symbol_table();
+  	print_constant_table();
 	return 0;
 }
 
