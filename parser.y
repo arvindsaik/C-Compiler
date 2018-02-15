@@ -38,6 +38,7 @@ char lval[100];
 	int success = 1;
 	char type[20], temp[20];
 	char token[100];
+	int flag=0;
 	FILE *yyin;
 %}
 
@@ -49,11 +50,8 @@ init_state
 	;
 
 statement
-	: compound_statement
-	| expression_statement
-	| iteration_statement
-	| jump_statement
-	| selection_statement
+	: compound_statement	| expression_statement	| iteration_statement	
+	| jump_statement	| selection_statement
 	;
 
 compound_statement
@@ -90,10 +88,7 @@ iteration_statement
 	;
 
 jump_statement
-	: CONTINUE ';'
-	| BREAK ';'
-	| RETURN ';'
-	| RETURN expression ';'
+	: CONTINUE ';'	| BREAK ';'	| RETURN ';'	| RETURN expression ';'
 	;
 
 function_definition
@@ -142,12 +137,7 @@ unary_expression
 	;
 
 unary_operator
-	: '&'
-	| '*'
-	| '+'
-	| '-'
-	| '~'
-	| '!'
+	: '&'	| '*'	| '+'	| '-'	| '~'	| '!'
 	;
 
 cast_expression
@@ -224,17 +214,8 @@ assignment_expression
 	;
 
 assignment_operator
-	: '='
-	| MUL_ASSIGN
-	| DIV_ASSIGN
-	| MOD_ASSIGN
-	| ADD_ASSIGN
-	| SUB_ASSIGN
-	| LEFT_ASSIGN
-	| RIGHT_ASSIGN
-	| AND_ASSIGN
-	| XOR_ASSIGN
-	| OR_ASSIGN
+	: '='	| MUL_ASSIGN	| DIV_ASSIGN	| MOD_ASSIGN	| ADD_ASSIGN	| SUB_ASSIGN
+	| LEFT_ASSIGN	| RIGHT_ASSIGN	| AND_ASSIGN	| XOR_ASSIGN	| OR_ASSIGN
 	;
 
 expression
@@ -352,13 +333,18 @@ int main()
 	fp = fopen("sample.c", "r");
 	yyin = fp; 
 	yyparse();
+	if(flag!=1)
+	{
 	print_symbol_table();
   	print_constant_table();
+	printf("\nParsing Successful\n");
+	}
 	return 0;
 }
 
 int yyerror(const char *s)
 {
+	flag=1;
 	printf("\nParsing Unsuccessful: %s", s);
 	return 1;
 }
