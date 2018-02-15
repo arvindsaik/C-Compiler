@@ -27,7 +27,7 @@ char lval[100];
 %type <lval> data_type declaration_specifiers
 
 %start init_state
-
+																																																	%expect 8
 
 %{
 	#include<stdio.h>
