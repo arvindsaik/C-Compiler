@@ -283,7 +283,7 @@ parameter_list
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator
+	: declaration_specifiers init_declarator
 	| declaration_specifiers abstract_declarator
 	| declaration_specifiers
 	;
