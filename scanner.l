@@ -5,6 +5,14 @@
 
     #include "y.tab.h"
 
+    #define KNRM  "\x1B[0m"
+    #define KRED  "\x1B[31m"
+    #define KGRN  "\x1B[32m"
+    #define KYEL  "\x1B[33m"
+    #define KBLU  "\x1B[34m"
+    #define KMAG  "\x1B[35m"
+    #define KCYN  "\x1B[36m"
+    #define KWHT "\x1B[37m"
 
    int pstack[100];
    int ptop=-1;
@@ -100,7 +108,7 @@ var [ \t]*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}
 {identifier}  							{strcpy(yylval.lval, yytext); return IDENTIFIER; }
 
 
-{BID}			{{printf("%s\n%40s%40s%40d", KRED, yytext, "Invalid Identifier", yylineno); }
+{BID}			{printf("%s\n%40s%40s%40d", KRED, yytext, "Invalid Identifier", yylineno); }
 
 
 
