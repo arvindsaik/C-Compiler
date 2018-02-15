@@ -26,7 +26,7 @@ char lval[100];
 %token <lval> STRING_LITERAL CONST_CHAR
 %type <lval> data_type declaration_specifiers
 
-%start start_state
+%start init_state
 
 
 %{
@@ -43,9 +43,9 @@ char lval[100];
 
 %%
 
-start_state
+init_state
 	: global_declaration
-	| start_state global_declaration
+	| init_state global_declaration
 	;
 
 statement
@@ -58,19 +58,19 @@ statement
 
 compound_statement
 	: '{' '}'
-	| '{' statement_list '}'
-	| '{' declaration_list '}'
-	| '{' declaration_list statement_list '}'
+	| '{' many_statements '}'
+	| '{' many_declarations '}'
+	| '{' many_declarations many_statements '}'
 	;
 
-declaration_list
+many_declarations
 	: declaration
-	| declaration_list declaration
+	| many_declarations declaration
 	;
 
-statement_list
+many_statements
 	: statement
-	| statement_list statement
+	| many_statements statement
 	;
 
 expression_statement
@@ -97,9 +97,9 @@ jump_statement
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list compound_statement
+	: declaration_specifiers declarator many_declarations compound_statement
 	| declaration_specifiers declarator compound_statement
-	| declarator declaration_list compound_statement
+	| declarator many_declarations compound_statement
 	| declarator compound_statement
 	;
 
@@ -108,7 +108,7 @@ global_declaration
 	| declaration
 	;
 
-primary_expression
+simplest_expression
 	: IDENTIFIER
 	| CONST_FLOAT	{char a[100]; sprintf(a, "%f", (float)$1); install_constant(a, "FP_CONST");}
 	| CONST_INT		{char a[100]; sprintf(a, "%d", (int)$1); install_constant(a, "INT_CONST");}
@@ -118,7 +118,7 @@ primary_expression
 	;
 
 postfix_expression
-	: primary_expression
+	: simplest_expression
 	| postfix_expression '[' expression ']'
 	| postfix_expression '(' ')'
 	| postfix_expression '(' argument_expression_list ')'
@@ -248,7 +248,6 @@ constant_expression
 
 declaration
 	: declaration_specifiers init_declarator_list ';' 
-	| error
 	;
 
 declaration_specifiers
@@ -288,7 +287,7 @@ declarator
 	| declarator '[' constant_expression ']'
 	| declarator '[' ']'
 	| declarator '(' parameter_type_list ')'
-	| declarator '(' identifier_list ')'
+	| declarator '(' id_list ')'
 	| declarator '(' ')'
 	;
 
@@ -307,9 +306,9 @@ parameter_declaration
 	| declaration_specifiers
 	;
 
-identifier_list
+id_list
 	: IDENTIFIER
-	| identifier_list ',' IDENTIFIER
+	| id_list ',' IDENTIFIER
 	;
 
 type_name
