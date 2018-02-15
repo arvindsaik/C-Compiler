@@ -18,9 +18,9 @@
    int ptop=-1;
    int cstack[100];
    int ctop=-1;
-   int line_num = 1;
+   
    int nested_comment_stack=0;
-  //  extern yyval;
+    extern int line_num;
 
 %}
 
@@ -38,7 +38,7 @@ var [ \t]*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}
 
 %%
 
-\n {yylineno++;}
+\n {line_num++;}
 {white_space}*
 
 #include[ ]*<[^>]+> {}
@@ -47,35 +47,35 @@ var [ \t]*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}
 <comment><<EOF>>        {printf("\nMulti-line Comment: \""); yyless(yyleng-2); ECHO; printf("\", not terminted."); yyterminate();}
 <comment>"/*"           {nested_comment_stack++; yymore();}
 <comment>.              {yymore();}
-<comment>\n             {yymore();yylineno++;}
+<comment>\n             {yymore();line_num++;}
 <comment>"*/"           {nested_comment_stack--;
                         if(nested_comment_stack<0)
                         {
-                          printf("\nComment: \"%s\", not balanced at line no: %d.", yytext, yylineno);
+                          printf("\nComment: \"%s\", not balanced at line no: %d.", yytext, line_num);
                           yyterminate();
                         }
                         else if(nested_comment_stack==0)
                         {
-                          /*printf("\nMulti-line comment : \"%s\" at line number: %d.", yytext, yylineno);*/
+                          /*printf("\nMulti-line comment : \"%s\" at line number: %d.", yytext, line_num);*/
                           BEGIN(INITIAL);
                         }
                         else
                           yymore();
                         }
 
-"*/"                    {printf("\n Uninitialised comment at line number: %d.", yylineno); yyterminate();}
+"*/"                    {printf("\n Uninitialised comment at line number: %d.", line_num); yyterminate();}
 
-"//".*                  {/*printf("\nSingle-line comment : \"%s\" at line number: %d.", yytext, yylineno);*/}
+"//".*                  {/*printf("\nSingle-line comment : \"%s\" at line number: %d.", yytext, line_num);*/}
 
 
 
 <INITIAL>{double_quotes}           		 		{ BEGIN(string_literal); yymore();}
 <string_literal>"\\"+{escape_sequence} 				{
                                                 yymore();}
-<string_literal>"\\"+[^a|n|b|t|f|r|v|\|"|'|?] 			printf("\nUnrecognized escape seqence at line number: %d.", yylineno);
+<string_literal>"\\"+[^a|n|b|t|f|r|v|\|"|'|?] 			printf("\nUnrecognized escape seqence at line number: %d.", line_num);
 <string_literal>{double_quotes}    				{strcpy(yylval.lval, yytext);;   BEGIN(INITIAL); return(STRING_LITERAL);}
 
-<string_literal>\n                 				{printf("\n\tError : Unterminated string: %s at line number: %d.", yytext, yylineno);yylineno++; BEGIN(INITIAL);}
+<string_literal>\n                 				{printf("\n\tError : Unterminated string: %s at line number: %d.", yytext, line_num);line_num++; BEGIN(INITIAL);}
 <string_literal>[^\\]               				{yymore();}
 
 {digit}+	{ yylval.val = atoi(yytext);  return CONST_INT;}
@@ -108,7 +108,7 @@ var [ \t]*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}
 {identifier}  							{strcpy(yylval.lval, yytext); return IDENTIFIER; }
 
 
-{BID}			{printf("%s\n%40s%40s%40d", KRED, yytext, "Invalid Identifier", yylineno); }
+{BID}			{printf("%s\n%40s%40s%40d", KRED, yytext, "Invalid Identifier", line_num); }
 
 
 

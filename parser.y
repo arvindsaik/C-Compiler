@@ -39,6 +39,7 @@ char lval[100];
 	char type[20], temp[20];
 	char token[100];
 	int flag=0;
+	int line_num=1;
 	FILE *yyin;
 %}
 
@@ -345,6 +346,6 @@ int main()
 int yyerror(const char *s)
 {
 	flag=1;
-	printf("\nParsing Unsuccessful: %s", s);
+	printf("\nParsing Unsuccessful: %s, at line number:%d.\n", s, line_num);
 	return 1;
 }

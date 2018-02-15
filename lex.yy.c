@@ -633,9 +633,9 @@ char *yytext;
    int ptop=-1;
    int cstack[100];
    int ctop=-1;
-   int line_num = 1;
+   
    int nested_comment_stack=0;
-  //  extern yyval;
+    extern int line_num;
 
 #line 641 "lex.yy.c"
 
@@ -917,7 +917,7 @@ case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
 #line 41 "scanner.l"
-{yylineno++;}
+{line_num++;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
@@ -953,7 +953,7 @@ case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
 #line 50 "scanner.l"
-{yymore();yylineno++;}
+{yymore();line_num++;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
@@ -961,12 +961,12 @@ YY_RULE_SETUP
 {nested_comment_stack--;
                         if(nested_comment_stack<0)
                         {
-                          printf("\nComment: \"%s\", not balanced at line no: %d.", yytext, yylineno);
+                          printf("\nComment: \"%s\", not balanced at line no: %d.", yytext, line_num);
                           yyterminate();
                         }
                         else if(nested_comment_stack==0)
                         {
-                          /*printf("\nMulti-line comment : \"%s\" at line number: %d.", yytext, yylineno);*/
+                          /*printf("\nMulti-line comment : \"%s\" at line number: %d.", yytext, line_num);*/
                           BEGIN(INITIAL);
                         }
                         else
@@ -976,12 +976,12 @@ YY_RULE_SETUP
 case 9:
 YY_RULE_SETUP
 #line 66 "scanner.l"
-{printf("\n Uninitialised comment at line number: %d.", yylineno); yyterminate();}
+{printf("\n Uninitialised comment at line number: %d.", line_num); yyterminate();}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 68 "scanner.l"
-{/*printf("\nSingle-line comment : \"%s\" at line number: %d.", yytext, yylineno);*/}
+{/*printf("\nSingle-line comment : \"%s\" at line number: %d.", yytext, line_num);*/}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
@@ -998,7 +998,7 @@ case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
 #line 75 "scanner.l"
-printf("\nUnrecognized escape seqence at line number: %d.", yylineno);
+printf("\nUnrecognized escape seqence at line number: %d.", line_num);
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
@@ -1009,7 +1009,7 @@ case 15:
 /* rule 15 can match eol */
 YY_RULE_SETUP
 #line 78 "scanner.l"
-{printf("\n\tError : Unterminated string: %s at line number: %d.", yytext, yylineno);yylineno++; BEGIN(INITIAL);}
+{printf("\n\tError : Unterminated string: %s at line number: %d.", yytext, line_num);line_num++; BEGIN(INITIAL);}
 	YY_BREAK
 case 16:
 /* rule 16 can match eol */
@@ -1125,7 +1125,7 @@ YY_RULE_SETUP
 case 38:
 YY_RULE_SETUP
 #line 111 "scanner.l"
-{printf("%s\n%40s%40s%40d", KRED, yytext, "Invalid Identifier", yylineno); }
+{printf("%s\n%40s%40s%40d", KRED, yytext, "Invalid Identifier", line_num); }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP

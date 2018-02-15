@@ -225,11 +225,12 @@ char lval[100];
 	char type[20], temp[20];
 	char token[100];
 	int flag=0;
+	int line_num=1;
 	FILE *yyin;
 
 
 /* Line 216 of yacc.c.  */
-#line 233 "y.tab.c"
+#line 234 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -578,22 +579,22 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    48,    48,    49,    53,    53,    53,    54,    54,    58,
-      59,    60,    61,    65,    66,    70,    71,    75,    76,    80,
-      81,    85,    86,    87,    91,    91,    91,    91,    95,    96,
-      97,    98,   102,   103,   107,   108,   109,   110,   111,   112,
-     116,   117,   118,   119,   120,   121,   122,   126,   127,   131,
-     132,   133,   134,   135,   136,   140,   140,   140,   140,   140,
-     140,   144,   145,   149,   150,   151,   152,   156,   157,   158,
-     162,   163,   164,   168,   169,   170,   171,   172,   176,   177,
-     178,   182,   183,   187,   188,   192,   193,   197,   198,   202,
-     203,   207,   208,   212,   213,   217,   217,   217,   217,   217,
-     217,   218,   218,   218,   218,   218,   222,   223,   227,   231,
-     235,   236,   240,   241,   242,   243,   244,   245,   246,   247,
-     251,   252,   256,   257,   261,   262,   266,   267,   268,   269,
-     270,   271,   272,   276,   280,   281,   285,   286,   287,   291,
-     292,   296,   297,   301,   305,   306,   307,   308,   309,   310,
-     311,   312,   313,   317,   318,   319,   323,   324
+       0,    49,    49,    50,    54,    54,    54,    55,    55,    59,
+      60,    61,    62,    66,    67,    71,    72,    76,    77,    81,
+      82,    86,    87,    88,    92,    92,    92,    92,    96,    97,
+      98,    99,   103,   104,   108,   109,   110,   111,   112,   113,
+     117,   118,   119,   120,   121,   122,   123,   127,   128,   132,
+     133,   134,   135,   136,   137,   141,   141,   141,   141,   141,
+     141,   145,   146,   150,   151,   152,   153,   157,   158,   159,
+     163,   164,   165,   169,   170,   171,   172,   173,   177,   178,
+     179,   183,   184,   188,   189,   193,   194,   198,   199,   203,
+     204,   208,   209,   213,   214,   218,   218,   218,   218,   218,
+     218,   219,   219,   219,   219,   219,   223,   224,   228,   232,
+     236,   237,   241,   242,   243,   244,   245,   246,   247,   248,
+     252,   253,   257,   258,   262,   263,   267,   268,   269,   270,
+     271,   272,   273,   277,   281,   282,   286,   287,   288,   292,
+     293,   297,   298,   302,   306,   307,   308,   309,   310,   311,
+     312,   313,   314,   318,   319,   320,   324,   325
 };
 #endif
 
@@ -1813,93 +1814,93 @@ yyreduce:
   switch (yyn)
     {
         case 35:
-#line 108 "parser.y"
+#line 109 "parser.y"
     {char a[100]; sprintf(a, "%f", (float)(yyvsp[(1) - (1)].val)); install_constant(a, "FP_CONST");}
     break;
 
   case 36:
-#line 109 "parser.y"
+#line 110 "parser.y"
     {char a[100]; sprintf(a, "%d", (int)(yyvsp[(1) - (1)].val)); install_constant(a, "INT_CONST");}
     break;
 
   case 37:
-#line 110 "parser.y"
+#line 111 "parser.y"
     {install_constant((yyvsp[(1) - (1)].lval), "CHAR_CONST");}
     break;
 
   case 38:
-#line 111 "parser.y"
+#line 112 "parser.y"
     {install_constant((yyvsp[(1) - (1)].lval), "STR_CONST");}
     break;
 
   case 110:
-#line 235 "parser.y"
+#line 236 "parser.y"
     { strcpy(temp, (yyvsp[(1) - (2)].lval)); strcat(temp, " "); strcat(temp, type); strcpy(type, temp); }
     break;
 
   case 111:
-#line 236 "parser.y"
+#line 237 "parser.y"
     { strcpy(type, (yyvsp[(1) - (1)].lval)); }
     break;
 
   case 112:
-#line 240 "parser.y"
+#line 241 "parser.y"
     {strcpy((yyval.lval), "void");}
     break;
 
   case 113:
-#line 241 "parser.y"
+#line 242 "parser.y"
     {strcpy((yyval.lval), "char");}
     break;
 
   case 114:
-#line 242 "parser.y"
+#line 243 "parser.y"
     {strcpy((yyval.lval), "short");}
     break;
 
   case 115:
-#line 243 "parser.y"
+#line 244 "parser.y"
     {strcpy((yyval.lval), "int");}
     break;
 
   case 116:
-#line 244 "parser.y"
+#line 245 "parser.y"
     {strcpy((yyval.lval), "long");}
     break;
 
   case 117:
-#line 245 "parser.y"
+#line 246 "parser.y"
     {strcpy((yyval.lval), "float");}
     break;
 
   case 118:
-#line 246 "parser.y"
+#line 247 "parser.y"
     {strcpy((yyval.lval), "signed");}
     break;
 
   case 119:
-#line 247 "parser.y"
+#line 248 "parser.y"
     {strcpy((yyval.lval), "unsigned");}
     break;
 
   case 122:
-#line 256 "parser.y"
-    {}
-    break;
-
-  case 123:
 #line 257 "parser.y"
     {}
     break;
 
+  case 123:
+#line 258 "parser.y"
+    {}
+    break;
+
   case 126:
-#line 266 "parser.y"
+#line 267 "parser.y"
     {strcpy(token, (yyvsp[(1) - (1)].lval)); install_symbol(token, type);}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1903 "y.tab.c"
+#line 1904 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2113,7 +2114,7 @@ yyreturn:
 }
 
 
-#line 327 "parser.y"
+#line 328 "parser.y"
 
 
 
@@ -2135,7 +2136,7 @@ int main()
 int yyerror(const char *s)
 {
 	flag=1;
-	printf("\nParsing Unsuccessful: %s", s);
+	printf("\nParsing Unsuccessful: %s, at line number:%d.\n", s, line_num);
 	return 1;
 }
 
