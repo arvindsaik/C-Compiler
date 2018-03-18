@@ -45,123 +45,132 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    UNARY = 258,
-    NO_ELSE = 259,
-    ELSE = 260,
-    GE_OP = 261,
-    LE_OP = 262,
-    EQ_OP = 263,
-    NE_OP = 264,
+    RETURN = 258,
+    BREAK = 259,
+    UNSIGNED = 260,
+    SIGNED = 261,
+    DO = 262,
+    WHILE = 263,
+    FOR = 264,
     IF = 265,
-    WHILE = 266,
-    FOR = 267,
-    CONTINUE = 268,
-    BREAK = 269,
-    RETURN = 270,
-    SIZEOF = 271,
-    INC_OP = 272,
-    DEC_OP = 273,
-    LEFT_OP = 274,
-    RIGHT_OP = 275,
-    AND_OP = 276,
-    OR_OP = 277,
-    NOT_OP = 278,
-    XOR_OP = 279,
-    MUL_OP = 280,
-    DIV_OP = 281,
-    ADD_OP = 282,
-    SUB_OP = 283,
-    MOD_OP = 284,
-    MUL_ASSIGN = 285,
-    DIV_ASSIGN = 286,
-    MOD_ASSIGN = 287,
-    ADD_ASSIGN = 288,
-    LEFT_ASSIGN = 289,
-    RIGHT_ASSIGN = 290,
-    DEF = 291,
-    SUB_ASSIGN = 292,
-    AND_ASSIGN = 293,
-    XOR_ASSIGN = 294,
-    OR_ASSIGN = 295,
-    INT = 296,
-    FLOAT = 297,
-    CHAR = 298,
-    UNSIGNED = 299,
-    SIGNED = 300,
-    VOID = 301,
-    LONG = 302,
-    SHORT = 303,
-    IDENTIFIER = 304,
-    CONST_INT = 305,
-    CONST_FLOAT = 306,
-    STRING_LITERAL = 307,
-    CONST_CHAR = 308
+    ELSE = 266,
+    CASE = 267,
+    DEFAULT = 268,
+    L_BRACE = 269,
+    R_BRACE = 270,
+    L_SQ_BRACE = 271,
+    R_SQ_BRACE = 272,
+    L_PAREN = 273,
+    R_PAREN = 274,
+    DOT = 275,
+    SEMICOLON = 276,
+    COLON = 277,
+    INCR = 278,
+    DECR = 279,
+    NOT = 280,
+    BNOT = 281,
+    MULTIPLY = 282,
+    DIVIDE = 283,
+    MOD = 284,
+    PLUS = 285,
+    MINUS = 286,
+    GREAT = 287,
+    LESS = 288,
+    EGREAT = 289,
+    ELESS = 290,
+    EQUALITY = 291,
+    NEQUAL = 292,
+    BAND = 293,
+    CARROT = 294,
+    BOR = 295,
+    AND = 296,
+    OR = 297,
+    EQUAL = 298,
+    PEQUAL = 299,
+    MEQUAL = 300,
+    SEQUAL = 301,
+    BEQUAL = 302,
+    COMMA = 303,
+    CHAR = 304,
+    FLOAT = 305,
+    VOID = 306,
+    INT = 307,
+    IDENTIFIER = 308,
+    CONST_FLOAT = 309,
+    CONST_INT = 310,
+    CONST_CHAR = 311,
+    CONST_STR = 312
   };
 #endif
 /* Tokens.  */
-#define UNARY 258
-#define NO_ELSE 259
-#define ELSE 260
-#define GE_OP 261
-#define LE_OP 262
-#define EQ_OP 263
-#define NE_OP 264
+#define RETURN 258
+#define BREAK 259
+#define UNSIGNED 260
+#define SIGNED 261
+#define DO 262
+#define WHILE 263
+#define FOR 264
 #define IF 265
-#define WHILE 266
-#define FOR 267
-#define CONTINUE 268
-#define BREAK 269
-#define RETURN 270
-#define SIZEOF 271
-#define INC_OP 272
-#define DEC_OP 273
-#define LEFT_OP 274
-#define RIGHT_OP 275
-#define AND_OP 276
-#define OR_OP 277
-#define NOT_OP 278
-#define XOR_OP 279
-#define MUL_OP 280
-#define DIV_OP 281
-#define ADD_OP 282
-#define SUB_OP 283
-#define MOD_OP 284
-#define MUL_ASSIGN 285
-#define DIV_ASSIGN 286
-#define MOD_ASSIGN 287
-#define ADD_ASSIGN 288
-#define LEFT_ASSIGN 289
-#define RIGHT_ASSIGN 290
-#define DEF 291
-#define SUB_ASSIGN 292
-#define AND_ASSIGN 293
-#define XOR_ASSIGN 294
-#define OR_ASSIGN 295
-#define INT 296
-#define FLOAT 297
-#define CHAR 298
-#define UNSIGNED 299
-#define SIGNED 300
-#define VOID 301
-#define LONG 302
-#define SHORT 303
-#define IDENTIFIER 304
-#define CONST_INT 305
-#define CONST_FLOAT 306
-#define STRING_LITERAL 307
-#define CONST_CHAR 308
+#define ELSE 266
+#define CASE 267
+#define DEFAULT 268
+#define L_BRACE 269
+#define R_BRACE 270
+#define L_SQ_BRACE 271
+#define R_SQ_BRACE 272
+#define L_PAREN 273
+#define R_PAREN 274
+#define DOT 275
+#define SEMICOLON 276
+#define COLON 277
+#define INCR 278
+#define DECR 279
+#define NOT 280
+#define BNOT 281
+#define MULTIPLY 282
+#define DIVIDE 283
+#define MOD 284
+#define PLUS 285
+#define MINUS 286
+#define GREAT 287
+#define LESS 288
+#define EGREAT 289
+#define ELESS 290
+#define EQUALITY 291
+#define NEQUAL 292
+#define BAND 293
+#define CARROT 294
+#define BOR 295
+#define AND 296
+#define OR 297
+#define EQUAL 298
+#define PEQUAL 299
+#define MEQUAL 300
+#define SEQUAL 301
+#define BEQUAL 302
+#define COMMA 303
+#define CHAR 304
+#define FLOAT 305
+#define VOID 306
+#define INT 307
+#define IDENTIFIER 308
+#define CONST_FLOAT 309
+#define CONST_INT 310
+#define CONST_CHAR 311
+#define CONST_STR 312
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 1 "parser.y" /* yacc.c:1909  */
+#line 19 "parser.y" /* yacc.c:1909  */
 
-double val;
-char lval[100];
+		char lval[100];
+		double val;
+		char val2[100];
 
-#line 165 "y.tab.h" /* yacc.c:1909  */
+#line 174 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

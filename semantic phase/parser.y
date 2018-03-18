@@ -1,333 +1,276 @@
-%union{
-double val;
-char lval[100];
+%token RETURN BREAK
+%token UNSIGNED SIGNED
+%token DO WHILE FOR IF ELSE CASE DEFAULT
+%token L_BRACE R_BRACE L_SQ_BRACE R_SQ_BRACE L_PAREN R_PAREN DOT
+%token SEMICOLON COLON
+%token INCR DECR
+%token NOT BNOT
+%left MULTIPLY DIVIDE MOD
+%left PLUS MINUS
+%left GREAT LESS EGREAT ELESS
+%left EQUALITY NEQUAL
+%left BAND
+%left CARROT
+%left BOR
+%left AND
+%left OR
+%right EQUAL PEQUAL MEQUAL SEQUAL BEQUAL
+%left COMMA
+%union {
+		char lval[100];
+		double val;
+		char val2[100];
 }
-%nonassoc UNARY
-%nonassoc NO_ELSE
-%nonassoc ELSE
-
-%left '<' '>' '=' GE_OP LE_OP EQ_OP NE_OP
-%left  '+'  '-'
-%left  '*'  '/' '%'
-%left  '|'
-%left  '&'
-
-%token IF ELSE WHILE FOR CONTINUE BREAK RETURN 
-%token SIZEOF    
-%token INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
-%token AND_OP OR_OP NOT_OP XOR_OP MUL_OP DIV_OP ADD_OP SUB_OP MOD_OP 
-%token MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN DEF
-%token SUB_ASSIGN AND_ASSIGN
-%token XOR_ASSIGN OR_ASSIGN
-
-%token <lval> INT FLOAT CHAR UNSIGNED SIGNED VOID LONG SHORT
+%token <lval> CHAR FLOAT VOID INT 
 %token <lval> IDENTIFIER
-%token <val> CONST_INT CONST_FLOAT
-%token <lval> STRING_LITERAL CONST_CHAR
-%type <lval> data_type declaration_specifiers
-
-%start init_state
-																																																	%expect 8
-
+%token <val> CONST_FLOAT CONST_INT
+%token <val2> CONST_CHAR CONST_STR
+%type <lval> NUM_TYPE DEC2 DEC4 DEC_ARR LVAL POINTER ARR
 %{
-	#include<stdio.h>
-	#include<string.h>
-	#include "lib.h"  
-	int yylex(void);
+	#include "lib.h"
+	#include <stdlib.h>
+	#define OUT stdout
+	#define SIZE 100
+	int line=1;
+    int yylex(void);
+    FILE *yyin;
 	int yyerror(const char *s);
 	int check_scope(char *msg);
-	int success = 1;
-	char type[20], temp[20];
-	char token[100];
-	int flag=0;
-	int line_num=1;
-	FILE *yyin;
 	int st[1000];
-    int brack_num = 0;
-    int top = -1;
+  	int brack_num = 0;
+  	int top = -1;
+	char id[100];
+	int flag = 0;
 %}
-
 %%
-
-init_state
-	: global_declaration
-	| init_state global_declaration
+// Start symbol, everything allowed outside main
+START
+	: START DEC0 SEMICOLON
+	| START FUNC_DEC SEMICOLON
+	| START FUNC_DEF
+	| SEMICOLON
+	| %empty
 	;
 
-statement
-	: compound_statement	| expression_statement	| iteration_statement	
-	| jump_statement	| selection_statement
+// Different types of statements
+STATEMENT_BLOCK
+	: STATEMENT_BLOCK STATEMENT
+	| STATEMENT
+	;
+STATEMENT
+	: EXPR0 SEMICOLON
+	| DEC0 SEMICOLON
+	| IF_CONS
+	| FOR_LOOP
+	| WHILE_LOOP
+	| DO_WHILE
+	| L_BRACE STATEMENT_BLOCK R_BRACE
+	| L_BRACE R_BRACE
+	| RETURN EXPR0 SEMICOLON
+	| BREAK SEMICOLON
+	| SEMICOLON
 	;
 
-compound_statement
-	: '{' '}'
-	| '{' many_statements '}'
-	| '{' many_declarations '}'
-	| '{' many_declarations many_statements '}'
-	| '{' many_statements many_declarations '}'
+// If construct
+IF_CONS
+	: IF L_PAREN EXPR0 R_PAREN STATEMENT
+	| IF L_PAREN EXPR0 R_PAREN STATEMENT ELSE STATEMENT
 	;
 
-many_declarations
-	: declaration
-	| many_declarations declaration
+// While Loop
+WHILE_LOOP
+	: WHILE L_PAREN EXPR0 R_PAREN STATEMENT
 	;
 
-many_statements
-	: statement
-	| many_statements statement
+// Do-While
+DO_WHILE
+	: DO STATEMENT WHILE L_PAREN EXPR0 R_PAREN SEMICOLON
 	;
 
-expression_statement
-	: ';'
-	| expression ';'
+// For Loop
+FOR_LOOP
+	: FOR L_PAREN FOR_PAR SEMICOLON FOR_PAR SEMICOLON FOR_PAR R_PAREN STATEMENT
+	;
+FOR_PAR
+	: EXPR0
+	| %empty
 	;
 
-selection_statement
-	: IF '(' expression ')' statement %prec NO_ELSE
-	| IF '(' expression ')' statement ELSE statement
+
+// Function Declarations/Definitions
+FUNC_DEC
+	: POINTER_TYPE IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
+	| CHAR IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(id, $1);}
+	| NUM_TYPE IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(id, $1);}
+	| VOID IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(id, $1);}
+	;
+FUNC_DEF
+	: FUNC_DEC L_BRACE STATEMENT_BLOCK R_BRACE
+	;
+FUNC_PARAMS
+	: FUNC_PARAMS1
+	| %empty
+	;
+FUNC_PARAMS1
+	: POINTER_TYPE IDENTIFIER COMMA FUNC_PARAMS1
+	| VOID IDENTIFIER COMMA FUNC_PARAMS1
+	| NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1
+	| CHAR IDENTIFIER COMMA FUNC_PARAMS1 {strcpy(id, $1);}
+	| POINTER_TYPE IDENTIFIER
+	| VOID IDENTIFIER {strcpy(id, $1);}
+	| NUM_TYPE IDENTIFIER {strcpy(id, $1);}
+	| CHAR IDENTIFIER {strcpy(id, $1);}
+	;
+FUNC_CALL
+	: IDENTIFIER L_PAREN FUNC_LIST R_PAREN
+	| IDENTIFIER L_PAREN R_PAREN
+	;
+FUNC_LIST
+	: EXPR0
+	| CONST_CHAR {}
+	| CONST_STR {}
+	| FUNC_LIST COMMA EXPR0
+	| FUNC_LIST COMMA CONST_CHAR {}
+	| FUNC_LIST COMMA CONST_STR {}
 	;
 
-iteration_statement
-	: WHILE '(' expression ')' statement
-	| FOR '(' expression_statement expression_statement ')' statement
-	| FOR '(' expression_statement expression_statement expression ')' statement
+// Variable Declarations
+DEC0
+	: NUM_TYPE DEC1
+	| CHAR DEC3 {strcpy(id, $1);}
+	;
+DEC1
+	: DEC1 COMMA DEC2
+	| DEC2
+	;
+DEC2
+	: IDENTIFIER EQUAL EXPR1 {install_symbol($1, id, st, top);}
+	| DEC_ARR EQUAL L_BRACE EXPR0 R_BRACE {char temp[100]; strcpy(temp, id); strcat(temp, "_arr"); install_symbol($1, id, st, top);}
+	| POINTER {install_symbol($1, id, st, top);}
+	| DEC_ARR {install_symbol($1, id, st, top);}
+	| IDENTIFIER {install_symbol($1, id, st, top);}
 	;
 
-jump_statement
-	: CONTINUE ';'	| BREAK ';'	| RETURN ';'	| RETURN expression ';'
+// Consider cases for char/strings/struct
+DEC3
+	: DEC3 COMMA DEC4
+	| DEC4
+	;
+DEC4
+	: IDENTIFIER EQUAL CONST_CHAR {install_symbol($1, id, st, top);}
+	| DEC_ARR EQUAL CONST_STR {char temp[100]; strcpy(temp, id); strcat(temp, "_arr"); install_symbol($1, id, st, top);}
+	| DEC_ARR {char temp[100]; strcpy(temp, id); strcat(temp, "_arr"); install_symbol($1, id, st, top);}
+	| IDENTIFIER {install_symbol($1, id, st, top);}
 	;
 
-function_definition
-	: declaration_specifiers declarator many_declarations compound_statement
-	| declaration_specifiers declarator compound_statement
-	| declarator many_declarations compound_statement
-	| declarator compound_statement
+// Arrays
+DEC_ARR
+	: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE {}
+	;
+ARR
+	: IDENTIFIER L_SQ_BRACE EXPR0 R_SQ_BRACE {strcpy($$, $1);}
 	;
 
-global_declaration
-	: function_definition
-	| declaration
+// Expressions
+EXPR0
+	: EXPR0 COMMA EXPR1
+	| EXPR1
+	;
+EXPR1
+	: LVAL EQUAL EXPR1
+	| LVAL PEQUAL EXPR1
+	| LVAL MEQUAL EXPR1
+	| LVAL SEQUAL EXPR1
+	| LVAL BEQUAL EXPR1
+	| EXPR1G
+	;
+EXPR1G
+	: EXPR1G OR EXPR1G
+	| EXPR1F
+	;
+EXPR1F
+	: EXPR1F AND EXPR1E
+	| EXPR1E
+	;
+EXPR1E
+	: EXPR1E BOR EXPR1D
+	| EXPR1D
+	;
+EXPR1D
+	: EXPR1D CARROT EXPR1C
+	| EXPR1C
+	;
+EXPR1C
+	: EXPR1C BAND EXPR1B
+	| EXPR1B
+	;
+EXPR1B
+	: EXPR1B EQUALITY EXPR1A
+	| EXPR1B NEQUAL EXPR1A
+	| EXPR1A
+	;
+EXPR1A
+	: EXPR1A GREAT EXPR2
+	| EXPR1A LESS EXPR2
+	| EXPR1A EGREAT EXPR2
+	| EXPR1A ELESS EXPR2
+	| EXPR2
+	;
+EXPR2
+	: EXPR2 PLUS EXPR3
+	| EXPR2 MINUS EXPR3
+	| EXPR3
+	;
+EXPR3
+	: EXPR3 MULTIPLY EXPR3A
+	| EXPR3 DIVIDE EXPR3A
+	| EXPR3A
+	;
+EXPR3A
+	: INCR LVAL
+	| DECR LVAL
+	| PLUS EXPR4
+	| MINUS EXPR4
+	| BAND LVAL
+	| FUNC_CALL
+	| EXPR4
+	;
+EXPR4
+	: L_PAREN EXPR0 R_PAREN
+	| LVAL INCR
+	| LVAL DECR
+	| NUM
+	| LVAL
+	| L_PAREN NUM_TYPE R_PAREN
 	;
 
-simplest_expression
-	: IDENTIFIER	{if(strcmp("printf",$1)!=0){char tempo[256]; strcpy(tempo,$1);if(check_scope(tempo) == 0){printf("line %d : %s is out of scope\n",line_num,tempo);yyerror(" - ");}}}
-	| CONST_FLOAT	{char a[100]; sprintf(a, "%f", (float)$1); }
-	| CONST_INT		{char a[100]; sprintf(a, "%d", (int)$1); }
-	| CONST_CHAR	{}
-	| STRING_LITERAL	{}
-	| '(' expression ')'
+LVAL
+	: POINTER {strcpy($$, $1);}
+	| IDENTIFIER {strcpy($$, $1);if(strcmp("printf",$1)!=0){char tempo[256]; strcpy(tempo,$1);if(check_scope(tempo) == 0){printf("line %d : %s is out of scope\n",line,tempo);yyerror(" - ");}}} 
+	| ARR {strcpy($$, $1);}
+	| L_PAREN LVAL R_PAREN {strcpy($$, $2);}
 	;
-
-postfix_expression
-	: simplest_expression
-	| postfix_expression '[' expression ']'
-	| postfix_expression '(' ')'
-	| postfix_expression '(' argument_expression_list ')'
-	| postfix_expression '.' IDENTIFIER
-	| postfix_expression INC_OP
-	| postfix_expression DEC_OP
+  
+POINTER
+	: MULTIPLY LVAL {strcpy($$, $2); strcat(id, "_ptr");}
 	;
-
-argument_expression_list
-	: assignment_expression
-	| argument_expression_list ',' assignment_expression
+NUM
+	: CONST_FLOAT {}
+	| CONST_INT {}
 	;
-
-unary_expression
-	: postfix_expression
-	| INC_OP unary_expression
-	| DEC_OP unary_expression
-	| unary_operator cast_expression
-	| SIZEOF unary_expression
-	| SIZEOF '(' type_name ')'
+NUM_TYPE
+	: INT {strcpy(id, $1);}
+	| FLOAT {strcpy(id, $1);}
+	| SIGNED INT {strcpy(id, $2);}
+	| SIGNED FLOAT {strcpy(id, $2);}
+	| UNSIGNED INT {strcpy(id, $2); strcat(id, "_u");}
+	| UNSIGNED FLOAT {strcpy(id, $2); strcat(id, "_u");}
 	;
-
-unary_operator
-	: '&'	| '*'	| '+'	| '-'	| '~'	| '!'
-	;
-
-cast_expression
-	: unary_expression
-	| '(' type_name ')' cast_expression
-	;
-
-multiplicative_expression
-	: cast_expression
-	| multiplicative_expression '*' cast_expression
-	| multiplicative_expression '/' cast_expression
-	| multiplicative_expression '%' cast_expression
-	;
-
-additive_expression
-	: multiplicative_expression
-	| additive_expression '+' multiplicative_expression
-	| additive_expression '-' multiplicative_expression
-	;
-
-shift_expression
-	: additive_expression
-	| shift_expression LEFT_OP additive_expression
-	| shift_expression RIGHT_OP additive_expression
-	;
-
-relational_expression
-	: shift_expression
-	| relational_expression '<' shift_expression
-	| relational_expression '>' shift_expression
-	| relational_expression LE_OP shift_expression
-	| relational_expression GE_OP shift_expression
-	;
-
-equality_expression
-	: relational_expression
-	| equality_expression EQ_OP relational_expression
-	| equality_expression NE_OP relational_expression
-	;
-
-and_expression
-	: equality_expression
-	| and_expression '&' equality_expression
-	;
-
-exclusive_or_expression
-	: and_expression
-	| exclusive_or_expression '^' and_expression
-	;
-
-inclusive_or_expression
-	: exclusive_or_expression
-	| inclusive_or_expression '|' exclusive_or_expression
-	;
-
-logical_and_expression
-	: inclusive_or_expression
-	| logical_and_expression AND_OP inclusive_or_expression
-	;
-
-logical_or_expression
-	: logical_and_expression
-	| logical_or_expression OR_OP logical_and_expression
-	;
-
-conditional_expression
-	: logical_or_expression
-	| logical_or_expression '?' expression ':' conditional_expression
-	;
-
-assignment_expression
-	: conditional_expression
-	| unary_expression assignment_operator assignment_expression
-	;
-
-assignment_operator
-	: '='	| MUL_ASSIGN	| DIV_ASSIGN	| MOD_ASSIGN	| ADD_ASSIGN	| SUB_ASSIGN
-	| LEFT_ASSIGN	| RIGHT_ASSIGN	| AND_ASSIGN	| XOR_ASSIGN	| OR_ASSIGN
-	;
-
-expression
-	: assignment_expression
-	| expression ',' assignment_expression
-	;
-
-constant_expression
-	: conditional_expression
-	;
-
-declaration
-	: declaration_specifiers init_declarator_list ';' 
-	;
-
-declaration_specifiers
-	: data_type declaration_specifiers	{ strcpy(temp, $1); strcat(temp, " "); strcat(temp, type); strcpy(type, temp); }
-	| data_type	{ strcpy(type, $1); }
-	;
-
-data_type
-	: VOID {strcpy($$, "void");}
-	| CHAR {strcpy($$, "char");}
-	| SHORT {strcpy($$, "short");}
-	| INT {strcpy($$, "int");}
-	| LONG {strcpy($$, "long");}
-	| FLOAT {strcpy($$, "float");}
-	| SIGNED {strcpy($$, "signed");}
-	| UNSIGNED {strcpy($$, "unsigned");}
-	;
-
-init_declarator_list
-	: init_declarator	
-	| init_declarator_list ',' init_declarator 
-	;
-
-init_declarator
-	: declarator					{}
-	| declarator '=' initializer	{}
-	;
-
-specifier_qualifier_list
-	: declaration_specifiers specifier_qualifier_list
-	| declaration_specifiers
-	;
-
-declarator
-	: IDENTIFIER	{strcpy(token, $1); install_symbol(token, type,st,top);}
-	| '(' declarator ')'
-	| declarator '[' constant_expression ']'
-	| declarator '[' ']'
-	| declarator '(' parameter_type_list ')'
-	| declarator '(' id_list ')'
-	| declarator '(' ')'
-	;
-
-parameter_type_list
-	: parameter_list
-	;
-
-parameter_list
-	: parameter_declaration
-	| parameter_list ',' parameter_declaration
-	;
-
-parameter_declaration
-	: declaration_specifiers init_declarator
-	| declaration_specifiers abstract_declarator
-	| declaration_specifiers
-	;
-
-id_list
-	: IDENTIFIER
-	| id_list ',' IDENTIFIER
-	;
-
-type_name
-	: specifier_qualifier_list
-	| specifier_qualifier_list abstract_declarator
-	;
-
-abstract_declarator
-	: direct_abstract_declarator
-	;
-
-direct_abstract_declarator
-	: '(' abstract_declarator ')'
-	| '[' ']'
-	| '[' constant_expression ']'
-	| direct_abstract_declarator '[' ']'
-	| direct_abstract_declarator '[' constant_expression ']'
-	| '(' ')'
-	| '(' parameter_type_list ')'
-	| direct_abstract_declarator '(' ')'
-	| direct_abstract_declarator '(' parameter_type_list ')'
-	;
-
-initializer
-	: assignment_expression
-	| '{' initializer_list '}'
-	| '{' initializer_list ',' '}'
-	;
-
-initializer_list
-	: initializer
-	| initializer_list ',' initializer
+POINTER_TYPE
+	: NUM_TYPE MULTIPLY
+	| VOID MULTIPLY
+	| CHAR MULTIPLY
+	| POINTER_TYPE MULTIPLY
 	;
 
 %%
@@ -366,6 +309,7 @@ int main()
 int yyerror(const char *s)
 {
 	flag=1;
-	printf("\nParsing Unsuccessful: %s, at line number:%d.\n", s, line_num);
+	printf("\nParsing Unsuccessful: %s, at line number:%d.\n", s, line);
 	exit(0);
+
 }

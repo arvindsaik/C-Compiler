@@ -1,192 +1,151 @@
-%x comment
-%x string_literal
 %{
-    #include<stdio.h>
-
-    #include "y.tab.h"
-
-    #define KNRM  "\x1B[0m"
-    #define KRED  "\x1B[31m"
-    #define KGRN  "\x1B[32m"
-    #define KYEL  "\x1B[33m"
-    #define KBLU  "\x1B[34m"
-    #define KMAG  "\x1B[35m"
-    #define KCYN  "\x1B[36m"
-    #define KWHT "\x1B[37m"
-
-   int pstack[100];
-   int ptop=-1;
-   int cstack[100];
-   int ctop=-1;
-   
-   int nested_comment_stack=0;
-    extern int line_num;
-    extern int st[1000];
-    extern int brack_num;
-    extern int top;
+	#define CHECK if(com_top == 0)
+	#include "y.tab.h"
+	#include <string.h>
+	#include <stdio.h>
+	#include <stdlib.h>
+	#define SIZE 100
+	extern int line;
+	int com_top=0;
+	int com[SIZE]={0};
+	extern int st[1000];
+	extern int brack_num;
+	extern int top;
 %}
-
-identifier [a-zA-Z_]([a-zA-Z0-9_])*
-digit [0-9]
-BID		([0-9]|!|@|#|$|%)+([a-zA-Z0-9])+
-
-escape_sequence [a|n|b|t|f|r|v|\|"|'|?]
-white_space [ \t]
-backslash [\]
-double_quotes ["]
-
-var [ \t]*(unsigned|signed)?(void|int|char|short|long|float|double){white_space}+{identifier}[ \t]*
-
-
+operators [\+\-\*\/]
+identifier [a-zA-Z_][a-zA-Z0-9_]*
 %%
+"//".* ;
+"/*" com[com_top++]=line;
+#.* ;
+\n {
+	++line;
+}
+"=" CHECK return EQUAL;
+"{" {
+	CHECK
+	{
+		//depth[depth_top++]=line;
+    brack_num++;st[++top] = brack_num;
+		return L_BRACE;
+	}
+}
+"}" {
+	CHECK
+	{
+		//if(depth_top==0)
+		//	printf("\033[31m Error in line %d, '}' found with no matching '{'\n \033[0m", line);
+		//else
+		//{
+		//	--depth_top;
+      --top;
+			return R_BRACE;
+		//}
+	}
+}
+"*/" {
+	if(com_top==0)
+		printf("\033[31m Error in line %d, '*/' found with no matching '/*'\n \033[0m", line);
+	else
+		--com_top;
+}
+[ \t]+ ;
+"do" CHECK return DO;
+"while"  CHECK return WHILE;
+"for" CHECK return FOR;
+"if" CHECK return IF;
+"else" CHECK return ELSE;
+"case" CHECK return CASE;
+"default" CHECK return DEFAULT;
+"unsigned" CHECK return UNSIGNED;
+"signed" CHECK return SIGNED;
+"return" CHECK return RETURN;
+"break" CHECK return BREAK;
+"char" {CHECK {strcpy(yylval.lval, yytext); return CHAR;}}
+"float" {CHECK {strcpy(yylval.lval, yytext); return FLOAT;}}
+"void" {CHECK {strcpy(yylval.lval, yytext); return VOID;}}
+"int" {CHECK {strcpy(yylval.lval, yytext); return INT;}}
 
-\n {line_num++;}
-{white_space}*
+"." {CHECK return DOT;}
+"+" {CHECK return PLUS;}
+"-" {CHECK return MINUS;}
+"*" {CHECK return MULTIPLY;}
+"/" {CHECK return DIVIDE;}
+"%" {CHECK return MOD;}
+"^" {CHECK return CARROT;}
 
-#include[ ]*<[^>]+> {}
+"++" {CHECK return INCR;}
+"--" {CHECK return DECR;}
+"+=" {CHECK return PEQUAL;}
+"-=" {CHECK return MEQUAL;}
+"*=" {CHECK return SEQUAL;}
+"/=" {CHECK return BEQUAL;}
 
-"/*"                    {BEGIN(comment); nested_comment_stack=1; yymore();}
-<comment><<EOF>>        {printf("\nMulti-line Comment: \""); yyless(yyleng-2); ECHO; printf("\", not terminted."); yyterminate();}
-<comment>"/*"           {nested_comment_stack++; yymore();}
-<comment>.              {yymore();}
-<comment>\n             {yymore();line_num++;}
-<comment>"*/"           {nested_comment_stack--;
-                        if(nested_comment_stack<0)
-                        {
-                          printf("\nComment: \"%s\", not balanced at line no: %d.", yytext, line_num);
-                          yyterminate();
-                        }
-                        else if(nested_comment_stack==0)
-                        {
-                          /*printf("\nMulti-line comment : \"%s\" at line number: %d.", yytext, line_num);*/
-                          BEGIN(INITIAL);
-                        }
-                        else
-                          yymore();
-                        }
+"==" {CHECK return EQUALITY;}
+">" {CHECK return GREAT;}
+"<" {CHECK return  LESS;}
+">=" {CHECK return EGREAT;}
+"<=" {CHECK return ELESS;}
+"!=" {CHECK return NEQUAL;}
 
-"*/"                    {printf("\n Uninitialised comment at line number: %d.", line_num); yyterminate();}
-
-"//".*                  {/*printf("\nSingle-line comment : \"%s\" at line number: %d.", yytext, line_num);*/}
-
-
-
-<INITIAL>{double_quotes}           		 		{ BEGIN(string_literal); yymore();}
-<string_literal>"\\"+{escape_sequence} 				{
-                                                yymore();}
-<string_literal>"\\"+[^a|n|b|t|f|r|v|\|"|'|?] 			printf("\nUnrecognized escape seqence at line number: %d.", line_num);
-<string_literal>{double_quotes}    				{strcpy(yylval.lval, yytext);;   BEGIN(INITIAL); return(STRING_LITERAL);}
-
-<string_literal>\n                 				{printf("\n\tError : Unterminated string: %s at line number: %d.", yytext, line_num);line_num++; BEGIN(INITIAL);}
-<string_literal>[^\\]               				{yymore();}
-
-{digit}+	{ yylval.val = atoi(yytext);  return CONST_INT;}
-{digit}*\.?{digit}*(E[+|-]?{digit}+*\.?{digit}*)?	{ yylval.val = atof(yytext); return CONST_FLOAT; }
-{digit}*\.?{digit}*E.?	{ yylval.val = atof(yytext); return CONST_FLOAT;}
-\'.\'	{ yylval.lval[0] = yytext[1]; yylval.lval[1] = '\0';  return CONST_CHAR;}
-
-
-
-"break"       							{   return BREAK;  }
-"char"        							{   strcpy(yylval.lval, yytext); return CHAR;  }
-"continue" 									{   return CONTINUE;  }
-"else"     									{   return ELSE;  }
-"float"        							{   strcpy(yylval.lval, yytext); return FLOAT;  }
-"for"        								{   return FOR;  }
-"if"       									{   return IF;  }
-"int"      									{   strcpy(yylval.lval, yytext); return INT;  }
-"long"     									{   return LONG;  }
-"return"        						{   return RETURN;  }
-"short"       							{   return SHORT;  }
-"signed"     								{   return SIGNED;  }
-"sizeof"     								{   return SIZEOF;  }
-"unsigned"       						{   return UNSIGNED;  }
-"void"        		  				{   strcpy(yylval.lval, yytext);return VOID;  }
-"while"    									{   return WHILE;  }
-
-
-
-
-{identifier}  							{strcpy(yylval.lval, yytext); return IDENTIFIER; }
-
-
-{BID}			{printf("%s\n%40s%40s%40d", KRED, yytext, "Invalid Identifier", line_num); }
-
-
-
-(\+)  { return('+'); }
-
-(\-)  { return('-'); }
-
-(\*)  { return('*'); }
-
-(\/)  { return('/'); }
-
-(\&)  { return('&'); }
-
-(\>)  { return('&'); }
-
-(\<)  { return('&'); }
+"!" {CHECK return NOT;}
+"||" {CHECK return OR;}
+"&&" {CHECK return AND;}
+"~" {CHECK return BNOT;}
+"|" {CHECK return BOR;}
+"&" {CHECK return BAND;}
 
 
-(\>\>)  { return(LEFT_OP); }
+"[" CHECK return L_SQ_BRACE;
+"]" CHECK return R_SQ_BRACE;
+"(" CHECK return L_PAREN;
+")" CHECK return R_PAREN;
+"," CHECK return COMMA;
+";" CHECK return SEMICOLON;
+":" CHECK return COLON;
+{identifier} {
+	CHECK
+	{
+		strcpy(yylval.lval, yytext);
+		return IDENTIFIER;
+	}
+}
 
-(\<\<)  { return(RIGHT_OP); }
-
-(\!\=)  { return(NE_OP); }
-
-(\+\+)  { return(INC_OP); }
-
-(\-\-)  { return(DEC_OP); }
-
-(\%)  { return('%'); }
-
-(\>\=)  { return(GE_OP); }
-
-(\<\=)  { return(LE_OP); }
-
-(\=\=)  { return(EQ_OP); }
-
-(\&\&)  { return(AND_OP); }
-
-(\|\|)  { return(OR_OP); }
-
-(\!)  { return('!'); }
-
-(\+\=)  { return(ADD_ASSIGN); }
-
-(\-\=)  { return(SUB_ASSIGN); }
-
-(\/\=)  { return(DIV_ASSIGN); }
-
-(\*\=)  { return(MUL_ASSIGN); }
-
-(\%\=)  { return(MOD_ASSIGN); }
-
-(\&\=)  { return(AND_ASSIGN); }
-
-(\|\=)  { return(OR_ASSIGN); }
-
-(\^\=)  { return(XOR_ASSIGN); }
-
-(\<\<\=)  { return(LEFT_ASSIGN); }
-
-
-(\>\>\=)  { return(RIGHT_ASSIGN); }
-
-
-(\=)  { return('='); }
-
-
-[\)]                              {return ')';}
-[\(]                              {return '(';}
-[}]                              {--top;return '}';}
-[{]                              {brack_num++;st[++top] = brack_num; return '{';}
-[\[]							 {return '[';}
-[\]]							 {return ']';}
-[;]                              {return ';';}
-[\,]                             {return ',';}
-[:]                              { return ':';}
-\'.                              {}
-.                                {}
+[0-9]+\.[0-9]+f{0,1} {
+	CHECK
+	{
+		yylval.val = atof(yytext);
+		return CONST_FLOAT;
+	}
+}
+[0-9]+ {
+	CHECK
+	{
+		yylval.val = atoi(yytext);
+		return CONST_INT;
+	}
+}
+\'.\' {
+	CHECK
+	{
+		yylval.val2[0] = yytext[1];
+		yylval.val2[1] = '\0';
+		return CONST_CHAR;
+	}
+}
+\".*\" {
+	CHECK
+	{
+		strcpy(yylval.val2, yytext);
+		return CONST_STR;
+	}
+}
+\" {
+	CHECK
+		printf("\033[31m Error in line %d \" encountered\n \033[0m", line);
+}
+. {
+	CHECK
+		printf("\033[31m Error in line %d undefined symbol '%s'\n \033[0m", line, yytext);
+}
 %%
