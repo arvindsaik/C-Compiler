@@ -16,6 +16,7 @@
 %left OR
 %right EQUAL PEQUAL MEQUAL SEQUAL BEQUAL
 %left COMMA
+%expect 4
 %union {
 		char lval[100];
 		double val;
@@ -112,14 +113,14 @@ FUNC_PARAMS
 	| %empty
 	;
 FUNC_PARAMS1
-	: POINTER_TYPE IDENTIFIER COMMA FUNC_PARAMS1
-	| VOID IDENTIFIER COMMA FUNC_PARAMS1
-	| NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1
-	| CHAR IDENTIFIER COMMA FUNC_PARAMS1 {strcpy(id, $1);}
-	| POINTER_TYPE IDENTIFIER
-	| VOID IDENTIFIER {strcpy(id, $1);}
-	| NUM_TYPE IDENTIFIER {strcpy(id, $1);}
-	| CHAR IDENTIFIER {strcpy(id, $1);}
+: POINTER_TYPE IDENTIFIER COMMA FUNC_PARAMS1 {}	
+	| VOID IDENTIFIER COMMA FUNC_PARAMS1 {st[++top] = brack_num+1;install_symbol($2, id, st, top);	top--;}
+	| NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1 {st[++top] = brack_num+1;install_symbol($2, id, st, top);	top--;}
+	| CHAR IDENTIFIER COMMA FUNC_PARAMS1 {st[++top] = brack_num+1;strcpy(id, $1);install_symbol($2,id, st, top);	top--;}
+	| POINTER_TYPE IDENTIFIER {}
+	| VOID IDENTIFIER {strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, id, st, top);	top--;}
+	| NUM_TYPE IDENTIFIER {st[++top] = brack_num+1;install_symbol($2, id, st, top);	top--;} 
+	| CHAR IDENTIFIER {strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, id, st, top);	top--;} 
 	;
 FUNC_CALL
 	: IDENTIFIER L_PAREN FUNC_LIST R_PAREN
@@ -275,33 +276,46 @@ POINTER_TYPE
 
 %%
 int check_scope(char * msg){
-	int * scp = malloc(sizeof(int)*1000);
-	scp = give_scope_array(msg);
-	int scp_no = give_scope_size(msg);
-	if(scp_no == -2){
+
+	struct table_entry *temp = (struct table_entry *)malloc(sizeof(struct table_entry));
+	temp = give_scope_struct(msg);
+
+	if(temp == NULL){
 		return 0;
 	}
 	int flag = 1;
 	int iter = 0;
-	for(iter = 0;iter <= scp_no;++iter){
-		if(scp[iter] != st[iter]){
-			flag = 0;
-			break;
-		}
-	}
-	return flag;
+  
+  int i,j;
+  int flg1 = 0,flg2 = 0;
+
+  for(i=0;i<=temp->num_of_scopes;++i){
+    flg1 = 0;
+    for(j=0;j<=temp->tp[i];++j){
+      if(temp->st_state[i][j] != st[j]){
+        flg1 = 1;
+        break;
+      }
+    }
+    if(flg1 == 0){
+      flg2 = 1;
+      break;
+    }
+  }
+  
+  return flg2;
 }
 int main()
 {
+
 	FILE *fp;
 	fp = fopen("sample.c", "r");
 	yyin = fp; 
 	yyparse();
 	if(flag!=1)
 	{
-	print_symbol_table();
-  	// print_constant_table();
-	printf("\nParsing Successful\n");
+		print_symbol_table();
+		printf("\nParsing Successful\n");
 	}
 	return 0;
 }
@@ -309,7 +323,7 @@ int main()
 int yyerror(const char *s)
 {
 	flag=1;
+	// print_symbol_table();
 	printf("\nParsing Unsuccessful: %s, at line number:%d.\n", s, line);
 	exit(0);
-
 }

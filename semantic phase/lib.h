@@ -16,8 +16,9 @@
 struct table_entry
 {
     char key[200], value[200];
-    int st_state[1000];
-    int tp;
+    int st_state[20][1000];
+    int tp[20];
+    int num_of_scopes;
     struct table_entry *next;
 };
 
@@ -36,9 +37,12 @@ unsigned int get_hash(char *str)
     return hash%1000;
 }
 
+
+
 struct table_entry *create_node()
 {
   struct table_entry *temp = (struct table_entry *)malloc(sizeof(struct table_entry));
+  temp->num_of_scopes = -1;
   if(temp==NULL)
   {
     printf("\nCould not allocate memory for the symbol table.");
@@ -48,27 +52,10 @@ struct table_entry *create_node()
   return temp;
 }
 
-void insert(struct table_entry *head[], unsigned int index, char *key, char *value, int *stk,int top)
-{
-  struct table_entry *temp = create_node();
-  strcpy(temp->key,key);
-  strcpy(temp->value,value);
-
-  temp->tp = top;
-  if(top == -1) temp->tp = -1;
-  int iter;
-  for(iter=0;iter<=top;++iter){
-    temp->st_state[iter] = stk[iter];
-  }
-  temp->next = head[index];
-
-  head[index] = temp;
-  
-}
-
 struct table_entry *search(struct table_entry *head, char *key)
 {
-  struct table_entry *temp = head;
+  struct table_entry *temp = create_node();
+  temp = head;
   while(temp!=NULL)
   {
     if(strcmp(temp->key, (char *)key)==0)
@@ -78,7 +65,26 @@ struct table_entry *search(struct table_entry *head, char *key)
   return temp;
 }
 
+void insert(struct table_entry *head[], unsigned int index, char *key, char *value, int *stk,int top)
+{
 
+  struct table_entry *temp = search(head[index], key);
+  if(temp == NULL){ 
+    temp = create_node();
+    strcpy(temp->key,key);
+    strcpy(temp->value,value);
+    temp->next = head[index];
+    head[index] = temp;
+  }
+  ++temp->num_of_scopes;
+  temp->tp[temp->num_of_scopes] = top;
+  if(top == -1) temp->tp[temp->num_of_scopes] = -1;
+  int iter;
+  for(iter=0;iter<=top;++iter){
+    temp->st_state[temp->num_of_scopes][iter] = stk[iter];
+  }
+  
+}
 
 void install_symbol(char *k, char *v, int *stk, int top)
 {
@@ -96,8 +102,28 @@ void install_symbol(char *k, char *v, int *stk, int top)
   unsigned int index = get_hash(key);
 
   struct table_entry *temp = search(s_head[index], key);
-  if(temp==NULL)
+  if(temp!=NULL){
+      int i,j;
+      int flg1 = 0,flg2 = 0;
+      for(i=0;i<=temp->num_of_scopes;++i){
+        flg1 = 0;
+        for(j=0;j<=temp->tp[i] && j<=top;++j){
+          if(temp->st_state[i][j] != stk[j]){
+            flg1 = 1;
+            break;
+          }
+        }
+        if(flg1 == 0 && temp->tp[i]==top){
+          flg2 = 1;
+          break;
+        }
+      }
+    if(flg2 == 0)
+      insert(s_head, index, key, value,scp_stack,top);
+  }
+  else{
     insert(s_head, index, key, value,scp_stack,top);
+  }
 }
 /*
 void install_constant(char *k, char *v)
@@ -127,20 +153,26 @@ void print_symbol_table()
   for(int i=0;i<n_buckets;i++)
   {
       if(s_head[i]!=NULL)
-      {
-        struct table_entry *temp = s_head[i];
+      { 
+        struct table_entry *temp = create_node();
+        temp = s_head[i];
         while(temp!=NULL)
         {
-          printf("%s\n%40s%40s>", KWHT,  (char *)temp->key, strcat(a, (char *)temp->value));
-          strcpy(a, "<");
-          int iter = 0;
-          if(temp->tp==-1)
-            printf("%30d", 0);
-          for(iter=0;iter<=temp->tp;++iter){
-            if(iter == 0) printf("%30d ",temp->st_state[iter]);
-            else
-            printf("%d ",temp->st_state[iter]);
+          int j;
+          // printf("%s\t%d",temp->key,temp->num_of_scopes);
+          for(j=0;j<=temp->num_of_scopes;++j){
+            printf("%s\n%40s%40s>", KWHT,  (char *)temp->key, strcat(a, (char *)temp->value));
+            strcpy(a, "<");
+            int iter = 0;
+            if(temp->tp[j]==-1)
+              printf("%30d", 0);
+            for(iter=0;iter<=temp->tp[j];++iter){
+              if(iter == 0) printf("%30d ",temp->st_state[j][iter]);
+              else
+              printf("%d ",temp->st_state[j][iter]);
+            }
           }
+
           temp = temp->next;
         }
       }
@@ -171,16 +203,8 @@ void print_constant_table()
   printf("\n");
 }
 */
-int * give_scope_array(char * nm){
+struct table_entry * give_scope_struct(char * nm){
   struct table_entry *temp = search(s_head[get_hash(nm)],nm);
   if(temp == NULL) return NULL;
-  return temp->st_state;
-}
-
-
-int give_scope_size(char * nm){
-  struct table_entry *temp = search(s_head[get_hash(nm)],nm);
-  if(temp == NULL) return -2;
-  // printf("%d\n", temp->tp);
-  return temp->tp;
+  return temp;
 }

@@ -1,7 +1,9 @@
 #include <stdio.h>
 
 /* No errors just testing if-else, if-else ladder */
-
+int sum(int ab1,int ab2){
+  return ab1+ab2;
+}
 int d = 3;
 int main(){
    int a = 1;
@@ -14,7 +16,7 @@ int main(){
            max = a;
        }
        else{
-	   int aws;
+	     int aws;
            max = c;
            ask = 0;
        }
@@ -31,6 +33,7 @@ int main(){
    }
 
    if(max > 2){
+       int d = 0; 
        printf("Good! \n");
    }
    d = 3;
