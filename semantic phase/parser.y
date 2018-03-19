@@ -26,7 +26,7 @@
 %token <lval> IDENTIFIER
 %token <val> CONST_FLOAT CONST_INT
 %token <val2> CONST_CHAR CONST_STR
-%type <lval> NUM_TYPE DEC2 DEC4 DEC_ARR LVAL POINTER ARR
+%type <lval> NUM_TYPE DEC2 DEC4 DEC_ARR LVAL ARR
 %{
 	#include "lib.h"
 	#include <stdlib.h>
@@ -100,8 +100,7 @@ FOR_PAR
 
 // Function Declarations/Definitions
 FUNC_DEC
-	: POINTER_TYPE IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
-	| CHAR IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(id, $1);}
+	: CHAR IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(id, $1);}
 	| NUM_TYPE IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(id, $1);}
 	| VOID IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(id, $1);}
 	;
@@ -113,14 +112,12 @@ FUNC_PARAMS
 	| %empty
 	;
 FUNC_PARAMS1
-: POINTER_TYPE IDENTIFIER COMMA FUNC_PARAMS1 {}	
-	| VOID IDENTIFIER COMMA FUNC_PARAMS1 {st[++top] = brack_num+1;install_symbol($2, id, st, top);	top--;}
-	| NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1 {st[++top] = brack_num+1;install_symbol($2, id, st, top);	top--;}
-	| CHAR IDENTIFIER COMMA FUNC_PARAMS1 {st[++top] = brack_num+1;strcpy(id, $1);install_symbol($2,id, st, top);	top--;}
-	| POINTER_TYPE IDENTIFIER {}
-	| VOID IDENTIFIER {strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, id, st, top);	top--;}
-	| NUM_TYPE IDENTIFIER {st[++top] = brack_num+1;install_symbol($2, id, st, top);	top--;} 
-	| CHAR IDENTIFIER {strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, id, st, top);	top--;} 
+	: VOID IDENTIFIER COMMA FUNC_PARAMS1 {st[++top] = brack_num+1;install_symbol($2, id, st, top,-1);	top--;}
+	| NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1 {st[++top] = brack_num+1;install_symbol($2, id, st, top,-1);	top--;}
+	| CHAR IDENTIFIER COMMA FUNC_PARAMS1 {st[++top] = brack_num+1;strcpy(id, $1);install_symbol($2,id, st, top,-1);	top--;}
+	| VOID IDENTIFIER {strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, id, st, top,-1);	top--;}
+	| NUM_TYPE IDENTIFIER {st[++top] = brack_num+1;install_symbol($2, id, st, top,-1);	top--;} 
+	| CHAR IDENTIFIER {strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, id, st, top,-1);	top--;} 
 	;
 FUNC_CALL
 	: IDENTIFIER L_PAREN FUNC_LIST R_PAREN
@@ -138,18 +135,19 @@ FUNC_LIST
 // Variable Declarations
 DEC0
 	: NUM_TYPE DEC1
-	| CHAR DEC3 {strcpy(id, $1);}
+	| CHR_TYPE DEC3 
 	;
+CHR_TYPE
+	: CHAR {strcpy(id, $1);} // added so that char comes in type in symbol table
 DEC1
 	: DEC1 COMMA DEC2
 	| DEC2
 	;
 DEC2
-	: IDENTIFIER EQUAL EXPR1 {install_symbol($1, id, st, top);}
-	| DEC_ARR EQUAL L_BRACE EXPR0 R_BRACE {char temp[100]; strcpy(temp, id); strcat(temp, "_arr"); install_symbol($1, id, st, top);}
-	| POINTER {install_symbol($1, id, st, top);}
-	| DEC_ARR {install_symbol($1, id, st, top);}
-	| IDENTIFIER {install_symbol($1, id, st, top);}
+	: IDENTIFIER EQUAL EXPR1 {install_symbol($1, id, st, top,-1);}
+	| DEC_ARR EQUAL L_BRACE EXPR0 R_BRACE {}
+	| DEC_ARR {}
+	| IDENTIFIER {install_symbol($1, id, st, top,-1);}
 	;
 
 // Consider cases for char/strings/struct
@@ -158,18 +156,19 @@ DEC3
 	| DEC4
 	;
 DEC4
-	: IDENTIFIER EQUAL CONST_CHAR {install_symbol($1, id, st, top);}
-	| DEC_ARR EQUAL CONST_STR {char temp[100]; strcpy(temp, id); strcat(temp, "_arr"); install_symbol($1, id, st, top);}
-	| DEC_ARR {char temp[100]; strcpy(temp, id); strcat(temp, "_arr"); install_symbol($1, id, st, top);}
-	| IDENTIFIER {install_symbol($1, id, st, top);}
+	: IDENTIFIER EQUAL CONST_CHAR {install_symbol($1, id, st, top,-1);}
+	| IDENTIFIER EQUAL CONST_INT {install_symbol($1, id, st, top,-1);} 
+	| DEC_ARR EQUAL CONST_STR {}
+	| DEC_ARR {}
+	| IDENTIFIER {install_symbol($1, id, st, top,-1);}
 	;
 
 // Arrays
 DEC_ARR
-	: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE {}
+	: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE { strcat(id,"_array");install_symbol($1, id, st, top,$3);}
 	;
 ARR
-	: IDENTIFIER L_SQ_BRACE EXPR0 R_SQ_BRACE {strcpy($$, $1);}
+	: IDENTIFIER L_SQ_BRACE EXPR0 R_SQ_BRACE {strcpy($$, $1); }
 	;
 
 // Expressions
@@ -246,15 +245,11 @@ EXPR4
 	;
 
 LVAL
-	: POINTER {strcpy($$, $1);}
-	| IDENTIFIER {strcpy($$, $1);if(strcmp("printf",$1)!=0){char tempo[256]; strcpy(tempo,$1);if(check_scope(tempo) == 0){printf("line %d : %s is out of scope\n",line,tempo);yyerror(" - ");}}} 
+	: IDENTIFIER {strcpy($$, $1);if(strcmp("printf",$1)!=0){char tempo[256]; strcpy(tempo,$1);if(check_scope(tempo) == 0){printf("line %d : %s is out of scope\n",line,tempo);yyerror(" - ");}}} 
 	| ARR {strcpy($$, $1);}
 	| L_PAREN LVAL R_PAREN {strcpy($$, $2);}
 	;
-  
-POINTER
-	: MULTIPLY LVAL {strcpy($$, $2); strcat(id, "_ptr");}
-	;
+
 NUM
 	: CONST_FLOAT {}
 	| CONST_INT {}
@@ -267,12 +262,7 @@ NUM_TYPE
 	| UNSIGNED INT {strcpy(id, $2); strcat(id, "_u");}
 	| UNSIGNED FLOAT {strcpy(id, $2); strcat(id, "_u");}
 	;
-POINTER_TYPE
-	: NUM_TYPE MULTIPLY
-	| VOID MULTIPLY
-	| CHAR MULTIPLY
-	| POINTER_TYPE MULTIPLY
-	;
+
 
 %%
 int check_scope(char * msg){
@@ -325,5 +315,5 @@ int yyerror(const char *s)
 	flag=1;
 	// print_symbol_table();
 	printf("\nParsing Unsuccessful: %s, at line number:%d.\n", s, line);
-	exit(0);
+	return 0;
 }

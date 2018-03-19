@@ -6,11 +6,13 @@ int sum(int ab1,int ab2){
 }
 int d = 3;
 int main(){
-   int a = 1;
+   char a = 1;
    int b = 2;
    int c = 3;
+   char arr[3];
    int max;
    if(a >= b){
+       int arr[7];
        int ask = 0;
        if(a >= c){
            max = a;

@@ -12,19 +12,20 @@
 #define KWHT  "\x1B[37m"
 
 #define n_buckets 1000
-
 struct table_entry
 {
-    char key[200], value[200];
+    char key[200], value[20][200];
     int st_state[20][1000];
     int tp[20];
     int num_of_scopes;
+    int array_dim[20];
     struct table_entry *next;
 };
 
 struct table_entry *s_head[n_buckets];
 struct table_entry *c_head[n_buckets];
 
+  int yyerror(const char *s);
 
 unsigned int get_hash(char *str)
 {
@@ -65,19 +66,21 @@ struct table_entry *search(struct table_entry *head, char *key)
   return temp;
 }
 
-void insert(struct table_entry *head[], unsigned int index, char *key, char *value, int *stk,int top)
+void insert(struct table_entry *head[], unsigned int index, char *key, char *value, int *stk,int top,int a_dim)
 {
 
   struct table_entry *temp = search(head[index], key);
   if(temp == NULL){ 
     temp = create_node();
-    strcpy(temp->key,key);
-    strcpy(temp->value,value);
     temp->next = head[index];
     head[index] = temp;
   }
+
+  strcpy(temp->key,key);
   ++temp->num_of_scopes;
+  strcpy(temp->value[temp->num_of_scopes],value);
   temp->tp[temp->num_of_scopes] = top;
+  temp->array_dim[temp->num_of_scopes] = a_dim;
   if(top == -1) temp->tp[temp->num_of_scopes] = -1;
   int iter;
   for(iter=0;iter<=top;++iter){
@@ -86,15 +89,13 @@ void insert(struct table_entry *head[], unsigned int index, char *key, char *val
   
 }
 
-void install_symbol(char *k, char *v, int *stk, int top)
+void install_symbol(char *k, char *v, int *stk, int top,int a_dim)
 {
   char *key = (char *)malloc(sizeof(k));
-  char *value = (char *)malloc(sizeof(v));
 
   int *scp_stack = (int *)malloc(sizeof(int)*1000);
 
   strcpy(key, k);
-  strcpy(value, v);
   int iter;
   for(iter=0;iter<=top;++iter){
     scp_stack[iter] = stk[iter];
@@ -119,10 +120,14 @@ void install_symbol(char *k, char *v, int *stk, int top)
         }
       }
     if(flg2 == 0)
-      insert(s_head, index, key, value,scp_stack,top);
+      insert(s_head, index, key, v,scp_stack,top,a_dim);
+    else{
+      printf("Variable %s already in use... redeclaration error\n",k);
+      yyerror("-");
+    }
   }
   else{
-    insert(s_head, index, key, value,scp_stack,top);
+    insert(s_head, index, key, v,scp_stack,top,a_dim);
   }
 }
 /*
@@ -149,7 +154,7 @@ void print_symbol_table()
   printf("%s\n==========================================================================================================================================", KRED);
   printf("%s\n\t\t\t\t\t\t\t\t\tSYMBOL TABLE", KBLU);
   printf("%s\n==========================================================================================================================================", KRED);  
-  printf("%s\n%40s%40s%40s", KCYN, "TOKEN", "TOKEN TYPE","STACK");
+  printf("%s\n%20s%20s%20s%20s", KCYN, "TOKEN", "TOKEN TYPE","STACK","Dimension");
   for(int i=0;i<n_buckets;i++)
   {
       if(s_head[i]!=NULL)
@@ -161,16 +166,22 @@ void print_symbol_table()
           int j;
           // printf("%s\t%d",temp->key,temp->num_of_scopes);
           for(j=0;j<=temp->num_of_scopes;++j){
-            printf("%s\n%40s%40s>", KWHT,  (char *)temp->key, strcat(a, (char *)temp->value));
+            printf("%s\n%20s%20s>", KWHT,  (char *)temp->key, strcat(a, (char *)temp->value[j]));
             strcpy(a, "<");
             int iter = 0;
+            char pri[200];
+            pri[0] = '\0';
             if(temp->tp[j]==-1)
-              printf("%30d", 0);
+              strcat(pri,"0\0");
             for(iter=0;iter<=temp->tp[j];++iter){
-              if(iter == 0) printf("%30d ",temp->st_state[j][iter]);
-              else
-              printf("%d ",temp->st_state[j][iter]);
+              // for printing stack properly sprintf and strcat used
+              char t[200];
+              t[0]='\0';
+              sprintf(t,"%d ",temp->st_state[j][iter]);
+              strcat(pri,t);
             }
+            printf("%20s ",pri);
+            printf("%20d ",temp->array_dim[j]);
           }
 
           temp = temp->next;
