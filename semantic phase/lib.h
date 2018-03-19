@@ -147,6 +147,30 @@ void install_constant(char *k, char *v)
 }
 */
 
+// function to get datatype of variable which has nearest scope to current variable
+
+char * get_datatype(char *k,int * stk, int top){
+  int i,j;
+  int flag1=0,maxi = 0,pos;
+  struct table_entry *temp = search(s_head[get_hash(k)], k);
+  for(i=0;i<=temp->num_of_scopes;++i){
+    flag1 = 0;
+    for(j=0;j<=temp->tp[i];++j){
+      if(stk[j]!=temp->st_state[i][j]){
+        flag1 = 1;
+        break;
+      }
+    }
+    if(flag1 == 0){
+      if(temp->tp[i] > maxi){
+        maxi = temp->tp[i];
+        pos = i;
+      }
+    }
+  }
+  return temp->value[pos];
+}
+
 void print_symbol_table()
 {
   int i;

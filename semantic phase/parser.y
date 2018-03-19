@@ -245,7 +245,7 @@ EXPR4
 	;
 
 LVAL
-	: IDENTIFIER {strcpy($$, $1);if(strcmp("printf",$1)!=0){char tempo[256]; strcpy(tempo,$1);if(check_scope(tempo) == 0){printf("line %d : %s is out of scope\n",line,tempo);yyerror(" - ");}}} 
+	: IDENTIFIER {strcpy($$, $1);printf("found %s : %s\n",get_datatype($1,st,top),$1);if(strcmp("printf",$1)!=0){char tempo[256]; strcpy(tempo,$1);if(check_scope(tempo) == 0){printf("line %d : %s is out of scope\n",line,tempo);yyerror(" - ");}}} 
 	| ARR {strcpy($$, $1);}
 	| L_PAREN LVAL R_PAREN {strcpy($$, $2);}
 	;

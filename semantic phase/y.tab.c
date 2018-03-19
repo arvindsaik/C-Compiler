@@ -1692,7 +1692,7 @@ yyreduce:
 
   case 110:
 #line 248 "parser.y" /* yacc.c:1646  */
-    {strcpy((yyval.lval), (yyvsp[0].lval));if(strcmp("printf",(yyvsp[0].lval))!=0){char tempo[256]; strcpy(tempo,(yyvsp[0].lval));if(check_scope(tempo) == 0){printf("line %d : %s is out of scope\n",line,tempo);yyerror(" - ");}}}
+    {strcpy((yyval.lval), (yyvsp[0].lval));printf("found %s : %s\n",get_datatype((yyvsp[0].lval),st,top),(yyvsp[0].lval));if(strcmp("printf",(yyvsp[0].lval))!=0){char tempo[256]; strcpy(tempo,(yyvsp[0].lval));if(check_scope(tempo) == 0){printf("line %d : %s is out of scope\n",line,tempo);yyerror(" - ");}}}
 #line 1697 "y.tab.c" /* yacc.c:1646  */
     break;
 
