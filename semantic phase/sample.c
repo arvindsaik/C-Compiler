@@ -5,7 +5,7 @@ int sum(int ab1,int ab2){
   return ab1+ab2;
 }
 int d = 3;
-int main(){
+int main(float abc){
    char a = 1;
    int b = 2;
    int c = 3;
@@ -35,7 +35,7 @@ int main(){
    }
 
    if(max > 2){
-       int d = 0; 
+       int d = 0;
        printf("Good! \n");
    }
    d = 3;

@@ -22,11 +22,11 @@
 		double val;
 		char val2[100];
 }
-%token <lval> CHAR FLOAT VOID INT 
+%token <lval> CHAR FLOAT VOID INT
 %token <lval> IDENTIFIER
 %token <val> CONST_FLOAT CONST_INT
 %token <val2> CONST_CHAR CONST_STR
-%type <lval> NUM_TYPE DEC2 DEC4 DEC_ARR LVAL ARR 
+%type <lval> NUM_TYPE DEC2 DEC4 DEC_ARR LVAL ARR
 %type <lval> NUM EXPR0 EXPR1 EXPR1G EXPR1F EXPR1E EXPR1D EXPR1C EXPR1B EXPR1A EXPR2 EXPR3 EXPR3A EXPR4 FUNC_CALL
 %{
 	#include "lib.h"
@@ -43,6 +43,10 @@
   	int top = -1;
 	char id[100];
 	int flag = 0;
+
+	char return_type[20];
+	struct func_param temp[20];
+	int num_params = -1;
 %}
 %%
 // Start symbol, everything allowed outside main
@@ -51,7 +55,7 @@ START
 	| START FUNC_DEC SEMICOLON
 	| START FUNC_DEF
 	| SEMICOLON
-	| %empty
+	|
 	;
 
 // Different types of statements
@@ -95,30 +99,39 @@ FOR_LOOP
 	;
 FOR_PAR
 	: EXPR0
-	| %empty
+	|
 	;
 
 
 // Function Declarations/Definitions
 FUNC_DEC
-	: CHAR IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(id, $1);}
-	| NUM_TYPE IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(id, $1);}
-	| VOID IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(id, $1);}
+	: CHAR IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(return_type, $1);
+																								install_symbol($2,id, st, top,-1, return_type, 	temp, num_params,1); num_params=-1;}
+	| NUM_TYPE IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(return_type, $1);
+																										install_symbol($2,id, st, top,-1, return_type, 	temp, num_params, 1);	num_params=-1;}
+	| VOID IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(return_type, $1);
+																								install_symbol($2,id, st, top,-1, return_type, 	temp, num_params, 1);	num_params=-1;}
 	;
 FUNC_DEF
-	: FUNC_DEC L_BRACE STATEMENT_BLOCK R_BRACE
+	: FUNC_DEC L_BRACE STATEMENT_BLOCK R_BRACE	{}
 	;
 FUNC_PARAMS
 	: FUNC_PARAMS1
-	| %empty
+	|
 	;
 FUNC_PARAMS1
-	: VOID IDENTIFIER COMMA FUNC_PARAMS1 {st[++top] = brack_num+1;install_symbol($2, id, st, top,-1);	top--;}
-	| NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1 {st[++top] = brack_num+1;install_symbol($2, id, st, top,-1);	top--;}
-	| CHAR IDENTIFIER COMMA FUNC_PARAMS1 {st[++top] = brack_num+1;strcpy(id, $1);install_symbol($2,id, st, top,-1);	top--;}
-	| VOID IDENTIFIER {strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, id, st, top,-1);	top--;}
-	| NUM_TYPE IDENTIFIER {st[++top] = brack_num+1;install_symbol($2, id, st, top,-1);	top--;} 
-	| CHAR IDENTIFIER {strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, id, st, top,-1);	top--;} 
+	: VOID IDENTIFIER COMMA FUNC_PARAMS1 {strcpy(temp[++num_params].datatype, "void");
+																st[++top] = brack_num+1;install_symbol($2, id, st, top,-1, return_type, temp, num_params, 0);	top--; }
+	| NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1 {strcpy(temp[++num_params].datatype, id);
+																st[++top] = brack_num+1;install_symbol($2, id, st, top,-1, return_type, temp, num_params, 0);	top--;}
+	| CHAR IDENTIFIER COMMA FUNC_PARAMS1 {strcpy(temp[++num_params].datatype, "void");
+																st[++top] = brack_num+1;strcpy(id, $1);install_symbol($2,id, st, top,-1, return_type, temp, num_params, 0);	top--;}
+	| VOID IDENTIFIER {strcpy(temp[++num_params].datatype, "void");
+										strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, id, st, top,-1, return_type, temp, num_params, 0);	top--;}
+	| NUM_TYPE IDENTIFIER {strcpy(temp[++num_params].datatype, id);
+												st[++top] = brack_num+1;install_symbol($2, id, st, top,-1, return_type, temp, num_params, 0);	top--;}
+	| CHAR IDENTIFIER {strcpy(temp[++num_params].datatype, "char");
+											strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, id, st, top,-1, return_type, temp, num_params, 0);	top--;}
 	;
 FUNC_CALL
 	: IDENTIFIER L_PAREN FUNC_LIST R_PAREN
@@ -136,7 +149,7 @@ FUNC_LIST
 // Variable Declarations
 DEC0
 	: NUM_TYPE DEC1
-	| CHR_TYPE DEC3 
+	| CHR_TYPE DEC3
 	;
 CHR_TYPE
 	: CHAR {strcpy(id, $1);} // added so that char comes in type in symbol table
@@ -145,10 +158,10 @@ DEC1
 	| DEC2
 	;
 DEC2
-	: IDENTIFIER EQUAL EXPR1 {install_symbol($1, id, st, top,-1);}
+	: IDENTIFIER EQUAL EXPR1 {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
 	| DEC_ARR EQUAL L_BRACE EXPR0 R_BRACE {}
 	| DEC_ARR {}
-	| IDENTIFIER {install_symbol($1, id, st, top,-1);}
+	| IDENTIFIER {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
 	;
 
 // Consider cases for char/strings/struct
@@ -157,16 +170,16 @@ DEC3
 	| DEC4
 	;
 DEC4
-	: IDENTIFIER EQUAL CONST_CHAR {install_symbol($1, id, st, top,-1);}
-	| IDENTIFIER EQUAL CONST_INT {install_symbol($1, id, st, top,-1);} 
+	: IDENTIFIER EQUAL CONST_CHAR {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
+	| IDENTIFIER EQUAL CONST_INT {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
 	| DEC_ARR EQUAL CONST_STR {}
 	| DEC_ARR {}
-	| IDENTIFIER {install_symbol($1, id, st, top,-1);}
+	| IDENTIFIER {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
 	;
 
 // Arrays
 DEC_ARR
-	: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE { strcat(id,"_array");install_symbol($1, id, st, top,$3);}
+	: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE { strcat(id,"_array");install_symbol($1, id, st, top,$3, return_type, temp, num_params, 0);}
 	;
 ARR
 	: IDENTIFIER L_SQ_BRACE EXPR0 R_SQ_BRACE {strcpy($$, $1); }
@@ -237,7 +250,7 @@ EXPR3A
 	| EXPR4 {strcpy($$, $1);}
 	;
 EXPR4
-	: L_PAREN EXPR0 R_PAREN {strcpy($$, $2);} 
+	: L_PAREN EXPR0 R_PAREN {strcpy($$, $2);}
 	| LVAL INCR {strcpy($$, $1);}
 	| LVAL DECR {strcpy($$, $1);}
 	| NUM {strcpy($$, $1);}
@@ -246,7 +259,7 @@ EXPR4
 	;
 
 LVAL
-	: IDENTIFIER {printf("found %s : %s\n",get_datatype($1,st,top),$1);strcpy($$, $1);if(strcmp("printf",$1)!=0){char tempo[256]; strcpy(tempo,$1);if(check_scope(tempo) == 0){printf("line %d : %s is out of scope\n",line,tempo);yyerror(" - ");}}} 
+	: IDENTIFIER {printf("found %s : %s\n",get_datatype($1,st,top),$1);strcpy($$, $1);if(strcmp("printf",$1)!=0){char tempo[256]; strcpy(tempo,$1);if(check_scope(tempo) == 0){printf("line %d : %s is out of scope\n",line,tempo);yyerror(" - ");}}}
 	| ARR {strcpy($$, $1);}
 	| L_PAREN LVAL R_PAREN {strcpy($$, $2);}
 	;
@@ -276,7 +289,7 @@ int check_scope(char * msg){
 	}
 	int flag = 1;
 	int iter = 0;
-  
+
   int i,j;
   int flg1 = 0,flg2 = 0;
 
@@ -293,7 +306,7 @@ int check_scope(char * msg){
       break;
     }
   }
-  
+
   return flg2;
 }
 int main()
@@ -301,7 +314,7 @@ int main()
 
 	FILE *fp;
 	fp = fopen("sample.c", "r");
-	yyin = fp; 
+	yyin = fp;
 	yyparse();
 	if(flag!=1)
 	{
