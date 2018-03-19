@@ -26,7 +26,8 @@
 %token <lval> IDENTIFIER
 %token <val> CONST_FLOAT CONST_INT
 %token <val2> CONST_CHAR CONST_STR
-%type <lval> NUM_TYPE DEC2 DEC4 DEC_ARR LVAL ARR
+%type <lval> NUM_TYPE DEC2 DEC4 DEC_ARR LVAL ARR 
+%type <lval> NUM EXPR0 EXPR1 EXPR1G EXPR1F EXPR1E EXPR1D EXPR1C EXPR1B EXPR1A EXPR2 EXPR3 EXPR3A EXPR4 FUNC_CALL
 %{
 	#include "lib.h"
 	#include <stdlib.h>
@@ -173,86 +174,86 @@ ARR
 
 // Expressions
 EXPR0
-	: EXPR0 COMMA EXPR1
-	| EXPR1
+	: EXPR0 COMMA EXPR1 {if(strcmp($3,"invalid") == 0 || strcmp($1,"invalid") == 0) strcpy($$,"invalid"); else strcpy($$,"int"); }
+	| EXPR1 {strcpy($$,$1);}
 	;
 EXPR1
-	: LVAL EQUAL EXPR1
-	| LVAL PEQUAL EXPR1
-	| LVAL MEQUAL EXPR1
-	| LVAL SEQUAL EXPR1
-	| LVAL BEQUAL EXPR1
-	| EXPR1G
+	: LVAL EQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	| LVAL PEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	| LVAL MEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	| LVAL SEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	| LVAL BEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	| EXPR1G {strcpy($$, $1);}
 	;
 EXPR1G
-	: EXPR1G OR EXPR1G
-	| EXPR1F
+	: EXPR1G OR EXPR1F {if(strcmp($1,"int")!=0 || strcmp($3,"int")!=0) strcpy($$,"invalid"); else strcpy($$,"int");}
+	| EXPR1F {strcpy($$, $1);}
 	;
 EXPR1F
-	: EXPR1F AND EXPR1E
-	| EXPR1E
+	: EXPR1F AND EXPR1E {if(strcmp($1,"int")!=0 || strcmp($3,"int")!=0)  strcpy($$,"invalid"); else strcpy($$,"int");}
+	| EXPR1E {strcpy($$, $1);}
 	;
 EXPR1E
-	: EXPR1E BOR EXPR1D
-	| EXPR1D
+	: EXPR1E BOR EXPR1D {if(strcmp($1,"int")!=0 || strcmp($3,"int")!=0)  strcpy($$,"invalid"); else strcpy($$,"int");}
+	| EXPR1D {strcpy($$, $1);}
 	;
 EXPR1D
-	: EXPR1D CARROT EXPR1C
-	| EXPR1C
+	: EXPR1D CARROT EXPR1C {if(strcmp($1,"int")!=0 || strcmp($3,"int")!=0)  strcpy($$,"invalid"); else strcpy($$,"int");}
+	| EXPR1C {strcpy($$, $1);}
 	;
 EXPR1C
-	: EXPR1C BAND EXPR1B
-	| EXPR1B
+	: EXPR1C BAND EXPR1B {if(strcmp($1,"int")!=0 || strcmp($3,"int")!=0)  strcpy($$,"invalid"); else strcpy($$,"int");}
+	| EXPR1B {strcpy($$, $1);}
 	;
 EXPR1B
-	: EXPR1B EQUALITY EXPR1A
-	| EXPR1B NEQUAL EXPR1A
-	| EXPR1A
+	: EXPR1B EQUALITY EXPR1A {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	| EXPR1B NEQUAL EXPR1A {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	| EXPR1A {strcpy($$, $1);}
 	;
 EXPR1A
-	: EXPR1A GREAT EXPR2
-	| EXPR1A LESS EXPR2
-	| EXPR1A EGREAT EXPR2
-	| EXPR1A ELESS EXPR2
-	| EXPR2
+	: EXPR1A GREAT EXPR2 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	| EXPR1A LESS EXPR2 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	| EXPR1A EGREAT EXPR2 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	| EXPR1A ELESS EXPR2 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	| EXPR2 {strcpy($$, $1);}
 	;
 EXPR2
-	: EXPR2 PLUS EXPR3
-	| EXPR2 MINUS EXPR3
-	| EXPR3
+	: EXPR2 PLUS EXPR3 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	| EXPR2 MINUS EXPR3 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	| EXPR3 {strcpy($$, $1);}
 	;
 EXPR3
-	: EXPR3 MULTIPLY EXPR3A
-	| EXPR3 DIVIDE EXPR3A
-	| EXPR3A
+	: EXPR3 MULTIPLY EXPR3A {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	| EXPR3 DIVIDE EXPR3A {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	| EXPR3A {strcpy($$, $1);}
 	;
 EXPR3A
-	: INCR LVAL
-	| DECR LVAL
-	| PLUS EXPR4
-	| MINUS EXPR4
-	| BAND LVAL
-	| FUNC_CALL
-	| EXPR4
+	: INCR LVAL {strcpy($$, $2);}
+	| DECR LVAL {strcpy($$, $2);}
+	| PLUS EXPR4 {strcpy($$, $2);}
+	| MINUS EXPR4 {strcpy($$, $2);}
+	| BAND LVAL {strcpy($$, $2);}
+	| FUNC_CALL {strcpy($$, $1);}
+	| EXPR4 {strcpy($$, $1);}
 	;
 EXPR4
-	: L_PAREN EXPR0 R_PAREN
-	| LVAL INCR
-	| LVAL DECR
-	| NUM
-	| LVAL
-	| L_PAREN NUM_TYPE R_PAREN
+	: L_PAREN EXPR0 R_PAREN {strcpy($$, $2);} 
+	| LVAL INCR {strcpy($$, $1);}
+	| LVAL DECR {strcpy($$, $1);}
+	| NUM {strcpy($$, $1);}
+	| LVAL {strcpy($$, $1);}
+	| L_PAREN NUM_TYPE R_PAREN {strcpy($$, $2);}
 	;
 
 LVAL
-	: IDENTIFIER {strcpy($$, $1);printf("found %s : %s\n",get_datatype($1,st,top),$1);if(strcmp("printf",$1)!=0){char tempo[256]; strcpy(tempo,$1);if(check_scope(tempo) == 0){printf("line %d : %s is out of scope\n",line,tempo);yyerror(" - ");}}} 
+	: IDENTIFIER {printf("found %s : %s\n",get_datatype($1,st,top),$1);strcpy($$, $1);if(strcmp("printf",$1)!=0){char tempo[256]; strcpy(tempo,$1);if(check_scope(tempo) == 0){printf("line %d : %s is out of scope\n",line,tempo);yyerror(" - ");}}} 
 	| ARR {strcpy($$, $1);}
 	| L_PAREN LVAL R_PAREN {strcpy($$, $2);}
 	;
 
 NUM
-	: CONST_FLOAT {}
-	| CONST_INT {}
+	: CONST_FLOAT {strcpy($$, "float");}
+	| CONST_INT {strcpy($$, "int");}
 	;
 NUM_TYPE
 	: INT {strcpy(id, $1);}
