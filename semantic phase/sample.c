@@ -4,7 +4,7 @@
 int sum(int ab1,int ab2){
   return ab1+ab2;
 }
-int d = 3;
+unsigned int d = 3;
 int main(float abc){
    char a = 1;
    int b = 2;
@@ -17,27 +17,27 @@ int main(float abc){
        if(a >= c){
            max = a;
        }
-       else{
-	     int aws;
-           max = c;
-           ask = 0;
-       }
-       ask = 3;
+      //  else{
+	     // int aws;
+      //      max = c;
+      //      ask = 0.5;
+      //  }
+       ask = 3.5;
    }
-   else{
-       //ask = 2;
-       if(b >= c){
-           max = b;
-       }
-       else{
-           max = c;
-       }
-   }
+   // else{
+   //     //ask = 2;
+   //     if(b >= c){
+   //         max = b;
+   //     }
+   //     else{
+   //         max = c;
+   //     }
+   // }
 
-   if(max > 2){
-       int d = 0;
-       printf("Good! \n");
-   }
-   d = 3;
+   // if(max > 2){
+   //     int d = 0;
+   //     printf("Good! \n");
+   // }
+   // d = 3;
    return 0;
 }

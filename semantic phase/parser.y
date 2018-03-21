@@ -38,6 +38,8 @@
     FILE *yyin;
 	int yyerror(const char *s);
 	int check_scope(char *msg);
+	char *ret_type(char *a,char *b);
+	int ret_num(char *a);
 	int st[1000];
   	int brack_num = 0;
   	int top = -1;
@@ -187,57 +189,57 @@ ARR
 
 // Expressions
 EXPR0
-	: EXPR0 COMMA EXPR1 {if(strcmp($3,"invalid") == 0 || strcmp($1,"invalid") == 0) strcpy($$,"invalid"); else strcpy($$,"int"); }
+	: EXPR0 COMMA EXPR1 {}
 	| EXPR1 {strcpy($$,$1);}
 	;
 EXPR1
-	: LVAL EQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
-	| LVAL PEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
-	| LVAL MEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
-	| LVAL SEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
-	| LVAL BEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	: LVAL EQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");}}
+	| LVAL PEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");}}
+	| LVAL MEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");}}
+	| LVAL SEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");}}
+	| LVAL BEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");}}
 	| EXPR1G {strcpy($$, $1);}
 	;
 EXPR1G
-	: EXPR1G OR EXPR1F {if(strcmp($1,"int")!=0 || strcmp($3,"int")!=0) strcpy($$,"invalid"); else strcpy($$,"int");}
+	: EXPR1G OR EXPR1F {strcpy($$,"int");}
 	| EXPR1F {strcpy($$, $1);}
 	;
 EXPR1F
-	: EXPR1F AND EXPR1E {if(strcmp($1,"int")!=0 || strcmp($3,"int")!=0)  strcpy($$,"invalid"); else strcpy($$,"int");}
+	: EXPR1F AND EXPR1E {strcpy($$,"int");}
 	| EXPR1E {strcpy($$, $1);}
 	;
 EXPR1E
-	: EXPR1E BOR EXPR1D {if(strcmp($1,"int")!=0 || strcmp($3,"int")!=0)  strcpy($$,"invalid"); else strcpy($$,"int");}
+	: EXPR1E BOR EXPR1D {strcpy($$,"int");}
 	| EXPR1D {strcpy($$, $1);}
 	;
 EXPR1D
-	: EXPR1D CARROT EXPR1C {if(strcmp($1,"int")!=0 || strcmp($3,"int")!=0)  strcpy($$,"invalid"); else strcpy($$,"int");}
+	: EXPR1D CARROT EXPR1C {strcpy($$,"int");}
 	| EXPR1C {strcpy($$, $1);}
 	;
 EXPR1C
-	: EXPR1C BAND EXPR1B {if(strcmp($1,"int")!=0 || strcmp($3,"int")!=0)  strcpy($$,"invalid"); else strcpy($$,"int");}
+	: EXPR1C BAND EXPR1B {strcpy($$,"int");}
 	| EXPR1B {strcpy($$, $1);}
 	;
 EXPR1B
-	: EXPR1B EQUALITY EXPR1A {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
-	| EXPR1B NEQUAL EXPR1A {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	: EXPR1B EQUALITY EXPR1A {strcpy($$,"int");}
+	| EXPR1B NEQUAL EXPR1A {strcpy($$,"int");}
 	| EXPR1A {strcpy($$, $1);}
 	;
 EXPR1A
-	: EXPR1A GREAT EXPR2 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
-	| EXPR1A LESS EXPR2 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
-	| EXPR1A EGREAT EXPR2 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
-	| EXPR1A ELESS EXPR2 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	: EXPR1A GREAT EXPR2 {strcpy($$,"int");}
+	| EXPR1A LESS EXPR2 {strcpy($$,"int");}
+	| EXPR1A EGREAT EXPR2 {strcpy($$,"int");}
+	| EXPR1A ELESS EXPR2 {strcpy($$,"int");}
 	| EXPR2 {strcpy($$, $1);}
 	;
 EXPR2
-	: EXPR2 PLUS EXPR3 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
-	| EXPR2 MINUS EXPR3 {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	: EXPR2 PLUS EXPR3 {strcpy($$,ret_type($1,$3));}
+	| EXPR2 MINUS EXPR3 {strcpy($$,ret_type($1,$3));}
 	| EXPR3 {strcpy($$, $1);}
 	;
 EXPR3
-	: EXPR3 MULTIPLY EXPR3A {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
-	| EXPR3 DIVIDE EXPR3A {if(strcmp($1,$3) == 0) strcpy($$,$1); else strcpy($$,"invalid");}
+	: EXPR3 MULTIPLY EXPR3A {strcpy($$,ret_type($1,$3));}
+	| EXPR3 DIVIDE EXPR3A {strcpy($$,ret_type($1,$3));}
 	| EXPR3A {strcpy($$, $1);}
 	;
 EXPR3A
@@ -259,7 +261,7 @@ EXPR4
 	;
 
 LVAL
-	: IDENTIFIER {printf("found %s : %s\n",get_datatype($1,st,top),$1);strcpy($$, $1);if(strcmp("printf",$1)!=0){char tempo[256]; strcpy(tempo,$1);if(check_scope(tempo) == 0){printf("line %d : %s is out of scope\n",line,tempo);yyerror(" - ");}}}
+	: IDENTIFIER {sprintf($$,"%s",get_datatype($1,st,top));if(strcmp("printf",$1)!=0){char tempo[256]; strcpy(tempo,$1);if(check_scope(tempo) == 0){printf("line %d : %s is out of scope\n",line,tempo);yyerror(" ");}}}
 	| ARR {strcpy($$, $1);}
 	| L_PAREN LVAL R_PAREN {strcpy($$, $2);}
 	;
@@ -279,6 +281,20 @@ NUM_TYPE
 
 
 %%
+int ret_num(char *a){
+	int ans;
+	if(strcmp(a,"char") == 0) return 1;
+	if(strcmp(a,"int") == 0) return 2;
+	if(strcmp(a,"int_u") == 0) return 3;
+	if(strcmp(a,"float") == 0) return 4;
+	if(strcmp(a,"float_u") == 0) return 5;
+}
+char *ret_type(char *a,char *b){
+    int a1 = ret_num(a);
+    int a2 = ret_num(b);
+    if(a1 > a2) return a;
+    else return b;
+}
 int check_scope(char * msg){
 
 	struct table_entry *temp = (struct table_entry *)malloc(sizeof(struct table_entry));
@@ -306,7 +322,6 @@ int check_scope(char * msg){
       break;
     }
   }
-
   return flg2;
 }
 int main()

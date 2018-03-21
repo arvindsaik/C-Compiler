@@ -115,6 +115,7 @@ identifier [a-zA-Z_][a-zA-Z0-9_]*
 	CHECK
 	{
 		yylval.val = atof(yytext);
+		//printf("%s\n",yytext);
 		return CONST_FLOAT;
 	}
 }

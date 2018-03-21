@@ -1163,13 +1163,14 @@ YY_RULE_SETUP
 	CHECK
 	{
 		yylval.val = atof(yytext);
+		//printf("%s\n",yytext);
 		return CONST_FLOAT;
 	}
 }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 121 "scanner.l"
+#line 122 "scanner.l"
 {
 	CHECK
 	{
@@ -1180,7 +1181,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 128 "scanner.l"
+#line 129 "scanner.l"
 {
 	CHECK
 	{
@@ -1192,7 +1193,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 136 "scanner.l"
+#line 137 "scanner.l"
 {
 	CHECK
 	{
@@ -1203,7 +1204,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 143 "scanner.l"
+#line 144 "scanner.l"
 {
 	CHECK
 		printf("\033[31m Error in line %d \" encountered\n \033[0m", line);
@@ -1211,7 +1212,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 147 "scanner.l"
+#line 148 "scanner.l"
 {
 	CHECK
 		printf("\033[31m Error in line %d undefined symbol '%s'\n \033[0m", line, yytext);
@@ -1219,10 +1220,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 151 "scanner.l"
+#line 152 "scanner.l"
 ECHO;
 	YY_BREAK
-#line 1226 "lex.yy.c"
+#line 1227 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2223,7 +2224,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 151 "scanner.l"
+#line 152 "scanner.l"
 
 
 
