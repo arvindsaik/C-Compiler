@@ -16,7 +16,8 @@
 %left OR
 %right EQUAL PEQUAL MEQUAL SEQUAL BEQUAL
 %left COMMA
-%expect 4
+
+%expect 5
 %union {
 		char lval[100];
 		double val;
@@ -48,6 +49,8 @@
 
 	char return_type[20];
 	struct func_param temp[20];
+	struct func_param func_call[20];
+	int func_call_param = -1;
 	int num_params = -1;
 %}
 %%
@@ -81,18 +84,18 @@ STATEMENT
 
 // If construct
 IF_CONS
-	: IF L_PAREN EXPR0 R_PAREN STATEMENT
-	| IF L_PAREN EXPR0 R_PAREN STATEMENT ELSE STATEMENT
+	: IF L_PAREN EXPR0 R_PAREN STATEMENT {if(strcmp($3,"int") != 0){printf("expresion in if not of type int in line %d\n",line-1);}}
+	| IF L_PAREN EXPR0 R_PAREN STATEMENT ELSE STATEMENT {if(strcmp($3,"int") != 0){printf("expresion in if not of type int in line %d\n",line-1);}}
 	;
 
 // While Loop
 WHILE_LOOP
-	: WHILE L_PAREN EXPR0 R_PAREN STATEMENT
+	: WHILE L_PAREN EXPR0 R_PAREN STATEMENT {if(strcmp($3,"int") != 0){printf("expresion in while not of type int in line %d\n",line);}}
 	;
 
 // Do-While
 DO_WHILE
-	: DO STATEMENT WHILE L_PAREN EXPR0 R_PAREN SEMICOLON
+	: DO STATEMENT WHILE L_PAREN EXPR0 R_PAREN SEMICOLON {if(strcmp($5,"int") != 0){printf("expresion in do while not of type int in line %d\n",line);}}
 	;
 
 // For Loop
@@ -122,30 +125,72 @@ FUNC_PARAMS
 	|
 	;
 FUNC_PARAMS1
-	: VOID IDENTIFIER COMMA FUNC_PARAMS1 {strcpy(temp[++num_params].datatype, "void");
-																st[++top] = brack_num+1;install_symbol($2, id, st, top,-1, return_type, temp, num_params, 0);	top--; }
-	| NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1 {strcpy(temp[++num_params].datatype, id);
+	: NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1 {strcpy(temp[++num_params].datatype, $1);
 																st[++top] = brack_num+1;install_symbol($2, id, st, top,-1, return_type, temp, num_params, 0);	top--;}
 	| CHAR IDENTIFIER COMMA FUNC_PARAMS1 {strcpy(temp[++num_params].datatype, "void");
 																st[++top] = brack_num+1;strcpy(id, $1);install_symbol($2,id, st, top,-1, return_type, temp, num_params, 0);	top--;}
 	| VOID IDENTIFIER {strcpy(temp[++num_params].datatype, "void");
 										strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, id, st, top,-1, return_type, temp, num_params, 0);	top--;}
-	| NUM_TYPE IDENTIFIER {strcpy(temp[++num_params].datatype, id);
+	| NUM_TYPE IDENTIFIER {strcpy(temp[++num_params].datatype, $1);
 												st[++top] = brack_num+1;install_symbol($2, id, st, top,-1, return_type, temp, num_params, 0);	top--;}
 	| CHAR IDENTIFIER {strcpy(temp[++num_params].datatype, "char");
 											strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, id, st, top,-1, return_type, temp, num_params, 0);	top--;}
 	;
 FUNC_CALL
-	: IDENTIFIER L_PAREN FUNC_LIST R_PAREN
-	| IDENTIFIER L_PAREN R_PAREN
+	: IDENTIFIER L_PAREN FUNC_LIST R_PAREN	{
+																						struct table_entry *temp = (struct table_entry *)malloc(sizeof(struct table_entry));
+																						temp = give_scope_struct($1);
+																						if(temp!=NULL && temp->is_func==1 && strcmp("printf", $1)!=0 && ((temp->num_params)==func_call_param))
+																						{
+																								int flag=0;
+																								for(int i=0;i<=func_call_param;i++)
+																								{
+																									if(strcmp(temp->params[i].datatype, ret_type(func_call[temp->num_params-i].datatype, temp->params[i].datatype))!=0)
+																									{
+																										flag = 1;
+																										break;
+																									}
+																								}
+																								if(flag)
+																								{
+																										printf("Invalid function call: %s.\n", $1);
+																								}
+																						}
+																						else
+																						{
+																								printf("Invalid function call: %s.\n", $1);
+
+																						}
+
+																						func_call_param=-1;
+																						if(temp!=NULL)
+																							strcpy($$, temp->return_type);
+
+																					}
+	| IDENTIFIER L_PAREN R_PAREN	{
+															struct table_entry *temp = (struct table_entry *)malloc(sizeof(struct table_entry));
+															temp = give_scope_struct($1);
+															if(temp!=NULL && temp->is_func==1 && strcmp("printf", $1)!=0 && ((temp->num_params)==func_call_param))
+															{
+
+															}
+															else
+															{
+																	printf("Invalid function call: %s.\n", $1);
+
+															}
+
+															func_call_param=-1;
+															if(temp!=NULL)
+																strcpy($$, temp->return_type);
+	}
 	;
 FUNC_LIST
-	: EXPR0
-	| CONST_CHAR {}
-	| CONST_STR {}
-	| FUNC_LIST COMMA EXPR0
-	| FUNC_LIST COMMA CONST_CHAR {}
-	| FUNC_LIST COMMA CONST_STR {}
+	: EXPR1												{strcpy(func_call[++func_call_param].datatype, $1);}
+	| CONST_STR 									{strcpy(func_call[++func_call_param].datatype, "char*");}
+	| EXPR1 COMMA FUNC_LIST				{strcpy(func_call[++func_call_param].datatype, $1);}
+	| CONST_CHAR COMMA FUNC_LIST  {strcpy(func_call[++func_call_param].datatype, "char");}
+	| CONST_STR COMMA FUNC_LIST   {strcpy(func_call[++func_call_param].datatype, "char*");}
 	;
 
 // Variable Declarations
@@ -174,6 +219,7 @@ DEC3
 DEC4
 	: IDENTIFIER EQUAL CONST_CHAR {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
 	| IDENTIFIER EQUAL CONST_INT {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
+	| IDENTIFIER EQUAL CONST_FLOAT {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
 	| DEC_ARR EQUAL CONST_STR {}
 	| DEC_ARR {}
 	| IDENTIFIER {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
@@ -181,23 +227,56 @@ DEC4
 
 // Arrays
 DEC_ARR
-	: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE { strcat(id,"_array");install_symbol($1, id, st, top,$3, return_type, temp, num_params, 0);}
+	: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE {install_symbol($1, id, st, top,$3, return_type, temp, num_params, 0);
+																								if($3<=0)	{printf("Illegal size of array.\n"); yyerror(" ");}}
 	;
 ARR
-	: IDENTIFIER L_SQ_BRACE EXPR0 R_SQ_BRACE {strcpy($$, $1); }
+	: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE {
+	 char tempo[256];
+	 strcpy(tempo,$1);
+	 if(check_scope(tempo) == 0){
+	 	printf("line %d : %s is out of scope\n",line,tempo);
+	 }
+	 else{
+	 	if(get_arr_dim($1,st,top) > 0) {
+			strcpy($$, get_datatype($1, st, top));
+			if($3 < 0 || $3>=get_arr_dim($1, st, top)){
+				printf("Index out of bounds at line %d\n",line);
+			}
+		}
+		else{
+			printf("Not an array at line %d\n",line);
+		}
+	 }
+	}
+	| IDENTIFIER L_SQ_BRACE EXPR0 R_SQ_BRACE {
+			char tempo[256];
+			strcpy(tempo,$1);
+			if(check_scope(tempo) == 0){
+				printf("line %d : %s is out of scope\n",line,tempo);
+			}
+			else{
+				if(get_arr_dim($1,st,top) > 0) {
+					strcpy($$, get_datatype($1, st, top));
+				}
+				else{
+				printf("Not an array at line %d\n",line);
+				}
+			}
+		}
 	;
 
 // Expressions
 EXPR0
-	: EXPR0 COMMA EXPR1 {}
+	: EXPR0 COMMA EXPR1 {strcpy($$,"int");}
 	| EXPR1 {strcpy($$,$1);}
 	;
 EXPR1
-	: LVAL EQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");}}
-	| LVAL PEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");}}
-	| LVAL MEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");}}
-	| LVAL SEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");}}
-	| LVAL BEQUAL EXPR1 {if(strcmp($1,$3) == 0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");}}
+	: LVAL EQUAL EXPR1 {if(strcmp($1,$3) == 0 || strcmp(ret_type($1, $3), $1)==0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");}  strcpy($$, $1);}
+	| LVAL PEQUAL EXPR1 {if(strcmp($1,$3) == 0 || strcmp(ret_type($1, $3), $1)==0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");} strcpy($$, $1);}
+	| LVAL MEQUAL EXPR1 {if(strcmp($1,$3) == 0 || strcmp(ret_type($1, $3), $1)==0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");} strcpy($$, $1);}
+	| LVAL SEQUAL EXPR1 {if(strcmp($1,$3) == 0 || strcmp(ret_type($1, $3), $1)==0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");} strcpy($$, $1);}
+	| LVAL BEQUAL EXPR1 {if(strcmp($1,$3) == 0 || strcmp(ret_type($1, $3), $1)==0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");} strcpy($$, $1);}
 	| EXPR1G {strcpy($$, $1);}
 	;
 EXPR1G
@@ -261,7 +340,21 @@ EXPR4
 	;
 
 LVAL
-	: IDENTIFIER {sprintf($$,"%s",get_datatype($1,st,top));if(strcmp("printf",$1)!=0){char tempo[256]; strcpy(tempo,$1);if(check_scope(tempo) == 0){printf("line %d : %s is out of scope\n",line,tempo);yyerror(" ");}}}
+	: IDENTIFIER {
+		sprintf($$,"%s",get_datatype($1,st,top));
+		if(get_arr_dim($1,st,top) == -1){
+			if(strcmp("printf",$1)!=0){
+				char tempo[256];
+				strcpy(tempo,$1);
+				if(check_scope(tempo) == 0){
+					printf("line %d : %s is out of scope\n",line,tempo);
+				}
+			}
+		}
+		else{
+			printf("Array identifier cannot be used without subscript at line %d\n",line);
+		}
+	}
 	| ARR {strcpy($$, $1);}
 	| L_PAREN LVAL R_PAREN {strcpy($$, $2);}
 	;
@@ -269,14 +362,15 @@ LVAL
 NUM
 	: CONST_FLOAT {strcpy($$, "float");}
 	| CONST_INT {strcpy($$, "int");}
+	| CONST_CHAR {strcpy($$, "char");}
 	;
 NUM_TYPE
-	: INT {strcpy(id, $1);}
-	| FLOAT {strcpy(id, $1);}
-	| SIGNED INT {strcpy(id, $2);}
-	| SIGNED FLOAT {strcpy(id, $2);}
-	| UNSIGNED INT {strcpy(id, $2); strcat(id, "_u");}
-	| UNSIGNED FLOAT {strcpy(id, $2); strcat(id, "_u");}
+	: INT {strcpy(id, $1); strcpy($$, $1);}
+	| FLOAT {strcpy(id, $1); strcpy($$, $1);}
+	| SIGNED INT {strcpy(id, $2); strcpy($$, id);}
+	| SIGNED FLOAT {strcpy(id, $2); strcpy($$, id);}
+	| UNSIGNED INT {strcpy(id, $2); strcat(id, "_u");strcpy($$, id);}
+	| UNSIGNED FLOAT {strcpy(id, $2); strcat(id, "_u");strcpy($$, id);}
 	;
 
 
@@ -342,7 +436,7 @@ int main()
 int yyerror(const char *s)
 {
 	flag=1;
-	// print_symbol_table();
+	print_symbol_table();
 	printf("\nParsing Unsuccessful: %s, at line number:%d.\n", s, line);
 	return 0;
 }

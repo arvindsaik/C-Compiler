@@ -92,9 +92,9 @@ void insert(struct table_entry *head[], unsigned int index, char *key, char *val
   {
     strcpy(temp->return_type, ret_type);
     temp->num_params = num_params;
-    for(int i=0;i<=num_params;i++)
+    for(int i=num_params;i>=0;i--)
     {
-      strcpy(temp->params[i].datatype, params[i].datatype);
+      strcpy(temp->params[num_params-i].datatype, params[i].datatype);
     }
     temp->is_func = is_func;
 
@@ -210,6 +210,28 @@ char * get_datatype(char *k,int * stk, int top){
   return temp->value[pos];
 }
 
+int get_arr_dim(char *k,int * stk, int top){
+  int i,j;
+  int flag1=0,maxi = 0,pos;
+  struct table_entry *temp = search(s_head[get_hash(k)], k);
+  for(i=0;i<=temp->num_of_scopes;++i){
+    flag1 = 0;
+    for(j=0;j<=temp->tp[i];++j){
+      if(stk[j]!=temp->st_state[i][j]){
+        flag1 = 1;
+        break;
+      }
+    }
+    if(flag1 == 0){
+      if(temp->tp[i] > maxi){
+        maxi = temp->tp[i];
+        pos = i;
+      }
+    }
+  }
+  return temp->array_dim[pos];
+}
+
 void print_symbol_table()
 {
   int i;
@@ -235,7 +257,7 @@ void print_symbol_table()
             char pri[200];
             pri[0] = '\0';
             if(temp->tp[j]==-1)
-              strcat(pri,"0\0");
+              strcat(pri,"0 ");
             for(iter=0;iter<=temp->tp[j];++iter){
               // for printing stack properly sprintf and strcat used
               char t[200];
