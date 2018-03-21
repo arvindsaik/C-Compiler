@@ -77,7 +77,8 @@ STATEMENT
 	| DO_WHILE
 	| L_BRACE STATEMENT_BLOCK R_BRACE
 	| L_BRACE R_BRACE
-	| RETURN EXPR0 SEMICOLON
+	| RETURN EXPR1 SEMICOLON	{ if(strcmp(return_type, $2)!=0) printf("Return type is not correct at line: %d.\n", line);}
+	| RETURN SEMICOLON				{if(strcmp(return_type, "void")!=0) printf("Return type is not correct at line: %d.\n", line);}
 	| BREAK SEMICOLON
 	| SEMICOLON
 	;
@@ -126,15 +127,14 @@ FUNC_PARAMS
 	;
 FUNC_PARAMS1
 	: NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1 {strcpy(temp[++num_params].datatype, $1);
-																st[++top] = brack_num+1;install_symbol($2, id, st, top,-1, return_type, temp, num_params, 0);	top--;}
+																st[++top] = brack_num+1;install_symbol($2, $1, st, top,-1, return_type, temp, num_params, 0);	top--;}
 	| CHAR IDENTIFIER COMMA FUNC_PARAMS1 {strcpy(temp[++num_params].datatype, "void");
-																st[++top] = brack_num+1;strcpy(id, $1);install_symbol($2,id, st, top,-1, return_type, temp, num_params, 0);	top--;}
-	| VOID IDENTIFIER {strcpy(temp[++num_params].datatype, "void");
-										strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, id, st, top,-1, return_type, temp, num_params, 0);	top--;}
+																st[++top] = brack_num+1;strcpy(id, $1);install_symbol($2,$1, st, top,-1, return_type, temp, num_params, 0);	top--;}
+
 	| NUM_TYPE IDENTIFIER {strcpy(temp[++num_params].datatype, $1);
-												st[++top] = brack_num+1;install_symbol($2, id, st, top,-1, return_type, temp, num_params, 0);	top--;}
+												st[++top] = brack_num+1;install_symbol($2, $1, st, top,-1, return_type, temp, num_params, 0);	top--;}
 	| CHAR IDENTIFIER {strcpy(temp[++num_params].datatype, "char");
-											strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, id, st, top,-1, return_type, temp, num_params, 0);	top--;}
+											strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, $1, st, top,-1, return_type, temp, num_params, 0);	top--;}
 	;
 FUNC_CALL
 	: IDENTIFIER L_PAREN FUNC_LIST R_PAREN	{
@@ -196,7 +196,7 @@ FUNC_LIST
 // Variable Declarations
 DEC0
 	: NUM_TYPE DEC1
-	| CHR_TYPE DEC3
+	| CHR_TYPE DEC1
 	;
 CHR_TYPE
 	: CHAR {strcpy(id, $1);} // added so that char comes in type in symbol table
@@ -205,7 +205,7 @@ DEC1
 	| DEC2
 	;
 DEC2
-	: IDENTIFIER EQUAL EXPR1 {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
+	: IDENTIFIER EQUAL EXPR1 {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0); if(strcmp(id,ret_type(id,$3)) != 0){printf("Type Mismatch in assignment at line: %d\n", line);}}
 	| DEC_ARR EQUAL L_BRACE EXPR0 R_BRACE {}
 	| DEC_ARR {}
 	| IDENTIFIER {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
