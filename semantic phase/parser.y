@@ -1,4 +1,4 @@
-%token RETURN BREAK
+%token RETURN BREAK 
 %token UNSIGNED SIGNED
 %token DO WHILE FOR IF ELSE CASE DEFAULT
 %token L_BRACE R_BRACE L_SQ_BRACE R_SQ_BRACE L_PAREN R_PAREN DOT
@@ -27,7 +27,7 @@
 %token <lval> IDENTIFIER
 %token <val> CONST_FLOAT CONST_INT
 %token <val2> CONST_CHAR CONST_STR
-%type <lval> NUM_TYPE DEC2 DEC4 DEC_ARR LVAL ARR
+%type <lval> NUM_TYPE DEC2 DEC_ARR LVAL ARR
 %type <lval> NUM EXPR0 EXPR1 EXPR1G EXPR1F EXPR1E EXPR1D EXPR1C EXPR1B EXPR1A EXPR2 EXPR3 EXPR3A EXPR4 FUNC_CALL
 %{
 	#include "lib.h"
@@ -112,11 +112,35 @@ FOR_PAR
 // Function Declarations/Definitions
 FUNC_DEC
 	: CHAR IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(return_type, $1);
-																								install_symbol($2,id, st, top,-1, return_type, 	temp, num_params,1); num_params=-1;}
+													struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
+													t = give_scope_struct($2);
+													if(t==NULL)
+													{
+													install_symbol($2,id, st, top,-1, return_type, 	temp, num_params,1); 
+													}
+													else
+														printf("Invalid function name %s: at line number %d.\n", $2, line);
+													num_params=-1;}
 	| NUM_TYPE IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(return_type, $1);
-																										install_symbol($2,id, st, top,-1, return_type, 	temp, num_params, 1);	num_params=-1;}
+													struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
+													t = give_scope_struct($2);
+													if(t==NULL)
+													{
+													install_symbol($2,$1, st, top,-1, return_type, 	temp, num_params,1); 
+													}
+													else
+														printf("Invalid function name %s: at line number %d.\n", $2, line);
+													num_params=-1;}
 	| VOID IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(return_type, $1);
-																								install_symbol($2,id, st, top,-1, return_type, 	temp, num_params, 1);	num_params=-1;}
+													struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
+													t = give_scope_struct($2);
+													if(t==NULL)
+													{
+													install_symbol($2,id, st, top,-1, return_type, 	temp, num_params,1); 
+													}
+													else
+														printf("Invalid function name %s: at line number %d.\n", $2, line);
+													num_params=-1;}
 	;
 FUNC_DEF
 	: FUNC_DEC L_BRACE STATEMENT_BLOCK R_BRACE	{}
@@ -137,34 +161,34 @@ FUNC_PARAMS1
 											strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, $1, st, top,-1, return_type, temp, num_params, 0);	top--;}
 	;
 FUNC_CALL
-	: IDENTIFIER L_PAREN FUNC_LIST R_PAREN	{
-																						struct table_entry *temp = (struct table_entry *)malloc(sizeof(struct table_entry));
-																						temp = give_scope_struct($1);
-																						if(temp!=NULL && temp->is_func==1 && strcmp("printf", $1)!=0 && ((temp->num_params)==func_call_param))
-																						{
-																								int flag=0;
-																								for(int i=0;i<=func_call_param;i++)
-																								{
-																									if(strcmp(temp->params[i].datatype, ret_type(func_call[temp->num_params-i].datatype, temp->params[i].datatype))!=0)
-																									{
-																										flag = 1;
-																										break;
-																									}
-																								}
-																								if(flag)
-																								{
-																										printf("Invalid function call: %s.\n", $1);
-																								}
-																						}
-																						else
-																						{
-																								printf("Invalid function call: %s.\n", $1);
+: IDENTIFIER L_PAREN FUNC_LIST R_PAREN	{
+																struct table_entry *temp = (struct table_entry *)malloc(sizeof(struct table_entry));
+																temp = give_scope_struct($1);
+																if(temp!=NULL && temp->is_func==1 && strcmp("printf", $1)!=0 && ((temp->num_params)==func_call_param))
+																{
+																		int flag=0;
+																		for(int i=0;i<=func_call_param;i++)
+																		{
+																			if(strcmp(temp->params[i].datatype, ret_type(func_call[temp->num_params-i].datatype, temp->params[i].datatype))!=0)
+																			{
+																				flag = 1;
+																				break;
+																			}
+																		}
+																		if(flag)
+																		{
+																				printf("Invalid function call: %s.\n", $1);
+																		}
+																}
+																else
+																{
+																		printf("Invalid function call: %s.\n", $1);
 
-																						}
+																}
 
-																						func_call_param=-1;
-																						if(temp!=NULL)
-																							strcpy($$, temp->return_type);
+																func_call_param=-1;
+																if(temp!=NULL)
+																	strcpy($$, temp->return_type);
 
 																					}
 	| IDENTIFIER L_PAREN R_PAREN	{
@@ -205,25 +229,31 @@ DEC1
 	| DEC2
 	;
 DEC2
-	: IDENTIFIER EQUAL EXPR1 {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0); if(strcmp(id,ret_type(id,$3)) != 0){printf("Type Mismatch in assignment at line: %d\n", line);}}
+	: IDENTIFIER EQUAL EXPR1 {
+								struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
+								t = give_scope_struct($1);
+								if(t==NULL || (t!=NULL && t->is_func!=1) )
+								{	install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0); if(strcmp(id,ret_type(id,$3)) != 0){printf("Type Mismatch in assignment at line: %d\n", line);}
+								}
+								else if(t!=NULL)
+								{
+									printf("There exists a function with same name at line : %d.\n", line);
+								}
+							}
 	| DEC_ARR EQUAL L_BRACE EXPR0 R_BRACE {}
 	| DEC_ARR {}
-	| IDENTIFIER {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
+	| IDENTIFIER {
+					struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
+					t = give_scope_struct($1);
+					if(t==NULL || (t!=NULL && t->is_func!=1))
+						install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);
+					else
+						printf("There exists a function with same name at line : %d.\n", line);		
+				}
 	;
 
 // Consider cases for char/strings/struct
-DEC3
-	: DEC3 COMMA DEC4
-	| DEC4
-	;
-DEC4
-	: IDENTIFIER EQUAL CONST_CHAR {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
-	| IDENTIFIER EQUAL CONST_INT {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
-	| IDENTIFIER EQUAL CONST_FLOAT {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
-	| DEC_ARR EQUAL CONST_STR {}
-	| DEC_ARR {}
-	| IDENTIFIER {install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);}
-	;
+
 
 // Arrays
 DEC_ARR
@@ -252,6 +282,7 @@ ARR
 	| IDENTIFIER L_SQ_BRACE EXPR0 R_SQ_BRACE {
 			char tempo[256];
 			strcpy(tempo,$1);
+			
 			if(check_scope(tempo) == 0){
 				printf("line %d : %s is out of scope\n",line,tempo);
 			}
@@ -272,11 +303,11 @@ EXPR0
 	| EXPR1 {strcpy($$,$1);}
 	;
 EXPR1
-	: LVAL EQUAL EXPR1 {if(strcmp($1,$3) == 0 || strcmp(ret_type($1, $3), $1)==0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");}  strcpy($$, $1);}
-	| LVAL PEQUAL EXPR1 {if(strcmp($1,$3) == 0 || strcmp(ret_type($1, $3), $1)==0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");} strcpy($$, $1);}
-	| LVAL MEQUAL EXPR1 {if(strcmp($1,$3) == 0 || strcmp(ret_type($1, $3), $1)==0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");} strcpy($$, $1);}
-	| LVAL SEQUAL EXPR1 {if(strcmp($1,$3) == 0 || strcmp(ret_type($1, $3), $1)==0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");} strcpy($$, $1);}
-	| LVAL BEQUAL EXPR1 {if(strcmp($1,$3) == 0 || strcmp(ret_type($1, $3), $1)==0) strcpy($$,$1); else {printf("Type mismatch\n");yyerror(" ");strcpy($$,"char");} strcpy($$, $1);}
+	: LVAL EQUAL EXPR1 {printf("%s : %s\n",$1,$3);if(strcmp($1,$3) == 0 || strcmp(ret_type($1, $3), $1)==0) strcpy($$,$1); else {printf("Type mismatch at line %d\n",line);strcpy($$,$1);} }
+	| LVAL PEQUAL EXPR1 {printf("%s : %s\n",$1,$3);if(strcmp($1,$3) == 0 || strcmp(ret_type($1, $3), $1)==0) strcpy($$,$1); else {printf("Type mismatch at line %d\n",line);strcpy($$,$1);}}
+	| LVAL MEQUAL EXPR1 {printf("%s : %s\n",$1,$3);if(strcmp($1,$3) == 0 || strcmp(ret_type($1, $3), $1)==0) strcpy($$,$1); else {printf("Type mismatch at line %d\n",line);strcpy($$,$1);}}
+	| LVAL SEQUAL EXPR1 {printf("%s : %s\n",$1,$3);if(strcmp($1,$3) == 0 || strcmp(ret_type($1, $3), $1)==0) strcpy($$,$1); else {printf("Type mismatch at line %d\n",line);strcpy($$,$1);}}
+	| LVAL BEQUAL EXPR1 {printf("%s : %s\n",$1,$3);if(strcmp($1,$3) == 0 || strcmp(ret_type($1, $3), $1)==0) strcpy($$,$1); else {printf("Type mismatch at line %d\n",line);strcpy($$,$1);}}
 	| EXPR1G {strcpy($$, $1);}
 	;
 EXPR1G
@@ -346,6 +377,7 @@ LVAL
 			if(strcmp("printf",$1)!=0){
 				char tempo[256];
 				strcpy(tempo,$1);
+				//printf(" uhfriouwerhgiuwe %s\n",tempo);
 				if(check_scope(tempo) == 0){
 					printf("line %d : %s is out of scope\n",line,tempo);
 				}
@@ -411,7 +443,7 @@ int check_scope(char * msg){
         break;
       }
     }
-    if(flg1 == 0){
+    if(flg1 == 0 && temp->tp[i] <= top){
       flg2 = 1;
       break;
     }
