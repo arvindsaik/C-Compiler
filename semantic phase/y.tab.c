@@ -1586,7 +1586,7 @@ yyreduce:
 													t = give_scope_struct((yyvsp[-3].lval));
 													if(t==NULL)
 													{
-													install_symbol((yyvsp[-3].lval),id, st, top,-1, return_type, 	temp, num_params,1); 
+													install_symbol((yyvsp[-3].lval),id, st, top,-1, return_type, 	temp, num_params,1);
 													}
 													else
 														printf("Invalid function name %s: at line number %d.\n", (yyvsp[-3].lval), line);
@@ -1601,7 +1601,7 @@ yyreduce:
 													t = give_scope_struct((yyvsp[-3].lval));
 													if(t==NULL)
 													{
-													install_symbol((yyvsp[-3].lval),(yyvsp[-4].lval), st, top,-1, return_type, 	temp, num_params,1); 
+													install_symbol((yyvsp[-3].lval),(yyvsp[-4].lval), st, top,-1, return_type, 	temp, num_params,1);
 													}
 													else
 														printf("Invalid function name %s: at line number %d.\n", (yyvsp[-3].lval), line);
@@ -1616,7 +1616,7 @@ yyreduce:
 													t = give_scope_struct((yyvsp[-3].lval));
 													if(t==NULL)
 													{
-													install_symbol((yyvsp[-3].lval),id, st, top,-1, return_type, 	temp, num_params,1); 
+													install_symbol((yyvsp[-3].lval),id, st, top,-1, return_type, 	temp, num_params,1);
 													}
 													else
 														printf("Invalid function name %s: at line number %d.\n", (yyvsp[-3].lval), line);
@@ -1787,7 +1787,7 @@ yyreduce:
 					if(t==NULL || (t!=NULL && t->is_func!=1))
 						install_symbol((yyvsp[0].lval), id, st, top,-1, return_type, temp, num_params, 0);
 					else
-						printf("There exists a function with same name at line : %d.\n", line);		
+						printf("There exists a function with same name at line : %d.\n", line);
 				}
 #line 1793 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1827,7 +1827,7 @@ yyreduce:
     {
 			char tempo[256];
 			strcpy(tempo,(yyvsp[-3].lval));
-			
+
 			if(check_scope(tempo) == 0){
 				printf("line %d : %s is out of scope\n",line,tempo);
 			}

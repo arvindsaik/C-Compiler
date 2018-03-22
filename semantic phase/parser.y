@@ -1,4 +1,4 @@
-%token RETURN BREAK 
+%token RETURN BREAK
 %token UNSIGNED SIGNED
 %token DO WHILE FOR IF ELSE CASE DEFAULT
 %token L_BRACE R_BRACE L_SQ_BRACE R_SQ_BRACE L_PAREN R_PAREN DOT
@@ -116,7 +116,7 @@ FUNC_DEC
 													t = give_scope_struct($2);
 													if(t==NULL)
 													{
-													install_symbol($2,id, st, top,-1, return_type, 	temp, num_params,1); 
+													install_symbol($2,id, st, top,-1, return_type, 	temp, num_params,1);
 													}
 													else
 														printf("Invalid function name %s: at line number %d.\n", $2, line);
@@ -126,7 +126,7 @@ FUNC_DEC
 													t = give_scope_struct($2);
 													if(t==NULL)
 													{
-													install_symbol($2,$1, st, top,-1, return_type, 	temp, num_params,1); 
+													install_symbol($2,$1, st, top,-1, return_type, 	temp, num_params,1);
 													}
 													else
 														printf("Invalid function name %s: at line number %d.\n", $2, line);
@@ -136,7 +136,7 @@ FUNC_DEC
 													t = give_scope_struct($2);
 													if(t==NULL)
 													{
-													install_symbol($2,id, st, top,-1, return_type, 	temp, num_params,1); 
+													install_symbol($2,id, st, top,-1, return_type, 	temp, num_params,1);
 													}
 													else
 														printf("Invalid function name %s: at line number %d.\n", $2, line);
@@ -248,7 +248,7 @@ DEC2
 					if(t==NULL || (t!=NULL && t->is_func!=1))
 						install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);
 					else
-						printf("There exists a function with same name at line : %d.\n", line);		
+						printf("There exists a function with same name at line : %d.\n", line);
 				}
 	;
 
@@ -282,7 +282,7 @@ ARR
 	| IDENTIFIER L_SQ_BRACE EXPR0 R_SQ_BRACE {
 			char tempo[256];
 			strcpy(tempo,$1);
-			
+
 			if(check_scope(tempo) == 0){
 				printf("line %d : %s is out of scope\n",line,tempo);
 			}
