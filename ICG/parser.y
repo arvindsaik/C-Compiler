@@ -47,7 +47,15 @@
   	int top = -1;
 	char id[100];
 	int flag = 0;
-	char rnum = "0 ";
+
+	char rnum[20] = "0 ";
+	struct idr_item{
+		char idr_name[30];
+	}idr_stack[20];
+	int idr_stack_top = -1;
+
+
+	
 	char return_type[20];
 	struct func_param temp[20];
 	struct func_param func_call[20];
@@ -378,11 +386,13 @@ LVAL
 			if(strcmp("printf",$1)!=0){
 				char tempo[256];
 				strcpy(tempo,$1);
-				//printf(" uhfriouwerhgiuwe %s\n",tempo);
 				if(check_scope(tempo) == 0){
 					printf("line %d : %s is out of scope\n",line,tempo);
 				}
 			}
+			char temp[20];
+			sprintf(temp, "%s", $1);
+			printf("%s\n",temp);
 		}
 		else{
 			printf("Array identifier cannot be used without subscript at line %d\n",line);
@@ -393,9 +403,9 @@ LVAL
 	;
 
 NUM
-	: CONST_FLOAT {strcpy($$, "float");}
-	| CONST_INT {strcpy($$, "int");}
-	| CONST_CHAR {strcpy($$, "char");}
+	: CONST_FLOAT {strcpy($$, "float"); char temp[20]; sprintf(temp,"%f",$1);printf("%s\n",temp);}
+	| CONST_INT {strcpy($$, "int"); char temp[20]; sprintf(temp,"%f",$1);printf("%s\n",temp);}
+	| CONST_CHAR {strcpy($$, "char"); char temp[20]; sprintf(temp,"%s",$1);printf("%s\n",temp);}
 	;
 NUM_TYPE
 	: INT {strcpy(id, $1); strcpy($$, $1);}
@@ -454,6 +464,9 @@ int check_scope(char * msg){
     }
   }
   return flg2;
+}
+void add_idr_stack(char name[]){
+	strcpy(idr_stack[++idr_stack_top].name,name);
 }
 int main()
 {
