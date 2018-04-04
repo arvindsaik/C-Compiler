@@ -71,7 +71,9 @@
 %%
 // Start symbol, everything allowed outside main
 OUT
-	: START {}
+	: START { 
+		f = fopen("file.txt", "w");
+	}
 	;
 START
 	: START DEC0 SEMICOLON 
@@ -111,7 +113,7 @@ STATEMENT
 IF_CONS
 	: IF L_PAREN EXPR0 R_PAREN STATEMENT {
 		if(strcmp($3.dtype,"int") != 0){
-			printf("expresion in if not of type int in line %d\n",line-1)
+			printf("expresion in if not of type int in line %d\n",line-1);
 		}
 	}
 	| IF L_PAREN EXPR0 R_PAREN STATEMENT ELSE STATEMENT {
@@ -276,7 +278,7 @@ FUNC_LIST
 		strcpy(func_call[++func_call_param].datatype, "char*");
 	}
 	| EXPR1 COMMA FUNC_LIST	{
-		strcpy(func_call[++func_call_param].datatype, $1.dtype)
+		strcpy(func_call[++func_call_param].datatype, $1.dtype);
 	}
 	| CONST_CHAR COMMA FUNC_LIST {
 		strcpy(func_call[++func_call_param].datatype, "char");
