@@ -1,9 +1,26 @@
-
+t0 = 9 * 4;
+t1 = t0 - 3;
+a = t1;
 t0 = a * b;
 t1 = b + t0;
 b = t1;
-;t0 = 12 * 5;
-t1 = 10 + t0;
-t2 = t1 - 4;
-a = t2;
-;
+t0 = a > 10;
+if t0 == 1 goto Label_0
+goto Label_4
+Label_0 : 
+t0 = a > 3;
+if t0 == 1 goto Label_1
+goto Label_2
+Label_1 : 
+a = 3;
+goto Label_3
+Label_2 : 
+a = 0;
+Label_3 : 
+goto Label_5
+Label_4 : 
+t0 = b * 10;
+t1 = t0 + 5;
+b = t1;
+Label_5 : 
+a = 0;

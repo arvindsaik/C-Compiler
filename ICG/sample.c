@@ -6,8 +6,21 @@ int main()
 	int a;
 	float b;
 
-  b = b + a * b;
+	a = 9 * 4 - 3;
 
-	a = 10 + 12 * 5 - 4;
+	b = b + a * b;
 
+	if(a > 10)
+	{
+		if(a > 3){
+			a=3;
+		}
+		else{
+			a = 0;
+		}
+	}
+	else{
+		b = b *10 + 5;
+	}
+	a = 0;
 }

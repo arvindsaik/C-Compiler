@@ -5,6 +5,8 @@
 %token SEMICOLON COLON
 %token INCR DECR
 %token NOT BNOT
+%nonassoc "then"
+%nonassoc ELSE 
 %left MULTIPLY DIVIDE MOD
 %left PLUS MINUS
 %left GREAT LESS EGREAT ELESS
@@ -16,7 +18,6 @@
 %left OR
 %right EQUAL PEQUAL MEQUAL SEQUAL BEQUAL
 %left COMMA
-
 %expect 5
 %union {
 		struct type_and_value{
@@ -66,7 +67,60 @@
 	int func_call_param = -1;
 	int num_params = -1;
 	FILE *f;
+	char basic_code[300][100];
+	int basic_code_len = -1;
+	int bpStack[20];
+	int bptop = -1;
 
+	int linenum_stack[30];
+	int labelCount = 0;
+	void addToThreeCode(char * cd){
+		++basic_code_len;
+		strcpy(basic_code[basic_code_len],cd);
+	}
+	char * useLabel(){
+		char *result = malloc(200*sizeof(char));
+		sprintf(result,"Label_%d",labelCount);
+		++labelCount;
+		return result;
+	}
+	char * nextLabel(){
+		char *result = malloc(200 * sizeof(char));
+		sprintf(result, "Label_%d", labelCount);
+		return result;
+	}
+	char *curLabel()
+	{
+		char *result = malloc(200 * sizeof(char));
+		sprintf(result, "Label_%d", labelCount - 1);
+		return result;
+	}
+	void addToStack(int line){
+		bpStack[++bptop] = line; 
+	}
+	int popStack(){
+		return bpStack[bptop--];
+	}
+	void backPatch(char label[], int cnt){
+		if(cnt == 1){
+			int temp = popStack();
+			strcat(basic_code[temp],label);
+			strcat(basic_code[temp],"\n");
+		}
+		else{
+			int temp1 = popStack();
+			int temp2 = popStack();
+			addToStack(temp1);
+			strcat(basic_code[temp2], label);
+			strcat(basic_code[temp2], "\n");
+		}
+	}
+	int writeCode(){
+		int i;
+		for(i=0;i<=basic_code_len;++i){
+			fprintf(f, "%s",basic_code[i]);
+		}
+	}
 	%}
 %%
 // Start symbol, everything allowed outside main
@@ -82,10 +136,10 @@ START
 // Different types of statements
 STATEMENT_BLOCK
 	: STATEMENT_BLOCK STATEMENT {}
-	| STATEMENT {fprintf(f,"\n");} 
+	| STATEMENT
 	;
 STATEMENT
-	: EXPR0 SEMICOLON {fprintf(f, ";");}
+	: EXPR0 SEMICOLON {}
 	| DEC0 SEMICOLON
 	| IF_CONS
 	| WHILE_LOOP
@@ -95,13 +149,23 @@ STATEMENT
 	| RETURN EXPR1 SEMICOLON { 
 		if(strcmp(return_type, $2.dtype)!=0){
 			printf("Return type is not correct at line: %d.\n", line);
-			fprintf(f, ";");
+		}
+		else
+		{
+			char *tempCode = malloc(200*sizeof(char));
+			sprintf(tempCode, "return %s ;\n", $2.id_or_const);
+			addToThreeCode(tempCode);
 		}
 	}
 	| RETURN SEMICOLON {
 		if(strcmp(return_type, "void")!=0){
 			printf("Return type is not correct at line: %d.\n", line);
-			fprintf(f, ";");
+		}
+		else
+		{
+			char tempCode[200];
+			sprintf(tempCode, "return ;\n");
+			addToThreeCode(tempCode);
 		}
 	}
 	| BREAK SEMICOLON {}
@@ -109,21 +173,50 @@ STATEMENT
 
 	// If construct
 IF_CONS
-	: IF L_PAREN EXPR0 R_PAREN STATEMENT {
-		if(strcmp($3.dtype,"int") != 0){
-			printf("expresion in if not of type int in line %d\n",line-1);
+	: IF L_PAREN EXPR0 R_PAREN {
+		char tempCode[200];
+		if (strcmp($3.dtype, "int") != 0)
+		{
+			printf("expresion in if not of type int in line %d\n", line - 1);
 		}
-	}
-	| IF L_PAREN EXPR0 R_PAREN STATEMENT ELSE STATEMENT {
-		if(strcmp($3.dtype,"int") != 0){
-			printf("expresion in if not of type int in line %d\n",line-1);
-		}
+		sprintf(tempCode, "if %s == 1 goto %s\ngoto ", $3.id_or_const, nextLabel());
+		addToThreeCode(tempCode);
+		addToStack(basic_code_len);
+		sprintf(tempCode, "%s : \n", useLabel());
+		addToThreeCode(tempCode);
+	} 
+	STATEMENT
+	{
+		char *tempCode = malloc(sizeof(char)*200);
+		sprintf(tempCode, "goto ");
+		addToThreeCode(tempCode);
+		addToStack(basic_code_len);
+		sprintf(tempCode,"%s : \n",useLabel());
+		addToThreeCode(tempCode);
+		backPatch(curLabel(),2);
+	} 
+	ELSE_STATEMENT{
+		
 	}
 	;
+ELSE_STATEMENT
+	: ELSE STATEMENT {
+		char *tempCode = malloc(sizeof(char)*200);
+		sprintf(tempCode, "%s : \n", useLabel());
+		addToThreeCode(tempCode);
+		backPatch(curLabel(),1);
+	}
+	|	{
+		char *tempCode = malloc(sizeof(char) * 200);
+		sprintf(tempCode, "%s : \n", useLabel());
+		addToThreeCode(tempCode);
+		backPatch(curLabel(), 1);
+	};
 
-// While Loop
-WHILE_LOOP
-	: WHILE L_PAREN EXPR0 R_PAREN STATEMENT {
+	// While Loop
+	WHILE_LOOP
+		: WHILE L_PAREN EXPR0 R_PAREN STATEMENT
+	{
 		if(strcmp($3.dtype,"int") != 0){
 			printf("expresion in while not of type int in line %d\n",line);
 		}
@@ -375,8 +468,10 @@ EXPR1
 	: LVAL EQUAL EXPR1 {
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype); 
-			strcpy($$.id_or_const,rnum);
-			fprintf(f, "%s = %s;\n", $1.id_or_const, $3.id_or_const);
+			strcpy($$.id_or_const,rnum);		
+			char tempCode[200];
+			sprintf(tempCode, "%s = %s;\n", $1.id_or_const, $3.id_or_const);
+			addToThreeCode(tempCode);
 			rnum[1]++; 
 			rnum[1] = '0';
 		} 
@@ -389,7 +484,9 @@ EXPR1
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype); 
 			strcpy($$.id_or_const,rnum);
-			fprintf(f, "%s = %s;\n", $1.id_or_const, $3.id_or_const);
+			char tempCode[200];
+			sprintf(tempCode, "%s = %s;\n", $1.id_or_const, $3.id_or_const);
+			addToThreeCode(tempCode);
 			rnum[1]++;
 			rnum[1] = '0';
 		} 
@@ -402,7 +499,9 @@ EXPR1
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype); 
 			strcpy($$.id_or_const,rnum);
-			fprintf(f, "%s = %s;\n", $1.id_or_const, $3.id_or_const);
+			char tempCode[200];
+			sprintf(tempCode, "%s = %s;\n", $1.id_or_const, $3.id_or_const);
+			addToThreeCode(tempCode);
 			rnum[1]++; 
 			rnum[1] = '0';
 		} 
@@ -415,7 +514,9 @@ EXPR1
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype); 
 			strcpy($$.id_or_const,rnum);
-			fprintf(f, "%s = %s;\n", $1.id_or_const, $3.id_or_const);
+			char tempCode[200];
+			sprintf(tempCode, "%s = %s;\n", $1.id_or_const, $3.id_or_const);
+			addToThreeCode(tempCode);
 			rnum[1]++; 
 			rnum[1] = '0';
 		} 
@@ -428,7 +529,9 @@ EXPR1
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype); 
 			strcpy($$.id_or_const,rnum);
-			fprintf(f, "%s = %s;\n", $1.id_or_const, $3.id_or_const);
+			char tempCode[200];
+			sprintf(tempCode, "%s = %s;\n", $1.id_or_const, $3.id_or_const);
+			addToThreeCode(tempCode);
 			rnum[1]++; 
 			rnum[1] = '0';
 		} 
@@ -447,7 +550,9 @@ EXPR1G
 	: EXPR1G OR EXPR1F {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		fprintf(f, "%s = %s || %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		char tempCode[200];
+		sprintf(tempCode, "%s = %s || %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		addToThreeCode(tempCode);
 		rnum[1]++;
 	}
 	| EXPR1F {
@@ -459,7 +564,9 @@ EXPR1F
 	: EXPR1F AND EXPR1E {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		fprintf(f, "%s = %s && %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		char tempCode[200];
+		sprintf(tempCode, "%s = %s && %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		addToThreeCode(tempCode);
 		rnum[1]++;
 	}
 	| EXPR1E {
@@ -472,7 +579,10 @@ EXPR1E
 	: EXPR1E BOR EXPR1D {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		fprintf(f, "%s = %s | %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		
+		char tempCode[200];
+		sprintf(tempCode, "%s = %s | %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		addToThreeCode(tempCode);
 		rnum[1]++;
 	}
 	| EXPR1D {
@@ -484,7 +594,9 @@ EXPR1D
 	: EXPR1D CARROT EXPR1C {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		fprintf(f, "%s = %s ^ %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		
+		char tempCode[200];
+		sprintf(tempCode, "%s = %s ^ %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR1C {
@@ -496,7 +608,8 @@ EXPR1C
 	: EXPR1C BAND EXPR1B {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		fprintf(f, "%s = %s & %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		char tempCode[200];
+		sprintf(tempCode, "%s = %s & %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR1B {
@@ -508,13 +621,18 @@ EXPR1B
 	: EXPR1B EQUALITY EXPR1A {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		fprintf(f, "%s = %s == %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		char tempCode[200];
+		sprintf(tempCode, "%s = %s == %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		addToThreeCode(tempCode);
 		rnum[1]++;
 	}
 	| EXPR1B NEQUAL EXPR1A {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		fprintf(f, "%s = %s != %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		
+		char tempCode[200];
+		sprintf(tempCode, "%s = %s != %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		addToThreeCode(tempCode);
 		rnum[1]++;
 	}
 	| EXPR1A {
@@ -526,26 +644,41 @@ EXPR1A
 	: EXPR1A GREAT EXPR2 {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		fprintf(f, "%s = %s > %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		
+		char tempCode[200];
+		sprintf(tempCode, "%s = %s > %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		addToThreeCode(tempCode);
 		rnum[1]++;
 	}
 	| EXPR1A LESS EXPR2 {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		fprintf(f, "%s = %s < %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		
+		char tempCode[200];
+		sprintf(tempCode, "%s = %s < %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		addToThreeCode(tempCode);
 		rnum[1]++;
 	}
+	
 	| EXPR1A EGREAT EXPR2 {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		fprintf(f,"%s = %s >= %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		
+		char tempCode[200];
+		sprintf(tempCode,"%s = %s >= %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		addToThreeCode(tempCode);
 		rnum[1]++;
 	}
+	
 	| EXPR1A ELESS EXPR2 {
 		strcpy($$.dtype,"int");strcpy($$.id_or_const,rnum);
-		fprintf(f, "%s = %s <= %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		
+		char tempCode[200];
+		sprintf(tempCode, "%s = %s <= %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		addToThreeCode(tempCode);
 		rnum[1]++;
 	}
+	
 	| EXPR2 {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
@@ -555,13 +688,17 @@ EXPR2
 	: EXPR2 PLUS EXPR3 {
 		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
 		strcpy($$.id_or_const,rnum);
-		fprintf(f, "%s = %s + %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		char tempCode[200];
+		sprintf(tempCode, "%s = %s + %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		addToThreeCode(tempCode);
 		rnum[1]++;
 	}
 	| EXPR2 MINUS EXPR3 {
 		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
 		strcpy($$.id_or_const,rnum);
-		fprintf(f, "%s = %s - %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		char tempCode[200];
+		sprintf(tempCode, "%s = %s - %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		addToThreeCode(tempCode);
 		rnum[1]++;
 	}
 	| EXPR3 {
@@ -573,13 +710,17 @@ EXPR3
 	: EXPR3 MULTIPLY EXPR3A {
 		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
 		strcpy($$.id_or_const,rnum);
-		fprintf(f, "%s = %s * %s;\n",rnum,$1.id_or_const,$3.id_or_const);
+		char tempCode[200];
+		sprintf(tempCode, "%s = %s * %s;\n",rnum,$1.id_or_const,$3.id_or_const);
+		addToThreeCode(tempCode);
 		rnum[1]++;
 	}
 	| EXPR3 DIVIDE EXPR3A {
 		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
 		strcpy($$.id_or_const,rnum);
-		fprintf(f, "%s = %s / %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		char tempCode[200];
+		sprintf(tempCode, "%s = %s / %s;\n", rnum, $1.id_or_const, $3.id_or_const);
+		addToThreeCode(tempCode);
 		rnum[1]++;
 	}
 	| EXPR3A {
@@ -647,6 +788,7 @@ EXPR4
 LVAL
 	: IDENTIFIER {
 		sprintf($$.dtype,"%s",get_datatype($1,st,top));
+		//printf("%s : %d here \n",$1,get_arr_dim($1,st,top));
 		if(get_arr_dim($1,st,top) == -1){
 			if(strcmp("printf",$1)!=0){
 				char tempo[256];
@@ -657,7 +799,6 @@ LVAL
 			}
 			char temp[20];
 			sprintf(temp, "%s", $1);
-			// printf("%s\n",temp);
 			sprintf($$.id_or_const, "%s", $1);
 		}
 		else{
@@ -781,6 +922,8 @@ int main()
 		print_symbol_table();
 		printf("\nParsing Successful\n");
 	}
+	int i;
+	writeCode();
 	return 0;
 }
 

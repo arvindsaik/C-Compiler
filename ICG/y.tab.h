@@ -69,37 +69,37 @@ extern int yydebug;
     DECR = 279,
     NOT = 280,
     BNOT = 281,
-    MULTIPLY = 282,
-    DIVIDE = 283,
-    MOD = 284,
-    PLUS = 285,
-    MINUS = 286,
-    GREAT = 287,
-    LESS = 288,
-    EGREAT = 289,
-    ELESS = 290,
-    EQUALITY = 291,
-    NEQUAL = 292,
-    BAND = 293,
-    CARROT = 294,
-    BOR = 295,
-    AND = 296,
-    OR = 297,
-    EQUAL = 298,
-    PEQUAL = 299,
-    MEQUAL = 300,
-    SEQUAL = 301,
-    BEQUAL = 302,
-    COMMA = 303,
-    CHAR = 304,
-    FLOAT = 305,
-    VOID = 306,
-    INT = 307,
-    IDENTIFIER = 308,
-    CONST_FLOAT = 309,
-    CONST_INT = 310,
-    CONST_CHAR = 311,
-    CONST_STR = 312
+    MULTIPLY = 283,
+    DIVIDE = 284,
+    MOD = 285,
+    PLUS = 286,
+    MINUS = 287,
+    GREAT = 288,
+    LESS = 289,
+    EGREAT = 290,
+    ELESS = 291,
+    EQUALITY = 292,
+    NEQUAL = 293,
+    BAND = 294,
+    CARROT = 295,
+    BOR = 296,
+    AND = 297,
+    OR = 298,
+    EQUAL = 299,
+    PEQUAL = 300,
+    MEQUAL = 301,
+    SEQUAL = 302,
+    BEQUAL = 303,
+    COMMA = 304,
+    CHAR = 305,
+    FLOAT = 306,
+    VOID = 307,
+    INT = 308,
+    IDENTIFIER = 309,
+    CONST_FLOAT = 310,
+    CONST_INT = 311,
+    CONST_CHAR = 312,
+    CONST_STR = 313
   };
 #endif
 /* Tokens.  */
@@ -127,44 +127,44 @@ extern int yydebug;
 #define DECR 279
 #define NOT 280
 #define BNOT 281
-#define MULTIPLY 282
-#define DIVIDE 283
-#define MOD 284
-#define PLUS 285
-#define MINUS 286
-#define GREAT 287
-#define LESS 288
-#define EGREAT 289
-#define ELESS 290
-#define EQUALITY 291
-#define NEQUAL 292
-#define BAND 293
-#define CARROT 294
-#define BOR 295
-#define AND 296
-#define OR 297
-#define EQUAL 298
-#define PEQUAL 299
-#define MEQUAL 300
-#define SEQUAL 301
-#define BEQUAL 302
-#define COMMA 303
-#define CHAR 304
-#define FLOAT 305
-#define VOID 306
-#define INT 307
-#define IDENTIFIER 308
-#define CONST_FLOAT 309
-#define CONST_INT 310
-#define CONST_CHAR 311
-#define CONST_STR 312
+#define MULTIPLY 283
+#define DIVIDE 284
+#define MOD 285
+#define PLUS 286
+#define MINUS 287
+#define GREAT 288
+#define LESS 289
+#define EGREAT 290
+#define ELESS 291
+#define EQUALITY 292
+#define NEQUAL 293
+#define BAND 294
+#define CARROT 295
+#define BOR 296
+#define AND 297
+#define OR 298
+#define EQUAL 299
+#define PEQUAL 300
+#define MEQUAL 301
+#define SEQUAL 302
+#define BEQUAL 303
+#define COMMA 304
+#define CHAR 305
+#define FLOAT 306
+#define VOID 307
+#define INT 308
+#define IDENTIFIER 309
+#define CONST_FLOAT 310
+#define CONST_INT 311
+#define CONST_CHAR 312
+#define CONST_STR 313
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 21 "parser.y" /* yacc.c:1909  */
+#line 22 "parser.y" /* yacc.c:1909  */
 
 		struct type_and_value{
 			char dtype[20];

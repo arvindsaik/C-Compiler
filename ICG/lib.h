@@ -111,6 +111,8 @@ void insert(struct table_entry *head[], unsigned int index, char *key, char *val
   strcpy(temp->value[temp->num_of_scopes],value);
   temp->tp[temp->num_of_scopes] = top;
   temp->array_dim[temp->num_of_scopes] = a_dim;
+  // printf("%d ininin\n",temp->array_dim[temp->num_of_scopes]);
+  // printf("%d num in \n",temp->num_of_scopes);
   if(top == -1) temp->tp[temp->num_of_scopes] = -1;
   int iter;
   for(iter=0;iter<=top;++iter){
@@ -190,7 +192,7 @@ void install_constant(char *k, char *v)
 
 char * get_datatype(char *k,int * stk, int top){
   int i,j;
-  int flag1=0,maxi = 0,pos;
+  int flag1=0,maxi = 0,pos = 0;
   struct table_entry *temp = search(s_head[get_hash(k)], k);
   for(i=0;i<=temp->num_of_scopes;++i){
     flag1 = 0;
