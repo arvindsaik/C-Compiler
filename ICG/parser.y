@@ -65,16 +65,12 @@
 	struct func_param func_call[20];
 	int func_call_param = -1;
 	int num_params = -1;
-
 	FILE *f;
+
 	%}
 %%
 // Start symbol, everything allowed outside main
-OUT
-	: START { 
-		f = fopen("file.txt", "w");
-	}
-	;
+
 START
 	: START DEC0 SEMICOLON 
 	| START FUNC_DEC SEMICOLON
@@ -85,12 +81,12 @@ START
 
 // Different types of statements
 STATEMENT_BLOCK
-	: STATEMENT_BLOCK STATEMENT
-	| STATEMENT
+	: STATEMENT_BLOCK STATEMENT {}
+	| STATEMENT {fprintf(f,"\n");} 
 	;
 STATEMENT
-	: EXPR0 SEMICOLON
-	| DEC0 SEMICOLON
+	: EXPR0 SEMICOLON {fprintf(f, ";");}
+	| DEC0 SEMICOLON {fprintf(f, ";");}
 	| IF_CONS
 	| FOR_LOOP
 	| WHILE_LOOP
@@ -98,18 +94,21 @@ STATEMENT
 	| L_BRACE STATEMENT_BLOCK R_BRACE
 	| L_BRACE R_BRACE
 	| RETURN EXPR1 SEMICOLON { 
-		if(strcmp(return_type, $2.dtype)!=0) 
+		if(strcmp(return_type, $2.dtype)!=0){
 			printf("Return type is not correct at line: %d.\n", line);
+			fprintf(f, ";");
+		}
 	}
 	| RETURN SEMICOLON {
-		if(strcmp(return_type, "void")!=0)
+		if(strcmp(return_type, "void")!=0){
 			printf("Return type is not correct at line: %d.\n", line);
+			fprintf(f, ";");
+		}
 	}
-	| BREAK SEMICOLON
-	| SEMICOLON
-	;
+	| BREAK SEMICOLON { fprintf(f, ";"); }
+	| SEMICOLON { fprintf(f, ";"); };
 
-// If construct
+	// If construct
 IF_CONS
 	: IF L_PAREN EXPR0 R_PAREN STATEMENT {
 		if(strcmp($3.dtype,"int") != 0){
@@ -140,16 +139,6 @@ DO_WHILE
 		}
 	}
 	;
-
-// For Loop
-FOR_LOOP
-	: FOR L_PAREN FOR_PAR SEMICOLON FOR_PAR SEMICOLON FOR_PAR R_PAREN STATEMENT
-	;
-FOR_PAR
-	: EXPR0
-	|
-	;
-
 
 // Function Declarations/Definitions
 FUNC_DEC
@@ -388,8 +377,9 @@ EXPR1
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype); 
 			strcpy($$.id_or_const,rnum);
-			printf( "%s = %s\n", $1.id_or_const, $3.id_or_const);
-			rnum[1]++; rnum[1] = '0';
+			fprintf(f, "%s = %s\n", $1.id_or_const, $3.id_or_const);
+			rnum[1]++; 
+			rnum[1] = '0';
 		} 
 		else {
 			printf("Type mismatch at line %d\n",line);
@@ -783,7 +773,9 @@ int main()
 
 	FILE *fp;
 	fp = fopen("sample.c", "r");
+	f = fopen("ICG.txt", "w");
 	yyin = fp;
+	
 	yyparse();
 	if(flag!=1)
 	{
