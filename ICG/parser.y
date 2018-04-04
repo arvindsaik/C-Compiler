@@ -95,26 +95,48 @@ STATEMENT
 	| DO_WHILE
 	| L_BRACE STATEMENT_BLOCK R_BRACE
 	| L_BRACE R_BRACE
-	| RETURN EXPR1 SEMICOLON	{ if(strcmp(return_type, $2.dtype)!=0) printf("Return type is not correct at line: %d.\n", line);}
-	| RETURN SEMICOLON				{if(strcmp(return_type, "void")!=0) printf("Return type is not correct at line: %d.\n", line);}
+	| RETURN EXPR1 SEMICOLON { 
+		if(strcmp(return_type, $2.dtype)!=0) 
+			printf("Return type is not correct at line: %d.\n", line);
+	}
+	| RETURN SEMICOLON {
+		if(strcmp(return_type, "void")!=0)
+			printf("Return type is not correct at line: %d.\n", line);
+	}
 	| BREAK SEMICOLON
 	| SEMICOLON
 	;
 
 // If construct
 IF_CONS
-	: IF L_PAREN EXPR0 R_PAREN STATEMENT {if(strcmp($3.dtype,"int") != 0){printf("expresion in if not of type int in line %d\n",line-1);}}
-	| IF L_PAREN EXPR0 R_PAREN STATEMENT ELSE STATEMENT {if(strcmp($3.dtype,"int") != 0){printf("expresion in if not of type int in line %d\n",line-1);}}
+	: IF L_PAREN EXPR0 R_PAREN STATEMENT {
+		if(strcmp($3.dtype,"int") != 0){
+			printf("expresion in if not of type int in line %d\n",line-1)
+		}
+	}
+	| IF L_PAREN EXPR0 R_PAREN STATEMENT ELSE STATEMENT {
+		if(strcmp($3.dtype,"int") != 0){
+			printf("expresion in if not of type int in line %d\n",line-1);
+		}
+	}
 	;
 
 // While Loop
 WHILE_LOOP
-	: WHILE L_PAREN EXPR0 R_PAREN STATEMENT {if(strcmp($3.dtype,"int") != 0){printf("expresion in while not of type int in line %d\n",line);}}
+	: WHILE L_PAREN EXPR0 R_PAREN STATEMENT {
+		if(strcmp($3.dtype,"int") != 0){
+			printf("expresion in while not of type int in line %d\n",line);
+		}
+	}
 	;
 
 // Do-While
 DO_WHILE
-	: DO STATEMENT WHILE L_PAREN EXPR0 R_PAREN SEMICOLON {if(strcmp($5.dtype,"int") != 0){printf("expresion in do while not of type int in line %d\n",line);}}
+	: DO STATEMENT WHILE L_PAREN EXPR0 R_PAREN SEMICOLON {
+		if(strcmp($5.dtype,"int") != 0){
+			printf("expresion in do while not of type int in line %d\n",line);
+		}
+	}
 	;
 
 // For Loop
@@ -129,36 +151,40 @@ FOR_PAR
 
 // Function Declarations/Definitions
 FUNC_DEC
-	: CHAR IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(return_type, $1);
-													struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
-													t = give_scope_struct($2);
-													if(t==NULL)
-													{
-													install_symbol($2,id, st, top,-1, return_type, 	temp, num_params,1);
-													}
-													else
-														printf("Invalid function name %s: at line number %d.\n", $2, line);
-													num_params=-1;}
-	| NUM_TYPE IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(return_type, $1.dtype);
-													struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
-													t = give_scope_struct($2);
-													if(t==NULL)
-													{
-														install_symbol($2, $1.dtype, st, top, -1, return_type, temp, num_params, 1);
-													}
-													else
-														printf("Invalid function name %s: at line number %d.\n", $2, line);
-													num_params=-1;}
-	| VOID IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {strcpy(return_type, $1);
-													struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
-													t = give_scope_struct($2);
-													if(t==NULL)
-													{
-													install_symbol($2,id, st, top,-1, return_type, 	temp, num_params,1);
-													}
-													else
-														printf("Invalid function name %s: at line number %d.\n", $2, line);
-													num_params=-1;}
+	: CHAR IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {
+		strcpy(return_type, $1);
+		struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
+		t = give_scope_struct($2);
+		if(t==NULL){
+			install_symbol($2,id, st, top,-1, return_type, 	temp, num_params,1);
+		}
+		else
+			printf("Invalid function name %s: at line number %d.\n", $2, line);
+		num_params=-1;
+	}
+	| NUM_TYPE IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {
+		strcpy(return_type, $1.dtype);
+		struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
+		t = give_scope_struct($2);
+		if(t==NULL)
+		{
+			install_symbol($2, $1.dtype, st, top, -1, return_type, temp, num_params, 1);
+		}
+		else
+			printf("Invalid function name %s: at line number %d.\n", $2, line);
+		num_params=-1;
+	}
+	| VOID IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {
+		strcpy(return_type, $1);
+		struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
+		t = give_scope_struct($2);
+		if(t==NULL){
+			install_symbol($2,id, st, top,-1, return_type, 	temp, num_params,1);
+		}
+		else
+			printf("Invalid function name %s: at line number %d.\n", $2, line);
+		num_params=-1;
+	}
 	;
 FUNC_DEF
 	: FUNC_DEC L_BRACE STATEMENT_BLOCK R_BRACE	{}
@@ -168,71 +194,96 @@ FUNC_PARAMS
 	|
 	;
 FUNC_PARAMS1
-	: NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1 {strcpy(temp[++num_params].datatype, $1.dtype);
-																st[++top] = brack_num+1;install_symbol($2, $1.dtype, st, top,-1, return_type, temp, num_params, 0);	top--;}
-	| CHAR IDENTIFIER COMMA FUNC_PARAMS1 {strcpy(temp[++num_params].datatype, "void");
-																st[++top] = brack_num+1;strcpy(id, $1);install_symbol($2,$1, st, top,-1, return_type, temp, num_params, 0);	top--;}
+	: NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1 {
+		strcpy(temp[++num_params].datatype, $1.dtype);
+		st[++top] = brack_num+1;
+		install_symbol($2, $1.dtype, st, top,-1, return_type, temp, num_params, 0);	
+		top--;
+	}
+	| CHAR IDENTIFIER COMMA FUNC_PARAMS1 {
+		strcpy(temp[++num_params].datatype, "void");
+		st[++top] = brack_num+1;strcpy(id, $1);
+		install_symbol($2,$1, st, top,-1, return_type, temp, num_params, 0);	
+		top--;
+	}
 
-	| NUM_TYPE IDENTIFIER {strcpy(temp[++num_params].datatype, $1.dtype);
-												st[++top] = brack_num+1;install_symbol($2, $1.dtype, st, top,-1, return_type, temp, num_params, 0);	top--;}
-	| CHAR IDENTIFIER {strcpy(temp[++num_params].datatype, "char");
-											strcpy(id, $1); st[++top] = brack_num+1;install_symbol($2, $1, st, top,-1, return_type, temp, num_params, 0);	top--;}
+	| NUM_TYPE IDENTIFIER {
+		strcpy(temp[++num_params].datatype, $1.dtype);
+		st[++top] = brack_num+1;
+		install_symbol($2, $1.dtype, st, top,-1, return_type, temp, num_params, 0);	
+		top--;
+	}
+	| CHAR IDENTIFIER {
+		strcpy(temp[++num_params].datatype, "char");
+		strcpy(id, $1); st[++top] = brack_num+1;
+		install_symbol($2, $1, st, top,-1, return_type, temp, num_params, 0);	
+		top--;
+	}
 	;
 FUNC_CALL
 : IDENTIFIER L_PAREN FUNC_LIST R_PAREN	{
-																struct table_entry *temp = (struct table_entry *)malloc(sizeof(struct table_entry));
-																temp = give_scope_struct($1);
-																if(temp!=NULL && temp->is_func==1 && strcmp("printf", $1)!=0 && ((temp->num_params)==func_call_param))
-																{
-																		int flag=0;
-																		for(int i=0;i<=func_call_param;i++)
-																		{
-																			if(strcmp(temp->params[i].datatype, ret_type(func_call[temp->num_params-i].datatype, temp->params[i].datatype))!=0)
-																			{
-																				flag = 1;
-																				break;
-																			}
-																		}
-																		if(flag)
-																		{
-																				printf("Invalid function call: %s.\n", $1);
-																		}
-																}
-																else
-																{
-																		printf("Invalid function call: %s.\n", $1);
+		struct table_entry *temp = (struct table_entry *)malloc(sizeof(struct table_entry));
+		temp = give_scope_struct($1);
+		if(temp!=NULL && temp->is_func==1 && strcmp("printf", $1)!=0 && ((temp->num_params)==func_call_param))
+		{
+				int flag=0;
+				for(int i=0;i<=func_call_param;i++)
+				{
+					if(strcmp(temp->params[i].datatype, ret_type(func_call[temp->num_params-i].datatype, temp->params[i].datatype))!=0)
+					{
+						flag = 1;
+						break;
+					}
+				}
+				if(flag)
+				{
+						printf("Invalid function call: %s.\n", $1);
+				}
+		}
+		else
+		{
+				printf("Invalid function call: %s.\n", $1);
 
-																}
+		}
 
-																func_call_param=-1;
-																if(temp!=NULL)
-																	strcpy($$.dtype, temp->return_type);
+		func_call_param=-1;
+		if(temp!=NULL)
+			strcpy($$.dtype, temp->return_type);
 
-																					}
+	}
 	| IDENTIFIER L_PAREN R_PAREN	{
-															struct table_entry *temp = (struct table_entry *)malloc(sizeof(struct table_entry));
-															temp = give_scope_struct($1);
-															if(temp!=NULL && temp->is_func==1 && strcmp("printf", $1)!=0 && ((temp->num_params)==func_call_param))
-															{
+		struct table_entry *temp = (struct table_entry *)malloc(sizeof(struct table_entry));
+		temp = give_scope_struct($1);
+		if(temp!=NULL && temp->is_func==1 && strcmp("printf", $1)!=0 && ((temp->num_params)==func_call_param))
+		{
 
-															}
-															else
-															{
-																	printf("Invalid function call: %s.\n", $1);
+		}
+		else
+		{
+				printf("Invalid function call: %s.\n", $1);
 
-															}
-
-															func_call_param=-1;
-															if(temp!=NULL)
-																strcpy($$.dtype, temp->return_type);
+		}
+		func_call_param=-1;
+		if(temp!=NULL)
+			strcpy($$.dtype, temp->return_type);
 	}
 	;
 FUNC_LIST
-	: EXPR1												{strcpy(func_call[++func_call_param].datatype, $1.dtype);}
-	| CONST_STR 									{strcpy(func_call[++func_call_param].datatype, "char*");}
-	| EXPR1 COMMA FUNC_LIST				{strcpy(func_call[++func_call_param].datatype, $1.dtype);}
-	| CONST_CHAR COMMA FUNC_LIST  {strcpy(func_call[++func_call_param].datatype, "char");}
-	| CONST_STR COMMA FUNC_LIST   {strcpy(func_call[++func_call_param].datatype, "char*");}
+	: EXPR1	{
+		strcpy(func_call[++func_call_param].datatype, $1.dtype);
+	}
+	| CONST_STR {
+		strcpy(func_call[++func_call_param].datatype, "char*");
+	}
+	| EXPR1 COMMA FUNC_LIST	{
+		strcpy(func_call[++func_call_param].datatype, $1.dtype)
+	}
+	| CONST_CHAR COMMA FUNC_LIST {
+		strcpy(func_call[++func_call_param].datatype, "char");
+	}
+	| CONST_STR COMMA FUNC_LIST {
+		strcpy(func_call[++func_call_param].datatype, "char*");
+	}
 	;
 
 // Variable Declarations
@@ -248,26 +299,26 @@ DEC1
 	;
 DEC2
 	: IDENTIFIER EQUAL EXPR1 {
-								struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
-								t = give_scope_struct($1);
-								if(t==NULL || (t!=NULL && t->is_func!=1) )
-								{	install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0); if(strcmp(id,ret_type(id,$3.dtype)) != 0){printf("Type Mismatch in assignment at line: %d\n", line);}
-								}
-								else if(t!=NULL)
-								{
-									printf("There exists a function with same name at line : %d.\n", line);
-								}
-							}
+		struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
+		t = give_scope_struct($1);
+		if(t==NULL || (t!=NULL && t->is_func!=1) )
+		{	install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0); if(strcmp(id,ret_type(id,$3.dtype)) != 0){printf("Type Mismatch in assignment at line: %d\n", line);}
+		}
+		else if(t!=NULL)
+		{
+			printf("There exists a function with same name at line : %d.\n", line);
+		}
+	}
 	| DEC_ARR EQUAL L_BRACE EXPR0 R_BRACE {}
 	| DEC_ARR {}
 	| IDENTIFIER {
-					struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
-					t = give_scope_struct($1);
-					if(t==NULL || (t!=NULL && t->is_func!=1))
-						install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);
-					else
-						printf("There exists a function with same name at line : %d.\n", line);
-				}
+		struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
+		t = give_scope_struct($1);
+		if(t==NULL || (t!=NULL && t->is_func!=1))
+			install_symbol($1, id, st, top,-1, return_type, temp, num_params, 0);
+		else
+			printf("There exists a function with same name at line : %d.\n", line);
+	}
 	;
 
 // Consider cases for char/strings/struct
@@ -275,8 +326,13 @@ DEC2
 
 // Arrays
 DEC_ARR
-	: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE {install_symbol($1, id, st, top,$3, return_type, temp, num_params, 0);
-																								if($3<=0)	{printf("Illegal size of array.\n"); yyerror(" ");}}
+	: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE {
+		install_symbol($1, id, st, top,$3, return_type, temp, num_params, 0);
+		if($3<=0){
+			printf("Illegal size of array.\n"); 
+			yyerror(" ");
+		}
+	}
 	;
 ARR
 	: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE {
@@ -317,8 +373,13 @@ ARR
 
 // Expressions
 EXPR0
-	: EXPR0 COMMA EXPR1 {strcpy($$.dtype,"int");}
-	| EXPR1 {strcpy($$.dtype,$1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
+	: EXPR0 COMMA EXPR1 {
+		strcpy($$.dtype,"int");
+	}
+	| EXPR1 {
+		strcpy($$.dtype,$1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	}
 	;
 EXPR1
 	: LVAL EQUAL EXPR1 {
