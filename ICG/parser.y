@@ -86,9 +86,8 @@ STATEMENT_BLOCK
 	;
 STATEMENT
 	: EXPR0 SEMICOLON {fprintf(f, ";");}
-	| DEC0 SEMICOLON {fprintf(f, ";");}
+	| DEC0 SEMICOLON
 	| IF_CONS
-	| FOR_LOOP
 	| WHILE_LOOP
 	| DO_WHILE
 	| L_BRACE STATEMENT_BLOCK R_BRACE
@@ -105,8 +104,8 @@ STATEMENT
 			fprintf(f, ";");
 		}
 	}
-	| BREAK SEMICOLON { fprintf(f, ";"); }
-	| SEMICOLON { fprintf(f, ";"); };
+	| BREAK SEMICOLON {}
+	| SEMICOLON {};
 
 	// If construct
 IF_CONS
@@ -377,7 +376,7 @@ EXPR1
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype); 
 			strcpy($$.id_or_const,rnum);
-			fprintf(f, "%s = %s\n", $1.id_or_const, $3.id_or_const);
+			fprintf(f, "%s = %s;\n", $1.id_or_const, $3.id_or_const);
 			rnum[1]++; 
 			rnum[1] = '0';
 		} 
@@ -390,7 +389,7 @@ EXPR1
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype); 
 			strcpy($$.id_or_const,rnum);
-			printf( "%s = %s\n", $1.id_or_const, $3.id_or_const);
+			fprintf(f, "%s = %s;\n", $1.id_or_const, $3.id_or_const);
 			rnum[1]++;
 			rnum[1] = '0';
 		} 
@@ -403,7 +402,7 @@ EXPR1
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype); 
 			strcpy($$.id_or_const,rnum);
-			printf("%s = %s\n", $1.id_or_const, $3.id_or_const);
+			fprintf(f, "%s = %s;\n", $1.id_or_const, $3.id_or_const);
 			rnum[1]++; 
 			rnum[1] = '0';
 		} 
@@ -416,7 +415,7 @@ EXPR1
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype); 
 			strcpy($$.id_or_const,rnum);
-			printf( "%s = %s\n", $1.id_or_const, $3.id_or_const);
+			fprintf(f, "%s = %s;\n", $1.id_or_const, $3.id_or_const);
 			rnum[1]++; 
 			rnum[1] = '0';
 		} 
@@ -429,7 +428,7 @@ EXPR1
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype); 
 			strcpy($$.id_or_const,rnum);
-			printf( "%s = %s\n", $1.id_or_const, $3.id_or_const);
+			fprintf(f, "%s = %s;\n", $1.id_or_const, $3.id_or_const);
 			rnum[1]++; 
 			rnum[1] = '0';
 		} 
@@ -448,7 +447,7 @@ EXPR1G
 	: EXPR1G OR EXPR1F {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		printf("%s = %s || %s\n",rnum,$1.id_or_const,$3.id_or_const);
+		fprintf(f, "%s = %s || %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR1F {
@@ -460,7 +459,7 @@ EXPR1F
 	: EXPR1F AND EXPR1E {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		printf("%s = %s && %s\n",rnum,$1.id_or_const,$3.id_or_const);
+		fprintf(f, "%s = %s && %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR1E {
@@ -473,7 +472,7 @@ EXPR1E
 	: EXPR1E BOR EXPR1D {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		printf("%s = %s | %s\n",rnum,$1.id_or_const,$3.id_or_const);
+		fprintf(f, "%s = %s | %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR1D {
@@ -485,7 +484,7 @@ EXPR1D
 	: EXPR1D CARROT EXPR1C {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		printf( "%s = %s ^ %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		fprintf(f, "%s = %s ^ %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR1C {
@@ -497,7 +496,7 @@ EXPR1C
 	: EXPR1C BAND EXPR1B {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		printf( "%s = %s & %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		fprintf(f, "%s = %s & %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR1B {
@@ -509,13 +508,13 @@ EXPR1B
 	: EXPR1B EQUALITY EXPR1A {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		printf( "%s = %s == %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		fprintf(f, "%s = %s == %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR1B NEQUAL EXPR1A {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		printf( "%s = %s != %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		fprintf(f, "%s = %s != %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR1A {
@@ -527,24 +526,24 @@ EXPR1A
 	: EXPR1A GREAT EXPR2 {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		printf( "%s = %s > %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		fprintf(f, "%s = %s > %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR1A LESS EXPR2 {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		printf( "%s = %s < %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		fprintf(f, "%s = %s < %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR1A EGREAT EXPR2 {
 		strcpy($$.dtype,"int");
 		strcpy($$.id_or_const,rnum);
-		printf( "%s = %s >= %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		fprintf(f,"%s = %s >= %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR1A ELESS EXPR2 {
 		strcpy($$.dtype,"int");strcpy($$.id_or_const,rnum);
-		printf( "%s = %s <= %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		fprintf(f, "%s = %s <= %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR2 {
@@ -556,13 +555,13 @@ EXPR2
 	: EXPR2 PLUS EXPR3 {
 		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
 		strcpy($$.id_or_const,rnum);
-		printf( "%s = %s + %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		fprintf(f, "%s = %s + %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR2 MINUS EXPR3 {
 		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
 		strcpy($$.id_or_const,rnum);
-		printf( "%s = %s - %s\n",rnum,$1.id_or_const,$3.id_or_const);
+		fprintf(f, "%s = %s - %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR3 {
@@ -574,13 +573,13 @@ EXPR3
 	: EXPR3 MULTIPLY EXPR3A {
 		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
 		strcpy($$.id_or_const,rnum);
-		printf( "%s = %s * %s\n",rnum,$1.id_or_const,$3.id_or_const);
+		fprintf(f, "%s = %s * %s;\n",rnum,$1.id_or_const,$3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR3 DIVIDE EXPR3A {
 		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
 		strcpy($$.id_or_const,rnum);
-		printf( "%s = %s / %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		fprintf(f, "%s = %s / %s;\n", rnum, $1.id_or_const, $3.id_or_const);
 		rnum[1]++;
 	}
 	| EXPR3A {
