@@ -4,8 +4,8 @@ return t0 ;
 func end
 func begin main
 t1 = addr(c);
-t2 = addr(4 * 0);
-t3 = t1[t0];
+t2 = 4 * 0;
+t3 = t1[t2];
 t4 = t3 + 1;
 a = t4;
 a = 0;

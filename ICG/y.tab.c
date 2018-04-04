@@ -2214,9 +2214,9 @@ yyreduce:
 	 char *tempCode = malloc(sizeof(char) * 200);
 	 sprintf(tempCode, "t%d = addr(%s);\n",temp_num++,(yyvsp[-3].lval));
 	 addToThreeCode(tempCode);
-	 sprintf(tempCode, "t%d = addr(4 * %.0f);\n", temp_num++,(yyvsp[-1].val));
+	 sprintf(tempCode, "t%d = 4 * %.0f;\n", temp_num++,(yyvsp[-1].val));
 	 addToThreeCode(tempCode);
-	 sprintf(tempCode, "t%d = t%d[t%d];\n", temp_num++, temp_num-2,temp_num-3);
+	 sprintf(tempCode, "t%d = t%d[t%d];\n", temp_num++, temp_num-2,temp_num-1);
 	 addToThreeCode(tempCode);
 	 sprintf((yyval.pair).id_or_const, "t%d",(temp_num-1));
 	}

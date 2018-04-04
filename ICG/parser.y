@@ -582,9 +582,9 @@ ARR
 	 char *tempCode = malloc(sizeof(char) * 200);
 	 sprintf(tempCode, "t%d = addr(%s);\n",temp_num++,$1);
 	 addToThreeCode(tempCode);
-	 sprintf(tempCode, "t%d = addr(4 * %.0f);\n", temp_num++,$3);
+	 sprintf(tempCode, "t%d = 4 * %.0f;\n", temp_num++,$3);
 	 addToThreeCode(tempCode);
-	 sprintf(tempCode, "t%d = t%d[t%d];\n", temp_num++, temp_num-2,temp_num-3);
+	 sprintf(tempCode, "t%d = t%d[t%d];\n", temp_num++, temp_num-2,temp_num-1);
 	 addToThreeCode(tempCode);
 	 sprintf($$.id_or_const, "t%d",(temp_num-1));
 	}
