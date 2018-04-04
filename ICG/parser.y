@@ -65,11 +65,16 @@
 	struct func_param func_call[20];
 	int func_call_param = -1;
 	int num_params = -1;
-%}
+
+	FILE *f;
+	%}
 %%
 // Start symbol, everything allowed outside main
+OUT
+	: START {}
+	;
 START
-	: START DEC0 SEMICOLON
+	: START DEC0 SEMICOLON 
 	| START FUNC_DEC SEMICOLON
 	| START FUNC_DEF
 	| SEMICOLON
@@ -316,71 +321,275 @@ EXPR0
 	| EXPR1 {strcpy($$.dtype,$1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
 	;
 EXPR1
-	: LVAL EQUAL EXPR1 {if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {strcpy($$.dtype,$1.dtype); strcpy($$.id_or_const,rnum);printf("%s = %s\n",$1.id_or_const,$3.id_or_const);rnum[1]++; rnum[1] = '0';} else {printf("Type mismatch at line %d\n",line);strcpy($$.dtype,$1.dtype);} }
-	| LVAL PEQUAL EXPR1 {if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {strcpy($$.dtype,$1.dtype); strcpy($$.id_or_const,rnum);printf("%s = %s\n",$1.id_or_const,$3.id_or_const);rnum[1]++; rnum[1] = '0';} else {printf("Type mismatch at line %d\n",line);strcpy($$.dtype,$1.dtype);}}
-	| LVAL MEQUAL EXPR1 {if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {strcpy($$.dtype,$1.dtype); strcpy($$.id_or_const,rnum);printf("%s = %s\n",$1.id_or_const,$3.id_or_const);rnum[1]++; rnum[1] = '0';} else {printf("Type mismatch at line %d\n",line);strcpy($$.dtype,$1.dtype);}}
-	| LVAL SEQUAL EXPR1 {if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {strcpy($$.dtype,$1.dtype); strcpy($$.id_or_const,rnum);printf("%s = %s\n",$1.id_or_const,$3.id_or_const);rnum[1]++; rnum[1] = '0';} else {printf("Type mismatch at line %d\n",line);strcpy($$.dtype,$1.dtype);}}
-	| LVAL BEQUAL EXPR1 {if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {strcpy($$.dtype,$1.dtype); strcpy($$.id_or_const,rnum);printf("%s = %s\n",$1.id_or_const,$3.id_or_const);rnum[1]++; rnum[1] = '0';} else {printf("Type mismatch at line %d\n",line);strcpy($$.dtype,$1.dtype);}}
-	| EXPR1G {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);rnum[1] = '0';}
+	: LVAL EQUAL EXPR1 {
+		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
+			strcpy($$.dtype,$1.dtype); 
+			strcpy($$.id_or_const,rnum);
+			printf( "%s = %s\n", $1.id_or_const, $3.id_or_const);
+			rnum[1]++; rnum[1] = '0';
+		} 
+		else {
+			printf("Type mismatch at line %d\n",line);
+			strcpy($$.dtype,$1.dtype);
+		} 
+	}
+	| LVAL PEQUAL EXPR1 {
+		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
+			strcpy($$.dtype,$1.dtype); 
+			strcpy($$.id_or_const,rnum);
+			printf( "%s = %s\n", $1.id_or_const, $3.id_or_const);
+			rnum[1]++;
+			rnum[1] = '0';
+		} 
+		else {
+			printf("Type mismatch at line %d\n",line);
+			strcpy($$.dtype,$1.dtype);
+		}
+	}
+	| LVAL MEQUAL EXPR1 {
+		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
+			strcpy($$.dtype,$1.dtype); 
+			strcpy($$.id_or_const,rnum);
+			printf("%s = %s\n", $1.id_or_const, $3.id_or_const);
+			rnum[1]++; 
+			rnum[1] = '0';
+		} 
+		else {
+			printf("Type mismatch at line %d\n",line);
+			strcpy($$.dtype,$1.dtype);
+		}
+	}
+	| LVAL SEQUAL EXPR1 {
+		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
+			strcpy($$.dtype,$1.dtype); 
+			strcpy($$.id_or_const,rnum);
+			printf( "%s = %s\n", $1.id_or_const, $3.id_or_const);
+			rnum[1]++; 
+			rnum[1] = '0';
+		} 
+		else {
+			printf("Type mismatch at line %d\n",line);
+			strcpy($$.dtype,$1.dtype);
+		}
+	}
+	| LVAL BEQUAL EXPR1 {
+		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
+			strcpy($$.dtype,$1.dtype); 
+			strcpy($$.id_or_const,rnum);
+			printf( "%s = %s\n", $1.id_or_const, $3.id_or_const);
+			rnum[1]++; 
+			rnum[1] = '0';
+		} 
+		else {
+			printf("Type mismatch at line %d\n",line);
+			strcpy($$.dtype,$1.dtype);
+		}
+	}
+	| EXPR1G {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+		rnum[1] = '0';
+	}
 	;
 EXPR1G
-	: EXPR1G OR EXPR1F {strcpy($$.dtype,"int");strcpy($$.id_or_const,rnum);printf("%s = %s || %s\n",rnum,$1.id_or_const,$3.id_or_const);rnum[1]++;}
-	| EXPR1F {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
+	: EXPR1G OR EXPR1F {
+		strcpy($$.dtype,"int");
+		strcpy($$.id_or_const,rnum);
+		printf("%s = %s || %s\n",rnum,$1.id_or_const,$3.id_or_const);
+		rnum[1]++;
+	}
+	| EXPR1F {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	}
 	;
 EXPR1F
-	: EXPR1F AND EXPR1E {strcpy($$.dtype,"int");strcpy($$.id_or_const,rnum);printf("%s = %s && %s\n",rnum,$1.id_or_const,$3.id_or_const);rnum[1]++;}
-	| EXPR1E {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
+	: EXPR1F AND EXPR1E {
+		strcpy($$.dtype,"int");
+		strcpy($$.id_or_const,rnum);
+		printf("%s = %s && %s\n",rnum,$1.id_or_const,$3.id_or_const);
+		rnum[1]++;
+	}
+	| EXPR1E {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	
+	}
 	;
 EXPR1E
-	: EXPR1E BOR EXPR1D {strcpy($$.dtype,"int");strcpy($$.id_or_const,rnum);printf("%s = %s | %s\n",rnum,$1.id_or_const,$3.id_or_const);rnum[1]++;}
-	| EXPR1D {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
+	: EXPR1E BOR EXPR1D {
+		strcpy($$.dtype,"int");
+		strcpy($$.id_or_const,rnum);
+		printf("%s = %s | %s\n",rnum,$1.id_or_const,$3.id_or_const);
+		rnum[1]++;
+	}
+	| EXPR1D {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	}
 	;
 EXPR1D
-	: EXPR1D CARROT EXPR1C {strcpy($$.dtype,"int");strcpy($$.id_or_const,rnum);printf("%s = %s ^ %s\n",rnum,$1.id_or_const,$3.id_or_const);rnum[1]++;}
-	| EXPR1C {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
+	: EXPR1D CARROT EXPR1C {
+		strcpy($$.dtype,"int");
+		strcpy($$.id_or_const,rnum);
+		printf( "%s = %s ^ %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		rnum[1]++;
+	}
+	| EXPR1C {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	}
 	;
 EXPR1C
-	: EXPR1C BAND EXPR1B {strcpy($$.dtype,"int");strcpy($$.id_or_const,rnum);printf("%s = %s & %s\n",rnum,$1.id_or_const,$3.id_or_const);rnum[1]++;}
-	| EXPR1B {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
+	: EXPR1C BAND EXPR1B {
+		strcpy($$.dtype,"int");
+		strcpy($$.id_or_const,rnum);
+		printf( "%s = %s & %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		rnum[1]++;
+	}
+	| EXPR1B {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	}
 	;
 EXPR1B
-	: EXPR1B EQUALITY EXPR1A {strcpy($$.dtype,"int");strcpy($$.id_or_const,rnum);printf("%s = %s == %s\n",rnum,$1.id_or_const,$3.id_or_const);rnum[1]++;}
-	| EXPR1B NEQUAL EXPR1A {strcpy($$.dtype,"int");strcpy($$.id_or_const,rnum);printf("%s = %s != %s\n",rnum,$1.id_or_const,$3.id_or_const);rnum[1]++;}
-	| EXPR1A {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
+	: EXPR1B EQUALITY EXPR1A {
+		strcpy($$.dtype,"int");
+		strcpy($$.id_or_const,rnum);
+		printf( "%s = %s == %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		rnum[1]++;
+	}
+	| EXPR1B NEQUAL EXPR1A {
+		strcpy($$.dtype,"int");
+		strcpy($$.id_or_const,rnum);
+		printf( "%s = %s != %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		rnum[1]++;
+	}
+	| EXPR1A {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	}
 	;
 EXPR1A
-	: EXPR1A GREAT EXPR2 {strcpy($$.dtype,"int");strcpy($$.id_or_const,rnum);printf("%s = %s > %s\n",rnum,$1.id_or_const,$3.id_or_const);rnum[1]++;}
-	| EXPR1A LESS EXPR2 {strcpy($$.dtype,"int");strcpy($$.id_or_const,rnum);printf("%s = %s < %s\n",rnum,$1.id_or_const,$3.id_or_const);rnum[1]++;}
-	| EXPR1A EGREAT EXPR2 {strcpy($$.dtype,"int");strcpy($$.id_or_const,rnum);printf("%s = %s >= %s\n",rnum,$1.id_or_const,$3.id_or_const);rnum[1]++;}
-	| EXPR1A ELESS EXPR2 {strcpy($$.dtype,"int");strcpy($$.id_or_const,rnum);printf("%s = %s <= %s\n",rnum,$1.id_or_const,$3.id_or_const);rnum[1]++;}
-	| EXPR2 {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
+	: EXPR1A GREAT EXPR2 {
+		strcpy($$.dtype,"int");
+		strcpy($$.id_or_const,rnum);
+		printf( "%s = %s > %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		rnum[1]++;
+	}
+	| EXPR1A LESS EXPR2 {
+		strcpy($$.dtype,"int");
+		strcpy($$.id_or_const,rnum);
+		printf( "%s = %s < %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		rnum[1]++;
+	}
+	| EXPR1A EGREAT EXPR2 {
+		strcpy($$.dtype,"int");
+		strcpy($$.id_or_const,rnum);
+		printf( "%s = %s >= %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		rnum[1]++;
+	}
+	| EXPR1A ELESS EXPR2 {
+		strcpy($$.dtype,"int");strcpy($$.id_or_const,rnum);
+		printf( "%s = %s <= %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		rnum[1]++;
+	}
+	| EXPR2 {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	}
 	;
 EXPR2
-	: EXPR2 PLUS EXPR3 {strcpy($$.dtype,ret_type($1.dtype,$3.dtype));strcpy($$.id_or_const,rnum);printf("%s = %s + %s\n",rnum,$1.id_or_const,$3.id_or_const);rnum[1]++;}
-	| EXPR2 MINUS EXPR3 {strcpy($$.dtype,ret_type($1.dtype,$3.dtype));strcpy($$.id_or_const,rnum);printf("%s = %s - %s\n",rnum,$1.id_or_const,$3.id_or_const);rnum[1]++;}
-	| EXPR3 {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
+	: EXPR2 PLUS EXPR3 {
+		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
+		strcpy($$.id_or_const,rnum);
+		printf( "%s = %s + %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		rnum[1]++;
+	}
+	| EXPR2 MINUS EXPR3 {
+		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
+		strcpy($$.id_or_const,rnum);
+		printf( "%s = %s - %s\n",rnum,$1.id_or_const,$3.id_or_const);
+		rnum[1]++;
+	}
+	| EXPR3 {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	}
 	;
 EXPR3
-	: EXPR3 MULTIPLY EXPR3A {strcpy($$.dtype,ret_type($1.dtype,$3.dtype));strcpy($$.id_or_const,rnum);printf("%s = %s * %s\n",rnum,$1.id_or_const,$3.id_or_const);rnum[1]++;}
-	| EXPR3 DIVIDE EXPR3A {strcpy($$.dtype,ret_type($1.dtype,$3.dtype));strcpy($$.id_or_const,rnum);printf("%s = %s / %s\n",rnum,$1.id_or_const,$3.id_or_const);rnum[1]++;}
-	| EXPR3A {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
+	: EXPR3 MULTIPLY EXPR3A {
+		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
+		strcpy($$.id_or_const,rnum);
+		printf( "%s = %s * %s\n",rnum,$1.id_or_const,$3.id_or_const);
+		rnum[1]++;
+	}
+	| EXPR3 DIVIDE EXPR3A {
+		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
+		strcpy($$.id_or_const,rnum);
+		printf( "%s = %s / %s\n", rnum, $1.id_or_const, $3.id_or_const);
+		rnum[1]++;
+	}
+	| EXPR3A {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	}
 	;
 EXPR3A
-	: INCR LVAL {strcpy($$.dtype, $2.dtype);strcpy($$.id_or_const,$2.id_or_const);}
-	| DECR LVAL {strcpy($$.dtype, $2.dtype);strcpy($$.id_or_const,$2.id_or_const);}
-	| PLUS EXPR4 {strcpy($$.dtype, $2.dtype);strcpy($$.id_or_const,$2.id_or_const);}
-	| MINUS EXPR4 {strcpy($$.dtype, $2.dtype);strcpy($$.id_or_const,$2.id_or_const);}
-	| BAND LVAL {strcpy($$.dtype, $2.dtype);strcpy($$.id_or_const,$2.id_or_const);}
-	| FUNC_CALL {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
-	| EXPR4 {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
+	: INCR LVAL {
+		strcpy($$.dtype, $2.dtype);
+		strcpy($$.id_or_const,$2.id_or_const);
+	}
+	| DECR LVAL {
+		strcpy($$.dtype, $2.dtype);
+		strcpy($$.id_or_const,$2.id_or_const);
+	}
+	| PLUS EXPR4 {
+		strcpy($$.dtype, $2.dtype);
+		strcpy($$.id_or_const,$2.id_or_const);
+	}
+	| MINUS EXPR4 {
+		strcpy($$.dtype, $2.dtype);
+		strcpy($$.id_or_const,$2.id_or_const);
+	}
+	| BAND LVAL {
+		strcpy($$.dtype, $2.dtype);
+		strcpy($$.id_or_const,$2.id_or_const);
+	}
+	| FUNC_CALL {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	}
+	| EXPR4 {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	}
 	;
 EXPR4
-	: L_PAREN EXPR0 R_PAREN {strcpy($$.dtype, $2.dtype);strcpy($$.id_or_const,$2.id_or_const);}
-	| LVAL INCR {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
-	| LVAL DECR {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
-	| NUM {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
-	| LVAL {strcpy($$.dtype, $1.dtype);strcpy($$.id_or_const,$1.id_or_const);}
-	| L_PAREN NUM_TYPE R_PAREN {strcpy($$.dtype, $2.dtype);strcpy($$.id_or_const,$2.id_or_const);}
+	: L_PAREN EXPR0 R_PAREN {
+		strcpy($$.dtype, $2.dtype);
+		strcpy($$.id_or_const,$2.id_or_const);
+	}
+	| LVAL INCR {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	}
+	| LVAL DECR {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	}
+	| NUM {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	}
+	| LVAL {
+		strcpy($$.dtype, $1.dtype);
+		strcpy($$.id_or_const,$1.id_or_const);
+	}
+	| L_PAREN NUM_TYPE R_PAREN {
+		strcpy($$.dtype, $2.dtype);
+		strcpy($$.id_or_const,$2.id_or_const);
+	}
 	;
 
 LVAL
@@ -403,22 +612,58 @@ LVAL
 			printf("Array identifier cannot be used without subscript at line %d\n",line);
 		}
 	}
-	| ARR {strcpy($$.dtype, $1.dtype);}
-	| L_PAREN LVAL R_PAREN {strcpy($$.dtype, $2.dtype);}
+	| ARR {
+		strcpy($$.dtype, $1.dtype);
+	}
+	| L_PAREN LVAL R_PAREN {
+		strcpy($$.dtype, $2.dtype);
+	}
 	;
 
 NUM
-	: CONST_FLOAT {strcpy($$.dtype, "float"); sprintf($$.id_or_const,"%f",$1) ;char temp[20]; }
-	| CONST_INT {strcpy($$.dtype, "int"); sprintf($$.id_or_const,"%.0f",$1) ;char temp[20]; }
-	| CONST_CHAR {strcpy($$.dtype, "char"); sprintf($$.id_or_const,"%s",$1) ;char temp[20]; }
+	: CONST_FLOAT {
+		strcpy($$.dtype, "float"); 
+		sprintf($$.id_or_const,"%f",$1) ;
+		char temp[20]; 
+	}
+	| CONST_INT {
+		strcpy($$.dtype, "int"); 
+		sprintf($$.id_or_const,"%.0f",$1) ;
+		char temp[20]; 
+	}
+	| CONST_CHAR {
+		strcpy($$.dtype, "char"); 
+		sprintf($$.id_or_const,"%s",$1) ;
+		char temp[20]; 
+	}
 	;
 NUM_TYPE
-	: INT {strcpy(id, $1); strcpy($$.dtype, $1);}
-	| FLOAT {strcpy(id, $1); strcpy($$.dtype, $1);}
-	| SIGNED INT {strcpy(id, $2); strcpy($$.dtype, id);}
-	| SIGNED FLOAT {strcpy(id, $2); strcpy($$.dtype, id);}
-	| UNSIGNED INT {strcpy(id, $2); strcat(id, "_u");strcpy($$.dtype, id);}
-	| UNSIGNED FLOAT {strcpy(id, $2); strcat(id, "_u");strcpy($$.dtype, id);}
+	: INT {
+		strcpy(id, $1); 
+		strcpy($$.dtype, $1);
+	}
+	| FLOAT {
+		strcpy(id, $1); 
+		strcpy($$.dtype, $1);
+	}
+	| SIGNED INT {
+		strcpy(id, $2); 
+		strcpy($$.dtype, id);
+	}
+	| SIGNED FLOAT {
+		strcpy(id, $2); 
+		strcpy($$.dtype, id);
+	}
+	| UNSIGNED INT {
+		strcpy(id, $2); 
+		strcat(id, "_u");
+		strcpy($$.dtype, id);
+	}
+	| UNSIGNED FLOAT {
+		strcpy(id, $2); 
+		strcat(id, "_u");
+		strcpy($$.dtype, id);
+	}
 	;
 
 
