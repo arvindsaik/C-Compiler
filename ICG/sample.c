@@ -6,6 +6,8 @@ int main()
 	int a;
 	float b;
 
-  a = b + a * b;
+  b = b + a * b;
+
+	a = 10 + 12 * 5 - 4;
 
 }

@@ -166,11 +166,15 @@ union YYSTYPE
 {
 #line 21 "parser.y" /* yacc.c:1909  */
 
+		struct type_and_value{
+			char dtype[20];
+			char id_or_const[30];
+		}pair;
 		char lval[100];
 		double val;
 		char val2[100];
 
-#line 174 "y.tab.h" /* yacc.c:1909  */
+#line 178 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
