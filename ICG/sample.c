@@ -8,10 +8,12 @@ int main()
 	int a;
 	float b;
 
-	a = 9 * 4 - 3;
+	// a = 9 * 4 - 3;
 
-	b = b + a * b;
-  a = sum(a,10);
+	// b = b + a * b;
+  // a = sum(a,10);
+	int c[10];
+	a = c[0] + 1;
 	// if(a > 10)
 	// {
 	// 	if(a > 3){
@@ -32,9 +34,17 @@ int main()
 	// 	a++;
 	// }
 
-	do{
-		a++;
-	}while(a>10);
+	// do{
+	// 	a++;
+	// }while(a>10);
+
+	for(a=0;a<5;a++)
+	{
+		b = b+1;
+			while(b > 10.9){
+				b++;
+			}
+	}
 
 	a = 0;
 }

@@ -1,6 +1,5 @@
 Terminals unused in grammar
 
-   FOR
    CASE
    DEFAULT
    DOT
@@ -12,10 +11,10 @@ Terminals unused in grammar
 
 
 State 6 conflicts: 1 shift/reduce
-State 103 conflicts: 1 shift/reduce
-State 156 conflicts: 1 shift/reduce
-State 159 conflicts: 1 shift/reduce
-State 207 conflicts: 1 shift/reduce
+State 106 conflicts: 1 shift/reduce
+State 161 conflicts: 1 shift/reduce
+State 164 conflicts: 1 shift/reduce
+State 216 conflicts: 1 shift/reduce
 
 
 Grammar
@@ -34,213 +33,225 @@ Grammar
     8 STATEMENT: EXPR0 SEMICOLON
     9          | DEC0 SEMICOLON
    10          | IF_CONS
-   11          | WHILE_LOOP
-   12          | DO_WHILE
-   13          | L_BRACE STATEMENT_BLOCK R_BRACE
-   14          | L_BRACE R_BRACE
-   15          | RETURN EXPR1 SEMICOLON
-   16          | RETURN SEMICOLON
-   17          | BREAK SEMICOLON
-   18          | SEMICOLON
+   11          | FOR_LOOP
+   12          | WHILE_LOOP
+   13          | DO_WHILE
+   14          | L_BRACE STATEMENT_BLOCK R_BRACE
+   15          | L_BRACE R_BRACE
+   16          | RETURN EXPR1 SEMICOLON
+   17          | RETURN SEMICOLON
+   18          | BREAK SEMICOLON
+   19          | SEMICOLON
 
-   19 $@1: %empty
+   20 $@1: %empty
 
-   20 $@2: %empty
+   21 $@2: %empty
 
-   21 IF_CONS: IF L_PAREN EXPR0 R_PAREN $@1 STATEMENT $@2 ELSE_STATEMENT
+   22 IF_CONS: IF L_PAREN EXPR0 R_PAREN $@1 STATEMENT $@2 ELSE_STATEMENT
 
-   22 ELSE_STATEMENT: ELSE STATEMENT
-   23               | %empty
+   23 ELSE_STATEMENT: ELSE STATEMENT
+   24               | %empty
 
-   24 $@3: %empty
+   25 $@3: %empty
 
-   25 $@4: %empty
+   26 $@4: %empty
 
-   26 WHILE_LOOP: WHILE $@3 L_PAREN EXPR0 R_PAREN $@4 STATEMENT
+   27 WHILE_LOOP: WHILE $@3 L_PAREN EXPR0 R_PAREN $@4 STATEMENT
 
-   27 $@5: %empty
+   28 $@5: %empty
 
-   28 $@6: %empty
+   29 $@6: %empty
 
-   29 DO_WHILE: DO $@5 STATEMENT WHILE L_PAREN EXPR0 R_PAREN $@6 SEMICOLON
+   30 DO_WHILE: DO $@5 STATEMENT WHILE L_PAREN EXPR0 R_PAREN $@6 SEMICOLON
 
-   30 FUNC_DEC: CHAR IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
-   31         | NUM_TYPE IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
-   32         | VOID IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
+   31 $@7: %empty
 
-   33 $@7: %empty
+   32 $@8: %empty
 
-   34 FUNC_DEF: FUNC_DEC $@7 L_BRACE STATEMENT_BLOCK R_BRACE
+   33 $@9: %empty
 
-   35 FUNC_PARAMS: FUNC_PARAMS1
-   36            | %empty
+   34 FOR_LOOP: FOR L_PAREN FOR_PAR $@7 SEMICOLON FOR_PAR $@8 SEMICOLON FOR_PAR $@9 R_PAREN STATEMENT
 
-   37 FUNC_PARAMS1: NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1
-   38             | CHAR IDENTIFIER COMMA FUNC_PARAMS1
-   39             | NUM_TYPE IDENTIFIER
-   40             | CHAR IDENTIFIER
+   35 FOR_PAR: EXPR0
+   36        | %empty
 
-   41 FUNC_CALL: IDENTIFIER L_PAREN FUNC_LIST R_PAREN
-   42          | IDENTIFIER L_PAREN R_PAREN
+   37 FUNC_DEC: CHAR IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
+   38         | NUM_TYPE IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
+   39         | VOID IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
 
-   43 FUNC_LIST: EXPR1
-   44          | CONST_STR
-   45          | EXPR1 COMMA FUNC_LIST
-   46          | CONST_CHAR COMMA FUNC_LIST
-   47          | CONST_STR COMMA FUNC_LIST
+   40 $@10: %empty
 
-   48 DEC0: NUM_TYPE DEC1
-   49     | CHR_TYPE DEC1
+   41 FUNC_DEF: FUNC_DEC $@10 L_BRACE STATEMENT_BLOCK R_BRACE
 
-   50 CHR_TYPE: CHAR
+   42 FUNC_PARAMS: FUNC_PARAMS1
+   43            | %empty
 
-   51 DEC1: DEC1 COMMA DEC2
-   52     | DEC2
+   44 FUNC_PARAMS1: NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1
+   45             | CHAR IDENTIFIER COMMA FUNC_PARAMS1
+   46             | NUM_TYPE IDENTIFIER
+   47             | CHAR IDENTIFIER
 
-   53 DEC2: IDENTIFIER EQUAL EXPR1
-   54     | DEC_ARR EQUAL L_BRACE EXPR0 R_BRACE
-   55     | DEC_ARR
-   56     | IDENTIFIER
+   48 FUNC_CALL: IDENTIFIER L_PAREN FUNC_LIST R_PAREN
+   49          | IDENTIFIER L_PAREN R_PAREN
 
-   57 DEC_ARR: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE
+   50 FUNC_LIST: EXPR1
+   51          | CONST_STR
+   52          | EXPR1 COMMA FUNC_LIST
+   53          | CONST_CHAR COMMA FUNC_LIST
+   54          | CONST_STR COMMA FUNC_LIST
 
-   58 ARR: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE
-   59    | IDENTIFIER L_SQ_BRACE EXPR0 R_SQ_BRACE
+   55 DEC0: NUM_TYPE DEC1
+   56     | CHR_TYPE DEC1
 
-   60 EXPR0: EXPR0 COMMA EXPR1
-   61      | EXPR1
+   57 CHR_TYPE: CHAR
 
-   62 EXPR1: LVAL EQUAL EXPR1
-   63      | LVAL PEQUAL EXPR1
-   64      | LVAL MEQUAL EXPR1
-   65      | LVAL SEQUAL EXPR1
-   66      | LVAL BEQUAL EXPR1
-   67      | EXPR1G
+   58 DEC1: DEC1 COMMA DEC2
+   59     | DEC2
 
-   68 EXPR1G: EXPR1G OR EXPR1F
-   69       | EXPR1F
+   60 DEC2: IDENTIFIER EQUAL EXPR1
+   61     | DEC_ARR EQUAL L_BRACE EXPR0 R_BRACE
+   62     | DEC_ARR
+   63     | IDENTIFIER
 
-   70 EXPR1F: EXPR1F AND EXPR1E
-   71       | EXPR1E
+   64 DEC_ARR: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE
 
-   72 EXPR1E: EXPR1E BOR EXPR1D
-   73       | EXPR1D
+   65 ARR: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE
+   66    | IDENTIFIER L_SQ_BRACE EXPR0 R_SQ_BRACE
 
-   74 EXPR1D: EXPR1D CARROT EXPR1C
-   75       | EXPR1C
+   67 EXPR0: EXPR0 COMMA EXPR1
+   68      | EXPR1
 
-   76 EXPR1C: EXPR1C BAND EXPR1B
-   77       | EXPR1B
+   69 EXPR1: LVAL EQUAL EXPR1
+   70      | LVAL PEQUAL EXPR1
+   71      | LVAL MEQUAL EXPR1
+   72      | LVAL SEQUAL EXPR1
+   73      | LVAL BEQUAL EXPR1
+   74      | EXPR1G
 
-   78 EXPR1B: EXPR1B EQUALITY EXPR1A
-   79       | EXPR1B NEQUAL EXPR1A
-   80       | EXPR1A
+   75 EXPR1G: EXPR1G OR EXPR1F
+   76       | EXPR1F
 
-   81 EXPR1A: EXPR1A GREAT EXPR2
-   82       | EXPR1A LESS EXPR2
-   83       | EXPR1A EGREAT EXPR2
-   84       | EXPR1A ELESS EXPR2
-   85       | EXPR2
+   77 EXPR1F: EXPR1F AND EXPR1E
+   78       | EXPR1E
 
-   86 EXPR2: EXPR2 PLUS EXPR3
-   87      | EXPR2 MINUS EXPR3
-   88      | EXPR3
+   79 EXPR1E: EXPR1E BOR EXPR1D
+   80       | EXPR1D
 
-   89 EXPR3: EXPR3 MULTIPLY EXPR3A
-   90      | EXPR3 DIVIDE EXPR3A
-   91      | EXPR3A
+   81 EXPR1D: EXPR1D CARROT EXPR1C
+   82       | EXPR1C
 
-   92 EXPR3A: INCR LVAL
-   93       | DECR LVAL
-   94       | PLUS EXPR4
-   95       | MINUS EXPR4
-   96       | BAND LVAL
-   97       | FUNC_CALL
-   98       | EXPR4
+   83 EXPR1C: EXPR1C BAND EXPR1B
+   84       | EXPR1B
 
-   99 EXPR4: L_PAREN EXPR0 R_PAREN
-  100      | LVAL INCR
-  101      | LVAL DECR
-  102      | NUM
-  103      | LVAL
-  104      | L_PAREN NUM_TYPE R_PAREN
+   85 EXPR1B: EXPR1B EQUALITY EXPR1A
+   86       | EXPR1B NEQUAL EXPR1A
+   87       | EXPR1A
 
-  105 LVAL: IDENTIFIER
-  106     | ARR
-  107     | L_PAREN LVAL R_PAREN
+   88 EXPR1A: EXPR1A GREAT EXPR2
+   89       | EXPR1A LESS EXPR2
+   90       | EXPR1A EGREAT EXPR2
+   91       | EXPR1A ELESS EXPR2
+   92       | EXPR2
 
-  108 NUM: CONST_FLOAT
-  109    | CONST_INT
-  110    | CONST_CHAR
+   93 EXPR2: EXPR2 PLUS EXPR3
+   94      | EXPR2 MINUS EXPR3
+   95      | EXPR3
 
-  111 NUM_TYPE: INT
-  112         | FLOAT
-  113         | SIGNED INT
-  114         | SIGNED FLOAT
-  115         | UNSIGNED INT
-  116         | UNSIGNED FLOAT
+   96 EXPR3: EXPR3 MULTIPLY EXPR3A
+   97      | EXPR3 DIVIDE EXPR3A
+   98      | EXPR3A
+
+   99 EXPR3A: INCR LVAL
+  100       | DECR LVAL
+  101       | PLUS EXPR4
+  102       | MINUS EXPR4
+  103       | BAND LVAL
+  104       | FUNC_CALL
+  105       | EXPR4
+
+  106 EXPR4: L_PAREN EXPR0 R_PAREN
+  107      | LVAL INCR
+  108      | LVAL DECR
+  109      | NUM
+  110      | LVAL
+  111      | L_PAREN NUM_TYPE R_PAREN
+
+  112 LVAL: IDENTIFIER
+  113     | ARR
+  114     | L_PAREN LVAL R_PAREN
+
+  115 NUM: CONST_FLOAT
+  116    | CONST_INT
+  117    | CONST_CHAR
+
+  118 NUM_TYPE: INT
+  119         | FLOAT
+  120         | SIGNED INT
+  121         | SIGNED FLOAT
+  122         | UNSIGNED INT
+  123         | UNSIGNED FLOAT
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
 error (256)
-RETURN (258) 15 16
-BREAK (259) 17
-UNSIGNED (260) 115 116
-SIGNED (261) 113 114
-DO (262) 29
-WHILE (263) 26 29
-FOR (264)
-IF (265) 21
-ELSE (266) 22
+RETURN (258) 16 17
+BREAK (259) 18
+UNSIGNED (260) 122 123
+SIGNED (261) 120 121
+DO (262) 30
+WHILE (263) 27 30
+FOR (264) 34
+IF (265) 22
+ELSE (266) 23
 CASE (267)
 DEFAULT (268)
-L_BRACE (269) 13 14 34 54
-R_BRACE (270) 13 14 34 54
-L_SQ_BRACE (271) 57 58 59
-R_SQ_BRACE (272) 57 58 59
-L_PAREN (273) 21 26 29 30 31 32 41 42 99 104 107
-R_PAREN (274) 21 26 29 30 31 32 41 42 99 104 107
+L_BRACE (269) 14 15 41 61
+R_BRACE (270) 14 15 41 61
+L_SQ_BRACE (271) 64 65 66
+R_SQ_BRACE (272) 64 65 66
+L_PAREN (273) 22 27 30 34 37 38 39 48 49 106 111 114
+R_PAREN (274) 22 27 30 34 37 38 39 48 49 106 111 114
 DOT (275)
-SEMICOLON (276) 1 2 4 8 9 15 16 17 18 29
+SEMICOLON (276) 1 2 4 8 9 16 17 18 19 30 34
 COLON (277)
-INCR (278) 92 100
-DECR (279) 93 101
+INCR (278) 99 107
+DECR (279) 100 108
 NOT (280)
 BNOT (281)
 "then" (282)
-MULTIPLY (283) 89
-DIVIDE (284) 90
+MULTIPLY (283) 96
+DIVIDE (284) 97
 MOD (285)
-PLUS (286) 86 94
-MINUS (287) 87 95
-GREAT (288) 81
-LESS (289) 82
-EGREAT (290) 83
-ELESS (291) 84
-EQUALITY (292) 78
-NEQUAL (293) 79
-BAND (294) 76 96
-CARROT (295) 74
-BOR (296) 72
-AND (297) 70
-OR (298) 68
-EQUAL (299) 53 54 62
-PEQUAL (300) 63
-MEQUAL (301) 64
-SEQUAL (302) 65
-BEQUAL (303) 66
-COMMA (304) 37 38 45 46 47 51 60
-CHAR (305) 30 38 40 50
-FLOAT (306) 112 114 116
-VOID (307) 32
-INT (308) 111 113 115
-IDENTIFIER (309) 30 31 32 37 38 39 40 41 42 53 56 57 58 59 105
-CONST_FLOAT (310) 108
-CONST_INT (311) 57 58 109
-CONST_CHAR (312) 46 110
-CONST_STR (313) 44 47
+PLUS (286) 93 101
+MINUS (287) 94 102
+GREAT (288) 88
+LESS (289) 89
+EGREAT (290) 90
+ELESS (291) 91
+EQUALITY (292) 85
+NEQUAL (293) 86
+BAND (294) 83 103
+CARROT (295) 81
+BOR (296) 79
+AND (297) 77
+OR (298) 75
+EQUAL (299) 60 61 69
+PEQUAL (300) 70
+MEQUAL (301) 71
+SEQUAL (302) 72
+BEQUAL (303) 73
+COMMA (304) 44 45 52 53 54 58 67
+CHAR (305) 37 45 47 57
+FLOAT (306) 119 121 123
+VOID (307) 39
+INT (308) 118 120 122
+IDENTIFIER (309) 37 38 39 44 45 46 47 48 49 60 63 64 65 66 112
+CONST_FLOAT (310) 115
+CONST_INT (311) 64 65 116
+CONST_CHAR (312) 53 117
+CONST_STR (313) 51 54
 
 
 Nonterminals, with rules where they appear
@@ -250,90 +261,100 @@ $accept (59)
 START (60)
     on left: 1 2 3 4 5, on right: 0 1 2 3
 STATEMENT_BLOCK (61)
-    on left: 6 7, on right: 6 13 34
+    on left: 6 7, on right: 6 14 41
 STATEMENT (62)
-    on left: 8 9 10 11 12 13 14 15 16 17 18, on right: 6 7 21 22 26
-    29
+    on left: 8 9 10 11 12 13 14 15 16 17 18 19, on right: 6 7 22 23
+    27 30 34
 IF_CONS (63)
-    on left: 21, on right: 10
+    on left: 22, on right: 10
 $@1 (64)
-    on left: 19, on right: 21
+    on left: 20, on right: 22
 $@2 (65)
-    on left: 20, on right: 21
+    on left: 21, on right: 22
 ELSE_STATEMENT (66)
-    on left: 22 23, on right: 21
+    on left: 23 24, on right: 22
 WHILE_LOOP (67)
-    on left: 26, on right: 11
+    on left: 27, on right: 12
 $@3 (68)
-    on left: 24, on right: 26
+    on left: 25, on right: 27
 $@4 (69)
-    on left: 25, on right: 26
+    on left: 26, on right: 27
 DO_WHILE (70)
-    on left: 29, on right: 12
+    on left: 30, on right: 13
 $@5 (71)
-    on left: 27, on right: 29
+    on left: 28, on right: 30
 $@6 (72)
-    on left: 28, on right: 29
-FUNC_DEC (73)
-    on left: 30 31 32, on right: 2 34
-FUNC_DEF (74)
-    on left: 34, on right: 3
-$@7 (75)
+    on left: 29, on right: 30
+FOR_LOOP (73)
+    on left: 34, on right: 11
+$@7 (74)
+    on left: 31, on right: 34
+$@8 (75)
+    on left: 32, on right: 34
+$@9 (76)
     on left: 33, on right: 34
-FUNC_PARAMS (76)
-    on left: 35 36, on right: 30 31 32
-FUNC_PARAMS1 (77)
-    on left: 37 38 39 40, on right: 35 37 38
-FUNC_CALL (78)
-    on left: 41 42, on right: 97
-FUNC_LIST (79)
-    on left: 43 44 45 46 47, on right: 41 45 46 47
-DEC0 (80)
-    on left: 48 49, on right: 1 9
-CHR_TYPE (81)
-    on left: 50, on right: 49
-DEC1 (82)
-    on left: 51 52, on right: 48 49 51
-DEC2 (83)
-    on left: 53 54 55 56, on right: 51 52
-DEC_ARR (84)
-    on left: 57, on right: 54 55
-ARR (85)
-    on left: 58 59, on right: 106
-EXPR0 (86)
-    on left: 60 61, on right: 8 21 26 29 54 59 60 99
-EXPR1 (87)
-    on left: 62 63 64 65 66 67, on right: 15 43 45 53 60 61 62 63 64
-    65 66
-EXPR1G (88)
-    on left: 68 69, on right: 67 68
-EXPR1F (89)
-    on left: 70 71, on right: 68 69 70
-EXPR1E (90)
-    on left: 72 73, on right: 70 71 72
-EXPR1D (91)
-    on left: 74 75, on right: 72 73 74
-EXPR1C (92)
-    on left: 76 77, on right: 74 75 76
-EXPR1B (93)
-    on left: 78 79 80, on right: 76 77 78 79
-EXPR1A (94)
-    on left: 81 82 83 84 85, on right: 78 79 80 81 82 83 84
-EXPR2 (95)
-    on left: 86 87 88, on right: 81 82 83 84 85 86 87
-EXPR3 (96)
-    on left: 89 90 91, on right: 86 87 88 89 90
-EXPR3A (97)
-    on left: 92 93 94 95 96 97 98, on right: 89 90 91
-EXPR4 (98)
-    on left: 99 100 101 102 103 104, on right: 94 95 98
-LVAL (99)
-    on left: 105 106 107, on right: 62 63 64 65 66 92 93 96 100 101
-    103 107
-NUM (100)
-    on left: 108 109 110, on right: 102
-NUM_TYPE (101)
-    on left: 111 112 113 114 115 116, on right: 31 37 39 48 104
+FOR_PAR (77)
+    on left: 35 36, on right: 34
+FUNC_DEC (78)
+    on left: 37 38 39, on right: 2 41
+FUNC_DEF (79)
+    on left: 41, on right: 3
+$@10 (80)
+    on left: 40, on right: 41
+FUNC_PARAMS (81)
+    on left: 42 43, on right: 37 38 39
+FUNC_PARAMS1 (82)
+    on left: 44 45 46 47, on right: 42 44 45
+FUNC_CALL (83)
+    on left: 48 49, on right: 104
+FUNC_LIST (84)
+    on left: 50 51 52 53 54, on right: 48 52 53 54
+DEC0 (85)
+    on left: 55 56, on right: 1 9
+CHR_TYPE (86)
+    on left: 57, on right: 56
+DEC1 (87)
+    on left: 58 59, on right: 55 56 58
+DEC2 (88)
+    on left: 60 61 62 63, on right: 58 59
+DEC_ARR (89)
+    on left: 64, on right: 61 62
+ARR (90)
+    on left: 65 66, on right: 113
+EXPR0 (91)
+    on left: 67 68, on right: 8 22 27 30 35 61 66 67 106
+EXPR1 (92)
+    on left: 69 70 71 72 73 74, on right: 16 50 52 60 67 68 69 70 71
+    72 73
+EXPR1G (93)
+    on left: 75 76, on right: 74 75
+EXPR1F (94)
+    on left: 77 78, on right: 75 76 77
+EXPR1E (95)
+    on left: 79 80, on right: 77 78 79
+EXPR1D (96)
+    on left: 81 82, on right: 79 80 81
+EXPR1C (97)
+    on left: 83 84, on right: 81 82 83
+EXPR1B (98)
+    on left: 85 86 87, on right: 83 84 85 86
+EXPR1A (99)
+    on left: 88 89 90 91 92, on right: 85 86 87 88 89 90 91
+EXPR2 (100)
+    on left: 93 94 95, on right: 88 89 90 91 92 93 94
+EXPR3 (101)
+    on left: 96 97 98, on right: 93 94 95 96 97
+EXPR3A (102)
+    on left: 99 100 101 102 103 104 105, on right: 96 97 98
+EXPR4 (103)
+    on left: 106 107 108 109 110 111, on right: 101 102 105
+LVAL (104)
+    on left: 112 113 114, on right: 69 70 71 72 73 99 100 103 107 108
+    110 114
+NUM (105)
+    on left: 115 116 117, on right: 109
+NUM_TYPE (106)
+    on left: 118 119 120 121 122 123, on right: 38 44 46 55 111
 
 
 State 0
@@ -385,8 +406,8 @@ State 3
 
 State 4
 
-  115 NUM_TYPE: UNSIGNED . INT
-  116         | UNSIGNED . FLOAT
+  122 NUM_TYPE: UNSIGNED . INT
+  123         | UNSIGNED . FLOAT
 
     FLOAT  shift, and go to state 15
     INT    shift, and go to state 16
@@ -394,8 +415,8 @@ State 4
 
 State 5
 
-  113 NUM_TYPE: SIGNED . INT
-  114         | SIGNED . FLOAT
+  120 NUM_TYPE: SIGNED . INT
+  121         | SIGNED . FLOAT
 
     FLOAT  shift, and go to state 17
     INT    shift, and go to state 18
@@ -403,45 +424,45 @@ State 5
 
 State 6
 
-   30 FUNC_DEC: CHAR . IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
-   50 CHR_TYPE: CHAR .
+   37 FUNC_DEC: CHAR . IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
+   57 CHR_TYPE: CHAR .
 
     IDENTIFIER  shift, and go to state 19
 
-    IDENTIFIER  [reduce using rule 50 (CHR_TYPE)]
+    IDENTIFIER  [reduce using rule 57 (CHR_TYPE)]
 
 
 State 7
 
-  112 NUM_TYPE: FLOAT .
+  119 NUM_TYPE: FLOAT .
 
-    $default  reduce using rule 112 (NUM_TYPE)
+    $default  reduce using rule 119 (NUM_TYPE)
 
 
 State 8
 
-   32 FUNC_DEC: VOID . IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
+   39 FUNC_DEC: VOID . IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
 
     IDENTIFIER  shift, and go to state 20
 
 
 State 9
 
-  111 NUM_TYPE: INT .
+  118 NUM_TYPE: INT .
 
-    $default  reduce using rule 111 (NUM_TYPE)
+    $default  reduce using rule 118 (NUM_TYPE)
 
 
 State 10
 
     2 START: START FUNC_DEC . SEMICOLON
-   34 FUNC_DEF: FUNC_DEC . $@7 L_BRACE STATEMENT_BLOCK R_BRACE
+   41 FUNC_DEF: FUNC_DEC . $@10 L_BRACE STATEMENT_BLOCK R_BRACE
 
     SEMICOLON  shift, and go to state 21
 
-    $default  reduce using rule 33 ($@7)
+    $default  reduce using rule 40 ($@10)
 
-    $@7  go to state 22
+    $@10  go to state 22
 
 
 State 11
@@ -460,7 +481,7 @@ State 12
 
 State 13
 
-   49 DEC0: CHR_TYPE . DEC1
+   56 DEC0: CHR_TYPE . DEC1
 
     IDENTIFIER  shift, and go to state 24
 
@@ -471,8 +492,8 @@ State 13
 
 State 14
 
-   31 FUNC_DEC: NUM_TYPE . IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
-   48 DEC0: NUM_TYPE . DEC1
+   38 FUNC_DEC: NUM_TYPE . IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
+   55 DEC0: NUM_TYPE . DEC1
 
     IDENTIFIER  shift, and go to state 28
 
@@ -483,42 +504,42 @@ State 14
 
 State 15
 
-  116 NUM_TYPE: UNSIGNED FLOAT .
+  123 NUM_TYPE: UNSIGNED FLOAT .
 
-    $default  reduce using rule 116 (NUM_TYPE)
+    $default  reduce using rule 123 (NUM_TYPE)
 
 
 State 16
 
-  115 NUM_TYPE: UNSIGNED INT .
+  122 NUM_TYPE: UNSIGNED INT .
 
-    $default  reduce using rule 115 (NUM_TYPE)
+    $default  reduce using rule 122 (NUM_TYPE)
 
 
 State 17
 
-  114 NUM_TYPE: SIGNED FLOAT .
+  121 NUM_TYPE: SIGNED FLOAT .
 
-    $default  reduce using rule 114 (NUM_TYPE)
+    $default  reduce using rule 121 (NUM_TYPE)
 
 
 State 18
 
-  113 NUM_TYPE: SIGNED INT .
+  120 NUM_TYPE: SIGNED INT .
 
-    $default  reduce using rule 113 (NUM_TYPE)
+    $default  reduce using rule 120 (NUM_TYPE)
 
 
 State 19
 
-   30 FUNC_DEC: CHAR IDENTIFIER . L_PAREN FUNC_PARAMS R_PAREN
+   37 FUNC_DEC: CHAR IDENTIFIER . L_PAREN FUNC_PARAMS R_PAREN
 
     L_PAREN  shift, and go to state 30
 
 
 State 20
 
-   32 FUNC_DEC: VOID IDENTIFIER . L_PAREN FUNC_PARAMS R_PAREN
+   39 FUNC_DEC: VOID IDENTIFIER . L_PAREN FUNC_PARAMS R_PAREN
 
     L_PAREN  shift, and go to state 31
 
@@ -532,7 +553,7 @@ State 21
 
 State 22
 
-   34 FUNC_DEF: FUNC_DEC $@7 . L_BRACE STATEMENT_BLOCK R_BRACE
+   41 FUNC_DEF: FUNC_DEC $@10 . L_BRACE STATEMENT_BLOCK R_BRACE
 
     L_BRACE  shift, and go to state 32
 
@@ -546,70 +567,70 @@ State 23
 
 State 24
 
-   53 DEC2: IDENTIFIER . EQUAL EXPR1
-   56     | IDENTIFIER .
-   57 DEC_ARR: IDENTIFIER . L_SQ_BRACE CONST_INT R_SQ_BRACE
+   60 DEC2: IDENTIFIER . EQUAL EXPR1
+   63     | IDENTIFIER .
+   64 DEC_ARR: IDENTIFIER . L_SQ_BRACE CONST_INT R_SQ_BRACE
 
     L_SQ_BRACE  shift, and go to state 33
     EQUAL       shift, and go to state 34
 
-    $default  reduce using rule 56 (DEC2)
+    $default  reduce using rule 63 (DEC2)
 
 
 State 25
 
-   49 DEC0: CHR_TYPE DEC1 .
-   51 DEC1: DEC1 . COMMA DEC2
+   56 DEC0: CHR_TYPE DEC1 .
+   58 DEC1: DEC1 . COMMA DEC2
 
     COMMA  shift, and go to state 35
 
-    $default  reduce using rule 49 (DEC0)
+    $default  reduce using rule 56 (DEC0)
 
 
 State 26
 
-   52 DEC1: DEC2 .
+   59 DEC1: DEC2 .
 
-    $default  reduce using rule 52 (DEC1)
+    $default  reduce using rule 59 (DEC1)
 
 
 State 27
 
-   54 DEC2: DEC_ARR . EQUAL L_BRACE EXPR0 R_BRACE
-   55     | DEC_ARR .
+   61 DEC2: DEC_ARR . EQUAL L_BRACE EXPR0 R_BRACE
+   62     | DEC_ARR .
 
     EQUAL  shift, and go to state 36
 
-    $default  reduce using rule 55 (DEC2)
+    $default  reduce using rule 62 (DEC2)
 
 
 State 28
 
-   31 FUNC_DEC: NUM_TYPE IDENTIFIER . L_PAREN FUNC_PARAMS R_PAREN
-   53 DEC2: IDENTIFIER . EQUAL EXPR1
-   56     | IDENTIFIER .
-   57 DEC_ARR: IDENTIFIER . L_SQ_BRACE CONST_INT R_SQ_BRACE
+   38 FUNC_DEC: NUM_TYPE IDENTIFIER . L_PAREN FUNC_PARAMS R_PAREN
+   60 DEC2: IDENTIFIER . EQUAL EXPR1
+   63     | IDENTIFIER .
+   64 DEC_ARR: IDENTIFIER . L_SQ_BRACE CONST_INT R_SQ_BRACE
 
     L_SQ_BRACE  shift, and go to state 33
     L_PAREN     shift, and go to state 37
     EQUAL       shift, and go to state 34
 
-    $default  reduce using rule 56 (DEC2)
+    $default  reduce using rule 63 (DEC2)
 
 
 State 29
 
-   48 DEC0: NUM_TYPE DEC1 .
-   51 DEC1: DEC1 . COMMA DEC2
+   55 DEC0: NUM_TYPE DEC1 .
+   58 DEC1: DEC1 . COMMA DEC2
 
     COMMA  shift, and go to state 35
 
-    $default  reduce using rule 48 (DEC0)
+    $default  reduce using rule 55 (DEC0)
 
 
 State 30
 
-   30 FUNC_DEC: CHAR IDENTIFIER L_PAREN . FUNC_PARAMS R_PAREN
+   37 FUNC_DEC: CHAR IDENTIFIER L_PAREN . FUNC_PARAMS R_PAREN
 
     UNSIGNED  shift, and go to state 4
     SIGNED    shift, and go to state 5
@@ -617,7 +638,7 @@ State 30
     FLOAT     shift, and go to state 7
     INT       shift, and go to state 9
 
-    $default  reduce using rule 36 (FUNC_PARAMS)
+    $default  reduce using rule 43 (FUNC_PARAMS)
 
     FUNC_PARAMS   go to state 39
     FUNC_PARAMS1  go to state 40
@@ -626,7 +647,7 @@ State 30
 
 State 31
 
-   32 FUNC_DEC: VOID IDENTIFIER L_PAREN . FUNC_PARAMS R_PAREN
+   39 FUNC_DEC: VOID IDENTIFIER L_PAREN . FUNC_PARAMS R_PAREN
 
     UNSIGNED  shift, and go to state 4
     SIGNED    shift, and go to state 5
@@ -634,7 +655,7 @@ State 31
     FLOAT     shift, and go to state 7
     INT       shift, and go to state 9
 
-    $default  reduce using rule 36 (FUNC_PARAMS)
+    $default  reduce using rule 43 (FUNC_PARAMS)
 
     FUNC_PARAMS   go to state 42
     FUNC_PARAMS1  go to state 40
@@ -643,7 +664,7 @@ State 31
 
 State 32
 
-   34 FUNC_DEF: FUNC_DEC $@7 L_BRACE . STATEMENT_BLOCK R_BRACE
+   41 FUNC_DEF: FUNC_DEC $@10 L_BRACE . STATEMENT_BLOCK R_BRACE
 
     RETURN       shift, and go to state 43
     BREAK        shift, and go to state 44
@@ -651,110 +672,112 @@ State 32
     SIGNED       shift, and go to state 5
     DO           shift, and go to state 45
     WHILE        shift, and go to state 46
-    IF           shift, and go to state 47
-    L_BRACE      shift, and go to state 48
-    L_PAREN      shift, and go to state 49
-    SEMICOLON    shift, and go to state 50
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    CHAR         shift, and go to state 56
+    FOR          shift, and go to state 47
+    IF           shift, and go to state 48
+    L_BRACE      shift, and go to state 49
+    L_PAREN      shift, and go to state 50
+    SEMICOLON    shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    CHAR         shift, and go to state 57
     FLOAT        shift, and go to state 7
     INT          shift, and go to state 9
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    STATEMENT_BLOCK  go to state 61
-    STATEMENT        go to state 62
-    IF_CONS          go to state 63
-    WHILE_LOOP       go to state 64
-    DO_WHILE         go to state 65
-    FUNC_CALL        go to state 66
-    DEC0             go to state 67
+    STATEMENT_BLOCK  go to state 62
+    STATEMENT        go to state 63
+    IF_CONS          go to state 64
+    WHILE_LOOP       go to state 65
+    DO_WHILE         go to state 66
+    FOR_LOOP         go to state 67
+    FUNC_CALL        go to state 68
+    DEC0             go to state 69
     CHR_TYPE         go to state 13
-    ARR              go to state 68
-    EXPR0            go to state 69
-    EXPR1            go to state 70
-    EXPR1G           go to state 71
-    EXPR1F           go to state 72
-    EXPR1E           go to state 73
-    EXPR1D           go to state 74
-    EXPR1C           go to state 75
-    EXPR1B           go to state 76
-    EXPR1A           go to state 77
-    EXPR2            go to state 78
-    EXPR3            go to state 79
-    EXPR3A           go to state 80
-    EXPR4            go to state 81
-    LVAL             go to state 82
-    NUM              go to state 83
-    NUM_TYPE         go to state 84
+    ARR              go to state 70
+    EXPR0            go to state 71
+    EXPR1            go to state 72
+    EXPR1G           go to state 73
+    EXPR1F           go to state 74
+    EXPR1E           go to state 75
+    EXPR1D           go to state 76
+    EXPR1C           go to state 77
+    EXPR1B           go to state 78
+    EXPR1A           go to state 79
+    EXPR2            go to state 80
+    EXPR3            go to state 81
+    EXPR3A           go to state 82
+    EXPR4            go to state 83
+    LVAL             go to state 84
+    NUM              go to state 85
+    NUM_TYPE         go to state 86
 
 
 State 33
 
-   57 DEC_ARR: IDENTIFIER L_SQ_BRACE . CONST_INT R_SQ_BRACE
+   64 DEC_ARR: IDENTIFIER L_SQ_BRACE . CONST_INT R_SQ_BRACE
 
-    CONST_INT  shift, and go to state 85
+    CONST_INT  shift, and go to state 87
 
 
 State 34
 
-   53 DEC2: IDENTIFIER EQUAL . EXPR1
+   60 DEC2: IDENTIFIER EQUAL . EXPR1
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR1      go to state 86
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR1      go to state 88
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 35
 
-   51 DEC1: DEC1 COMMA . DEC2
+   58 DEC1: DEC1 COMMA . DEC2
 
     IDENTIFIER  shift, and go to state 24
 
-    DEC2     go to state 87
+    DEC2     go to state 89
     DEC_ARR  go to state 27
 
 
 State 36
 
-   54 DEC2: DEC_ARR EQUAL . L_BRACE EXPR0 R_BRACE
+   61 DEC2: DEC_ARR EQUAL . L_BRACE EXPR0 R_BRACE
 
-    L_BRACE  shift, and go to state 88
+    L_BRACE  shift, and go to state 90
 
 
 State 37
 
-   31 FUNC_DEC: NUM_TYPE IDENTIFIER L_PAREN . FUNC_PARAMS R_PAREN
+   38 FUNC_DEC: NUM_TYPE IDENTIFIER L_PAREN . FUNC_PARAMS R_PAREN
 
     UNSIGNED  shift, and go to state 4
     SIGNED    shift, and go to state 5
@@ -762,332 +785,128 @@ State 37
     FLOAT     shift, and go to state 7
     INT       shift, and go to state 9
 
-    $default  reduce using rule 36 (FUNC_PARAMS)
+    $default  reduce using rule 43 (FUNC_PARAMS)
 
-    FUNC_PARAMS   go to state 89
+    FUNC_PARAMS   go to state 91
     FUNC_PARAMS1  go to state 40
     NUM_TYPE      go to state 41
 
 
 State 38
 
-   38 FUNC_PARAMS1: CHAR . IDENTIFIER COMMA FUNC_PARAMS1
-   40             | CHAR . IDENTIFIER
-
-    IDENTIFIER  shift, and go to state 90
-
-
-State 39
-
-   30 FUNC_DEC: CHAR IDENTIFIER L_PAREN FUNC_PARAMS . R_PAREN
-
-    R_PAREN  shift, and go to state 91
-
-
-State 40
-
-   35 FUNC_PARAMS: FUNC_PARAMS1 .
-
-    $default  reduce using rule 35 (FUNC_PARAMS)
-
-
-State 41
-
-   37 FUNC_PARAMS1: NUM_TYPE . IDENTIFIER COMMA FUNC_PARAMS1
-   39             | NUM_TYPE . IDENTIFIER
+   45 FUNC_PARAMS1: CHAR . IDENTIFIER COMMA FUNC_PARAMS1
+   47             | CHAR . IDENTIFIER
 
     IDENTIFIER  shift, and go to state 92
 
 
-State 42
+State 39
 
-   32 FUNC_DEC: VOID IDENTIFIER L_PAREN FUNC_PARAMS . R_PAREN
+   37 FUNC_DEC: CHAR IDENTIFIER L_PAREN FUNC_PARAMS . R_PAREN
 
     R_PAREN  shift, and go to state 93
 
 
+State 40
+
+   42 FUNC_PARAMS: FUNC_PARAMS1 .
+
+    $default  reduce using rule 42 (FUNC_PARAMS)
+
+
+State 41
+
+   44 FUNC_PARAMS1: NUM_TYPE . IDENTIFIER COMMA FUNC_PARAMS1
+   46             | NUM_TYPE . IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 94
+
+
+State 42
+
+   39 FUNC_DEC: VOID IDENTIFIER L_PAREN FUNC_PARAMS . R_PAREN
+
+    R_PAREN  shift, and go to state 95
+
+
 State 43
 
-   15 STATEMENT: RETURN . EXPR1 SEMICOLON
-   16          | RETURN . SEMICOLON
+   16 STATEMENT: RETURN . EXPR1 SEMICOLON
+   17          | RETURN . SEMICOLON
 
-    L_PAREN      shift, and go to state 49
-    SEMICOLON    shift, and go to state 94
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    SEMICOLON    shift, and go to state 96
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR1      go to state 95
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR1      go to state 97
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 44
 
-   17 STATEMENT: BREAK . SEMICOLON
+   18 STATEMENT: BREAK . SEMICOLON
 
-    SEMICOLON  shift, and go to state 96
+    SEMICOLON  shift, and go to state 98
 
 
 State 45
 
-   29 DO_WHILE: DO . $@5 STATEMENT WHILE L_PAREN EXPR0 R_PAREN $@6 SEMICOLON
+   30 DO_WHILE: DO . $@5 STATEMENT WHILE L_PAREN EXPR0 R_PAREN $@6 SEMICOLON
 
-    $default  reduce using rule 27 ($@5)
+    $default  reduce using rule 28 ($@5)
 
-    $@5  go to state 97
+    $@5  go to state 99
 
 
 State 46
 
-   26 WHILE_LOOP: WHILE . $@3 L_PAREN EXPR0 R_PAREN $@4 STATEMENT
+   27 WHILE_LOOP: WHILE . $@3 L_PAREN EXPR0 R_PAREN $@4 STATEMENT
 
-    $default  reduce using rule 24 ($@3)
+    $default  reduce using rule 25 ($@3)
 
-    $@3  go to state 98
+    $@3  go to state 100
 
 
 State 47
 
-   21 IF_CONS: IF . L_PAREN EXPR0 R_PAREN $@1 STATEMENT $@2 ELSE_STATEMENT
+   34 FOR_LOOP: FOR . L_PAREN FOR_PAR $@7 SEMICOLON FOR_PAR $@8 SEMICOLON FOR_PAR $@9 R_PAREN STATEMENT
 
-    L_PAREN  shift, and go to state 99
+    L_PAREN  shift, and go to state 101
 
 
 State 48
 
-   13 STATEMENT: L_BRACE . STATEMENT_BLOCK R_BRACE
-   14          | L_BRACE . R_BRACE
+   22 IF_CONS: IF . L_PAREN EXPR0 R_PAREN $@1 STATEMENT $@2 ELSE_STATEMENT
 
-    RETURN       shift, and go to state 43
-    BREAK        shift, and go to state 44
-    UNSIGNED     shift, and go to state 4
-    SIGNED       shift, and go to state 5
-    DO           shift, and go to state 45
-    WHILE        shift, and go to state 46
-    IF           shift, and go to state 47
-    L_BRACE      shift, and go to state 48
-    R_BRACE      shift, and go to state 100
-    L_PAREN      shift, and go to state 49
-    SEMICOLON    shift, and go to state 50
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    CHAR         shift, and go to state 56
-    FLOAT        shift, and go to state 7
-    INT          shift, and go to state 9
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
-
-    STATEMENT_BLOCK  go to state 101
-    STATEMENT        go to state 62
-    IF_CONS          go to state 63
-    WHILE_LOOP       go to state 64
-    DO_WHILE         go to state 65
-    FUNC_CALL        go to state 66
-    DEC0             go to state 67
-    CHR_TYPE         go to state 13
-    ARR              go to state 68
-    EXPR0            go to state 69
-    EXPR1            go to state 70
-    EXPR1G           go to state 71
-    EXPR1F           go to state 72
-    EXPR1E           go to state 73
-    EXPR1D           go to state 74
-    EXPR1C           go to state 75
-    EXPR1B           go to state 76
-    EXPR1A           go to state 77
-    EXPR2            go to state 78
-    EXPR3            go to state 79
-    EXPR3A           go to state 80
-    EXPR4            go to state 81
-    LVAL             go to state 82
-    NUM              go to state 83
-    NUM_TYPE         go to state 84
+    L_PAREN  shift, and go to state 102
 
 
 State 49
 
-   99 EXPR4: L_PAREN . EXPR0 R_PAREN
-  104      | L_PAREN . NUM_TYPE R_PAREN
-  107 LVAL: L_PAREN . LVAL R_PAREN
-
-    UNSIGNED     shift, and go to state 4
-    SIGNED       shift, and go to state 5
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    FLOAT        shift, and go to state 7
-    INT          shift, and go to state 9
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
-
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR0      go to state 102
-    EXPR1      go to state 70
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 103
-    NUM        go to state 83
-    NUM_TYPE   go to state 104
-
-
-State 50
-
-   18 STATEMENT: SEMICOLON .
-
-    $default  reduce using rule 18 (STATEMENT)
-
-
-State 51
-
-   92 EXPR3A: INCR . LVAL
-
-    L_PAREN     shift, and go to state 105
-    IDENTIFIER  shift, and go to state 106
-
-    ARR   go to state 68
-    LVAL  go to state 107
-
-
-State 52
-
-   93 EXPR3A: DECR . LVAL
-
-    L_PAREN     shift, and go to state 105
-    IDENTIFIER  shift, and go to state 106
-
-    ARR   go to state 68
-    LVAL  go to state 108
-
-
-State 53
-
-   94 EXPR3A: PLUS . EXPR4
-
-    L_PAREN      shift, and go to state 49
-    IDENTIFIER   shift, and go to state 106
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
-
-    ARR    go to state 68
-    EXPR4  go to state 109
-    LVAL   go to state 110
-    NUM    go to state 83
-
-
-State 54
-
-   95 EXPR3A: MINUS . EXPR4
-
-    L_PAREN      shift, and go to state 49
-    IDENTIFIER   shift, and go to state 106
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
-
-    ARR    go to state 68
-    EXPR4  go to state 111
-    LVAL   go to state 110
-    NUM    go to state 83
-
-
-State 55
-
-   96 EXPR3A: BAND . LVAL
-
-    L_PAREN     shift, and go to state 105
-    IDENTIFIER  shift, and go to state 106
-
-    ARR   go to state 68
-    LVAL  go to state 112
-
-
-State 56
-
-   50 CHR_TYPE: CHAR .
-
-    $default  reduce using rule 50 (CHR_TYPE)
-
-
-State 57
-
-   41 FUNC_CALL: IDENTIFIER . L_PAREN FUNC_LIST R_PAREN
-   42          | IDENTIFIER . L_PAREN R_PAREN
-   58 ARR: IDENTIFIER . L_SQ_BRACE CONST_INT R_SQ_BRACE
-   59    | IDENTIFIER . L_SQ_BRACE EXPR0 R_SQ_BRACE
-  105 LVAL: IDENTIFIER .
-
-    L_SQ_BRACE  shift, and go to state 113
-    L_PAREN     shift, and go to state 114
-
-    $default  reduce using rule 105 (LVAL)
-
-
-State 58
-
-  108 NUM: CONST_FLOAT .
-
-    $default  reduce using rule 108 (NUM)
-
-
-State 59
-
-  109 NUM: CONST_INT .
-
-    $default  reduce using rule 109 (NUM)
-
-
-State 60
-
-  110 NUM: CONST_CHAR .
-
-    $default  reduce using rule 110 (NUM)
-
-
-State 61
-
-    6 STATEMENT_BLOCK: STATEMENT_BLOCK . STATEMENT
-   34 FUNC_DEF: FUNC_DEC $@7 L_BRACE STATEMENT_BLOCK . R_BRACE
+   14 STATEMENT: L_BRACE . STATEMENT_BLOCK R_BRACE
+   15          | L_BRACE . R_BRACE
 
     RETURN       shift, and go to state 43
     BREAK        shift, and go to state 44
@@ -1095,263 +914,485 @@ State 61
     SIGNED       shift, and go to state 5
     DO           shift, and go to state 45
     WHILE        shift, and go to state 46
-    IF           shift, and go to state 47
-    L_BRACE      shift, and go to state 48
-    R_BRACE      shift, and go to state 115
-    L_PAREN      shift, and go to state 49
-    SEMICOLON    shift, and go to state 50
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    CHAR         shift, and go to state 56
+    FOR          shift, and go to state 47
+    IF           shift, and go to state 48
+    L_BRACE      shift, and go to state 49
+    R_BRACE      shift, and go to state 103
+    L_PAREN      shift, and go to state 50
+    SEMICOLON    shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    CHAR         shift, and go to state 57
     FLOAT        shift, and go to state 7
     INT          shift, and go to state 9
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    STATEMENT   go to state 116
-    IF_CONS     go to state 63
-    WHILE_LOOP  go to state 64
-    DO_WHILE    go to state 65
-    FUNC_CALL   go to state 66
-    DEC0        go to state 67
-    CHR_TYPE    go to state 13
-    ARR         go to state 68
-    EXPR0       go to state 69
-    EXPR1       go to state 70
-    EXPR1G      go to state 71
-    EXPR1F      go to state 72
-    EXPR1E      go to state 73
-    EXPR1D      go to state 74
-    EXPR1C      go to state 75
-    EXPR1B      go to state 76
-    EXPR1A      go to state 77
-    EXPR2       go to state 78
-    EXPR3       go to state 79
-    EXPR3A      go to state 80
-    EXPR4       go to state 81
-    LVAL        go to state 82
-    NUM         go to state 83
-    NUM_TYPE    go to state 84
+    STATEMENT_BLOCK  go to state 104
+    STATEMENT        go to state 63
+    IF_CONS          go to state 64
+    WHILE_LOOP       go to state 65
+    DO_WHILE         go to state 66
+    FOR_LOOP         go to state 67
+    FUNC_CALL        go to state 68
+    DEC0             go to state 69
+    CHR_TYPE         go to state 13
+    ARR              go to state 70
+    EXPR0            go to state 71
+    EXPR1            go to state 72
+    EXPR1G           go to state 73
+    EXPR1F           go to state 74
+    EXPR1E           go to state 75
+    EXPR1D           go to state 76
+    EXPR1C           go to state 77
+    EXPR1B           go to state 78
+    EXPR1A           go to state 79
+    EXPR2            go to state 80
+    EXPR3            go to state 81
+    EXPR3A           go to state 82
+    EXPR4            go to state 83
+    LVAL             go to state 84
+    NUM              go to state 85
+    NUM_TYPE         go to state 86
+
+
+State 50
+
+  106 EXPR4: L_PAREN . EXPR0 R_PAREN
+  111      | L_PAREN . NUM_TYPE R_PAREN
+  114 LVAL: L_PAREN . LVAL R_PAREN
+
+    UNSIGNED     shift, and go to state 4
+    SIGNED       shift, and go to state 5
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    FLOAT        shift, and go to state 7
+    INT          shift, and go to state 9
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR0      go to state 105
+    EXPR1      go to state 72
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 106
+    NUM        go to state 85
+    NUM_TYPE   go to state 107
+
+
+State 51
+
+   19 STATEMENT: SEMICOLON .
+
+    $default  reduce using rule 19 (STATEMENT)
+
+
+State 52
+
+   99 EXPR3A: INCR . LVAL
+
+    L_PAREN     shift, and go to state 108
+    IDENTIFIER  shift, and go to state 109
+
+    ARR   go to state 70
+    LVAL  go to state 110
+
+
+State 53
+
+  100 EXPR3A: DECR . LVAL
+
+    L_PAREN     shift, and go to state 108
+    IDENTIFIER  shift, and go to state 109
+
+    ARR   go to state 70
+    LVAL  go to state 111
+
+
+State 54
+
+  101 EXPR3A: PLUS . EXPR4
+
+    L_PAREN      shift, and go to state 50
+    IDENTIFIER   shift, and go to state 109
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    ARR    go to state 70
+    EXPR4  go to state 112
+    LVAL   go to state 113
+    NUM    go to state 85
+
+
+State 55
+
+  102 EXPR3A: MINUS . EXPR4
+
+    L_PAREN      shift, and go to state 50
+    IDENTIFIER   shift, and go to state 109
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    ARR    go to state 70
+    EXPR4  go to state 114
+    LVAL   go to state 113
+    NUM    go to state 85
+
+
+State 56
+
+  103 EXPR3A: BAND . LVAL
+
+    L_PAREN     shift, and go to state 108
+    IDENTIFIER  shift, and go to state 109
+
+    ARR   go to state 70
+    LVAL  go to state 115
+
+
+State 57
+
+   57 CHR_TYPE: CHAR .
+
+    $default  reduce using rule 57 (CHR_TYPE)
+
+
+State 58
+
+   48 FUNC_CALL: IDENTIFIER . L_PAREN FUNC_LIST R_PAREN
+   49          | IDENTIFIER . L_PAREN R_PAREN
+   65 ARR: IDENTIFIER . L_SQ_BRACE CONST_INT R_SQ_BRACE
+   66    | IDENTIFIER . L_SQ_BRACE EXPR0 R_SQ_BRACE
+  112 LVAL: IDENTIFIER .
+
+    L_SQ_BRACE  shift, and go to state 116
+    L_PAREN     shift, and go to state 117
+
+    $default  reduce using rule 112 (LVAL)
+
+
+State 59
+
+  115 NUM: CONST_FLOAT .
+
+    $default  reduce using rule 115 (NUM)
+
+
+State 60
+
+  116 NUM: CONST_INT .
+
+    $default  reduce using rule 116 (NUM)
+
+
+State 61
+
+  117 NUM: CONST_CHAR .
+
+    $default  reduce using rule 117 (NUM)
 
 
 State 62
+
+    6 STATEMENT_BLOCK: STATEMENT_BLOCK . STATEMENT
+   41 FUNC_DEF: FUNC_DEC $@10 L_BRACE STATEMENT_BLOCK . R_BRACE
+
+    RETURN       shift, and go to state 43
+    BREAK        shift, and go to state 44
+    UNSIGNED     shift, and go to state 4
+    SIGNED       shift, and go to state 5
+    DO           shift, and go to state 45
+    WHILE        shift, and go to state 46
+    FOR          shift, and go to state 47
+    IF           shift, and go to state 48
+    L_BRACE      shift, and go to state 49
+    R_BRACE      shift, and go to state 118
+    L_PAREN      shift, and go to state 50
+    SEMICOLON    shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    CHAR         shift, and go to state 57
+    FLOAT        shift, and go to state 7
+    INT          shift, and go to state 9
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    STATEMENT   go to state 119
+    IF_CONS     go to state 64
+    WHILE_LOOP  go to state 65
+    DO_WHILE    go to state 66
+    FOR_LOOP    go to state 67
+    FUNC_CALL   go to state 68
+    DEC0        go to state 69
+    CHR_TYPE    go to state 13
+    ARR         go to state 70
+    EXPR0       go to state 71
+    EXPR1       go to state 72
+    EXPR1G      go to state 73
+    EXPR1F      go to state 74
+    EXPR1E      go to state 75
+    EXPR1D      go to state 76
+    EXPR1C      go to state 77
+    EXPR1B      go to state 78
+    EXPR1A      go to state 79
+    EXPR2       go to state 80
+    EXPR3       go to state 81
+    EXPR3A      go to state 82
+    EXPR4       go to state 83
+    LVAL        go to state 84
+    NUM         go to state 85
+    NUM_TYPE    go to state 86
+
+
+State 63
 
     7 STATEMENT_BLOCK: STATEMENT .
 
     $default  reduce using rule 7 (STATEMENT_BLOCK)
 
 
-State 63
+State 64
 
    10 STATEMENT: IF_CONS .
 
     $default  reduce using rule 10 (STATEMENT)
 
 
-State 64
-
-   11 STATEMENT: WHILE_LOOP .
-
-    $default  reduce using rule 11 (STATEMENT)
-
-
 State 65
 
-   12 STATEMENT: DO_WHILE .
+   12 STATEMENT: WHILE_LOOP .
 
     $default  reduce using rule 12 (STATEMENT)
 
 
 State 66
 
-   97 EXPR3A: FUNC_CALL .
+   13 STATEMENT: DO_WHILE .
 
-    $default  reduce using rule 97 (EXPR3A)
+    $default  reduce using rule 13 (STATEMENT)
 
 
 State 67
 
-    9 STATEMENT: DEC0 . SEMICOLON
+   11 STATEMENT: FOR_LOOP .
 
-    SEMICOLON  shift, and go to state 117
+    $default  reduce using rule 11 (STATEMENT)
 
 
 State 68
 
-  106 LVAL: ARR .
+  104 EXPR3A: FUNC_CALL .
 
-    $default  reduce using rule 106 (LVAL)
+    $default  reduce using rule 104 (EXPR3A)
 
 
 State 69
 
-    8 STATEMENT: EXPR0 . SEMICOLON
-   60 EXPR0: EXPR0 . COMMA EXPR1
+    9 STATEMENT: DEC0 . SEMICOLON
 
-    SEMICOLON  shift, and go to state 118
-    COMMA      shift, and go to state 119
+    SEMICOLON  shift, and go to state 120
 
 
 State 70
 
-   61 EXPR0: EXPR1 .
+  113 LVAL: ARR .
 
-    $default  reduce using rule 61 (EXPR0)
+    $default  reduce using rule 113 (LVAL)
 
 
 State 71
 
-   67 EXPR1: EXPR1G .
-   68 EXPR1G: EXPR1G . OR EXPR1F
+    8 STATEMENT: EXPR0 . SEMICOLON
+   67 EXPR0: EXPR0 . COMMA EXPR1
 
-    OR  shift, and go to state 120
-
-    $default  reduce using rule 67 (EXPR1)
+    SEMICOLON  shift, and go to state 121
+    COMMA      shift, and go to state 122
 
 
 State 72
 
-   69 EXPR1G: EXPR1F .
-   70 EXPR1F: EXPR1F . AND EXPR1E
+   68 EXPR0: EXPR1 .
 
-    AND  shift, and go to state 121
-
-    $default  reduce using rule 69 (EXPR1G)
+    $default  reduce using rule 68 (EXPR0)
 
 
 State 73
 
-   71 EXPR1F: EXPR1E .
-   72 EXPR1E: EXPR1E . BOR EXPR1D
+   74 EXPR1: EXPR1G .
+   75 EXPR1G: EXPR1G . OR EXPR1F
 
-    BOR  shift, and go to state 122
+    OR  shift, and go to state 123
 
-    $default  reduce using rule 71 (EXPR1F)
+    $default  reduce using rule 74 (EXPR1)
 
 
 State 74
 
-   73 EXPR1E: EXPR1D .
-   74 EXPR1D: EXPR1D . CARROT EXPR1C
+   76 EXPR1G: EXPR1F .
+   77 EXPR1F: EXPR1F . AND EXPR1E
 
-    CARROT  shift, and go to state 123
+    AND  shift, and go to state 124
 
-    $default  reduce using rule 73 (EXPR1E)
+    $default  reduce using rule 76 (EXPR1G)
 
 
 State 75
 
-   75 EXPR1D: EXPR1C .
-   76 EXPR1C: EXPR1C . BAND EXPR1B
+   78 EXPR1F: EXPR1E .
+   79 EXPR1E: EXPR1E . BOR EXPR1D
 
-    BAND  shift, and go to state 124
+    BOR  shift, and go to state 125
 
-    $default  reduce using rule 75 (EXPR1D)
+    $default  reduce using rule 78 (EXPR1F)
 
 
 State 76
 
-   77 EXPR1C: EXPR1B .
-   78 EXPR1B: EXPR1B . EQUALITY EXPR1A
-   79       | EXPR1B . NEQUAL EXPR1A
+   80 EXPR1E: EXPR1D .
+   81 EXPR1D: EXPR1D . CARROT EXPR1C
 
-    EQUALITY  shift, and go to state 125
-    NEQUAL    shift, and go to state 126
+    CARROT  shift, and go to state 126
 
-    $default  reduce using rule 77 (EXPR1C)
+    $default  reduce using rule 80 (EXPR1E)
 
 
 State 77
 
-   80 EXPR1B: EXPR1A .
-   81 EXPR1A: EXPR1A . GREAT EXPR2
-   82       | EXPR1A . LESS EXPR2
-   83       | EXPR1A . EGREAT EXPR2
-   84       | EXPR1A . ELESS EXPR2
+   82 EXPR1D: EXPR1C .
+   83 EXPR1C: EXPR1C . BAND EXPR1B
 
-    GREAT   shift, and go to state 127
-    LESS    shift, and go to state 128
-    EGREAT  shift, and go to state 129
-    ELESS   shift, and go to state 130
+    BAND  shift, and go to state 127
 
-    $default  reduce using rule 80 (EXPR1B)
+    $default  reduce using rule 82 (EXPR1D)
 
 
 State 78
 
-   85 EXPR1A: EXPR2 .
-   86 EXPR2: EXPR2 . PLUS EXPR3
-   87      | EXPR2 . MINUS EXPR3
+   84 EXPR1C: EXPR1B .
+   85 EXPR1B: EXPR1B . EQUALITY EXPR1A
+   86       | EXPR1B . NEQUAL EXPR1A
 
-    PLUS   shift, and go to state 131
-    MINUS  shift, and go to state 132
+    EQUALITY  shift, and go to state 128
+    NEQUAL    shift, and go to state 129
 
-    $default  reduce using rule 85 (EXPR1A)
+    $default  reduce using rule 84 (EXPR1C)
 
 
 State 79
 
-   88 EXPR2: EXPR3 .
-   89 EXPR3: EXPR3 . MULTIPLY EXPR3A
-   90      | EXPR3 . DIVIDE EXPR3A
+   87 EXPR1B: EXPR1A .
+   88 EXPR1A: EXPR1A . GREAT EXPR2
+   89       | EXPR1A . LESS EXPR2
+   90       | EXPR1A . EGREAT EXPR2
+   91       | EXPR1A . ELESS EXPR2
 
-    MULTIPLY  shift, and go to state 133
-    DIVIDE    shift, and go to state 134
+    GREAT   shift, and go to state 130
+    LESS    shift, and go to state 131
+    EGREAT  shift, and go to state 132
+    ELESS   shift, and go to state 133
 
-    $default  reduce using rule 88 (EXPR2)
+    $default  reduce using rule 87 (EXPR1B)
 
 
 State 80
 
-   91 EXPR3: EXPR3A .
+   92 EXPR1A: EXPR2 .
+   93 EXPR2: EXPR2 . PLUS EXPR3
+   94      | EXPR2 . MINUS EXPR3
 
-    $default  reduce using rule 91 (EXPR3)
+    PLUS   shift, and go to state 134
+    MINUS  shift, and go to state 135
+
+    $default  reduce using rule 92 (EXPR1A)
 
 
 State 81
 
-   98 EXPR3A: EXPR4 .
+   95 EXPR2: EXPR3 .
+   96 EXPR3: EXPR3 . MULTIPLY EXPR3A
+   97      | EXPR3 . DIVIDE EXPR3A
 
-    $default  reduce using rule 98 (EXPR3A)
+    MULTIPLY  shift, and go to state 136
+    DIVIDE    shift, and go to state 137
+
+    $default  reduce using rule 95 (EXPR2)
 
 
 State 82
 
-   62 EXPR1: LVAL . EQUAL EXPR1
-   63      | LVAL . PEQUAL EXPR1
-   64      | LVAL . MEQUAL EXPR1
-   65      | LVAL . SEQUAL EXPR1
-   66      | LVAL . BEQUAL EXPR1
-  100 EXPR4: LVAL . INCR
-  101      | LVAL . DECR
-  103      | LVAL .
+   98 EXPR3: EXPR3A .
 
-    INCR    shift, and go to state 135
-    DECR    shift, and go to state 136
-    EQUAL   shift, and go to state 137
-    PEQUAL  shift, and go to state 138
-    MEQUAL  shift, and go to state 139
-    SEQUAL  shift, and go to state 140
-    BEQUAL  shift, and go to state 141
-
-    $default  reduce using rule 103 (EXPR4)
+    $default  reduce using rule 98 (EXPR3)
 
 
 State 83
 
-  102 EXPR4: NUM .
+  105 EXPR3A: EXPR4 .
 
-    $default  reduce using rule 102 (EXPR4)
+    $default  reduce using rule 105 (EXPR3A)
 
 
 State 84
 
-   48 DEC0: NUM_TYPE . DEC1
+   69 EXPR1: LVAL . EQUAL EXPR1
+   70      | LVAL . PEQUAL EXPR1
+   71      | LVAL . MEQUAL EXPR1
+   72      | LVAL . SEQUAL EXPR1
+   73      | LVAL . BEQUAL EXPR1
+  107 EXPR4: LVAL . INCR
+  108      | LVAL . DECR
+  110      | LVAL .
+
+    INCR    shift, and go to state 138
+    DECR    shift, and go to state 139
+    EQUAL   shift, and go to state 140
+    PEQUAL  shift, and go to state 141
+    MEQUAL  shift, and go to state 142
+    SEQUAL  shift, and go to state 143
+    BEQUAL  shift, and go to state 144
+
+    $default  reduce using rule 110 (EXPR4)
+
+
+State 85
+
+  109 EXPR4: NUM .
+
+    $default  reduce using rule 109 (EXPR4)
+
+
+State 86
+
+   55 DEC0: NUM_TYPE . DEC1
 
     IDENTIFIER  shift, and go to state 24
 
@@ -1360,228 +1401,126 @@ State 84
     DEC_ARR  go to state 27
 
 
-State 85
-
-   57 DEC_ARR: IDENTIFIER L_SQ_BRACE CONST_INT . R_SQ_BRACE
-
-    R_SQ_BRACE  shift, and go to state 142
-
-
-State 86
-
-   53 DEC2: IDENTIFIER EQUAL EXPR1 .
-
-    $default  reduce using rule 53 (DEC2)
-
-
 State 87
 
-   51 DEC1: DEC1 COMMA DEC2 .
+   64 DEC_ARR: IDENTIFIER L_SQ_BRACE CONST_INT . R_SQ_BRACE
 
-    $default  reduce using rule 51 (DEC1)
+    R_SQ_BRACE  shift, and go to state 145
 
 
 State 88
 
-   54 DEC2: DEC_ARR EQUAL L_BRACE . EXPR0 R_BRACE
+   60 DEC2: IDENTIFIER EQUAL EXPR1 .
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
-
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR0      go to state 143
-    EXPR1      go to state 70
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
+    $default  reduce using rule 60 (DEC2)
 
 
 State 89
 
-   31 FUNC_DEC: NUM_TYPE IDENTIFIER L_PAREN FUNC_PARAMS . R_PAREN
+   58 DEC1: DEC1 COMMA DEC2 .
 
-    R_PAREN  shift, and go to state 144
+    $default  reduce using rule 58 (DEC1)
 
 
 State 90
 
-   38 FUNC_PARAMS1: CHAR IDENTIFIER . COMMA FUNC_PARAMS1
-   40             | CHAR IDENTIFIER .
+   61 DEC2: DEC_ARR EQUAL L_BRACE . EXPR0 R_BRACE
 
-    COMMA  shift, and go to state 145
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    $default  reduce using rule 40 (FUNC_PARAMS1)
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR0      go to state 146
+    EXPR1      go to state 72
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 91
 
-   30 FUNC_DEC: CHAR IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN .
+   38 FUNC_DEC: NUM_TYPE IDENTIFIER L_PAREN FUNC_PARAMS . R_PAREN
 
-    $default  reduce using rule 30 (FUNC_DEC)
+    R_PAREN  shift, and go to state 147
 
 
 State 92
 
-   37 FUNC_PARAMS1: NUM_TYPE IDENTIFIER . COMMA FUNC_PARAMS1
-   39             | NUM_TYPE IDENTIFIER .
+   45 FUNC_PARAMS1: CHAR IDENTIFIER . COMMA FUNC_PARAMS1
+   47             | CHAR IDENTIFIER .
 
-    COMMA  shift, and go to state 146
+    COMMA  shift, and go to state 148
 
-    $default  reduce using rule 39 (FUNC_PARAMS1)
+    $default  reduce using rule 47 (FUNC_PARAMS1)
 
 
 State 93
 
-   32 FUNC_DEC: VOID IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN .
+   37 FUNC_DEC: CHAR IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN .
 
-    $default  reduce using rule 32 (FUNC_DEC)
+    $default  reduce using rule 37 (FUNC_DEC)
 
 
 State 94
 
-   16 STATEMENT: RETURN SEMICOLON .
+   44 FUNC_PARAMS1: NUM_TYPE IDENTIFIER . COMMA FUNC_PARAMS1
+   46             | NUM_TYPE IDENTIFIER .
 
-    $default  reduce using rule 16 (STATEMENT)
+    COMMA  shift, and go to state 149
+
+    $default  reduce using rule 46 (FUNC_PARAMS1)
 
 
 State 95
 
-   15 STATEMENT: RETURN EXPR1 . SEMICOLON
+   39 FUNC_DEC: VOID IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN .
 
-    SEMICOLON  shift, and go to state 147
+    $default  reduce using rule 39 (FUNC_DEC)
 
 
 State 96
 
-   17 STATEMENT: BREAK SEMICOLON .
+   17 STATEMENT: RETURN SEMICOLON .
 
     $default  reduce using rule 17 (STATEMENT)
 
 
 State 97
 
-   29 DO_WHILE: DO $@5 . STATEMENT WHILE L_PAREN EXPR0 R_PAREN $@6 SEMICOLON
+   16 STATEMENT: RETURN EXPR1 . SEMICOLON
 
-    RETURN       shift, and go to state 43
-    BREAK        shift, and go to state 44
-    UNSIGNED     shift, and go to state 4
-    SIGNED       shift, and go to state 5
-    DO           shift, and go to state 45
-    WHILE        shift, and go to state 46
-    IF           shift, and go to state 47
-    L_BRACE      shift, and go to state 48
-    L_PAREN      shift, and go to state 49
-    SEMICOLON    shift, and go to state 50
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    CHAR         shift, and go to state 56
-    FLOAT        shift, and go to state 7
-    INT          shift, and go to state 9
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
-
-    STATEMENT   go to state 148
-    IF_CONS     go to state 63
-    WHILE_LOOP  go to state 64
-    DO_WHILE    go to state 65
-    FUNC_CALL   go to state 66
-    DEC0        go to state 67
-    CHR_TYPE    go to state 13
-    ARR         go to state 68
-    EXPR0       go to state 69
-    EXPR1       go to state 70
-    EXPR1G      go to state 71
-    EXPR1F      go to state 72
-    EXPR1E      go to state 73
-    EXPR1D      go to state 74
-    EXPR1C      go to state 75
-    EXPR1B      go to state 76
-    EXPR1A      go to state 77
-    EXPR2       go to state 78
-    EXPR3       go to state 79
-    EXPR3A      go to state 80
-    EXPR4       go to state 81
-    LVAL        go to state 82
-    NUM         go to state 83
-    NUM_TYPE    go to state 84
+    SEMICOLON  shift, and go to state 150
 
 
 State 98
 
-   26 WHILE_LOOP: WHILE $@3 . L_PAREN EXPR0 R_PAREN $@4 STATEMENT
+   18 STATEMENT: BREAK SEMICOLON .
 
-    L_PAREN  shift, and go to state 149
+    $default  reduce using rule 18 (STATEMENT)
 
 
 State 99
 
-   21 IF_CONS: IF L_PAREN . EXPR0 R_PAREN $@1 STATEMENT $@2 ELSE_STATEMENT
-
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
-
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR0      go to state 150
-    EXPR1      go to state 70
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
-
-
-State 100
-
-   14 STATEMENT: L_BRACE R_BRACE .
-
-    $default  reduce using rule 14 (STATEMENT)
-
-
-State 101
-
-    6 STATEMENT_BLOCK: STATEMENT_BLOCK . STATEMENT
-   13 STATEMENT: L_BRACE STATEMENT_BLOCK . R_BRACE
+   30 DO_WHILE: DO $@5 . STATEMENT WHILE L_PAREN EXPR0 R_PAREN $@6 SEMICOLON
 
     RETURN       shift, and go to state 43
     BREAK        shift, and go to state 44
@@ -1589,903 +1528,1032 @@ State 101
     SIGNED       shift, and go to state 5
     DO           shift, and go to state 45
     WHILE        shift, and go to state 46
-    IF           shift, and go to state 47
-    L_BRACE      shift, and go to state 48
-    R_BRACE      shift, and go to state 151
-    L_PAREN      shift, and go to state 49
-    SEMICOLON    shift, and go to state 50
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    CHAR         shift, and go to state 56
+    FOR          shift, and go to state 47
+    IF           shift, and go to state 48
+    L_BRACE      shift, and go to state 49
+    L_PAREN      shift, and go to state 50
+    SEMICOLON    shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    CHAR         shift, and go to state 57
     FLOAT        shift, and go to state 7
     INT          shift, and go to state 9
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    STATEMENT   go to state 116
-    IF_CONS     go to state 63
-    WHILE_LOOP  go to state 64
-    DO_WHILE    go to state 65
-    FUNC_CALL   go to state 66
-    DEC0        go to state 67
+    STATEMENT   go to state 151
+    IF_CONS     go to state 64
+    WHILE_LOOP  go to state 65
+    DO_WHILE    go to state 66
+    FOR_LOOP    go to state 67
+    FUNC_CALL   go to state 68
+    DEC0        go to state 69
     CHR_TYPE    go to state 13
-    ARR         go to state 68
-    EXPR0       go to state 69
-    EXPR1       go to state 70
-    EXPR1G      go to state 71
-    EXPR1F      go to state 72
-    EXPR1E      go to state 73
-    EXPR1D      go to state 74
-    EXPR1C      go to state 75
-    EXPR1B      go to state 76
-    EXPR1A      go to state 77
-    EXPR2       go to state 78
-    EXPR3       go to state 79
-    EXPR3A      go to state 80
-    EXPR4       go to state 81
-    LVAL        go to state 82
-    NUM         go to state 83
-    NUM_TYPE    go to state 84
+    ARR         go to state 70
+    EXPR0       go to state 71
+    EXPR1       go to state 72
+    EXPR1G      go to state 73
+    EXPR1F      go to state 74
+    EXPR1E      go to state 75
+    EXPR1D      go to state 76
+    EXPR1C      go to state 77
+    EXPR1B      go to state 78
+    EXPR1A      go to state 79
+    EXPR2       go to state 80
+    EXPR3       go to state 81
+    EXPR3A      go to state 82
+    EXPR4       go to state 83
+    LVAL        go to state 84
+    NUM         go to state 85
+    NUM_TYPE    go to state 86
+
+
+State 100
+
+   27 WHILE_LOOP: WHILE $@3 . L_PAREN EXPR0 R_PAREN $@4 STATEMENT
+
+    L_PAREN  shift, and go to state 152
+
+
+State 101
+
+   34 FOR_LOOP: FOR L_PAREN . FOR_PAR $@7 SEMICOLON FOR_PAR $@8 SEMICOLON FOR_PAR $@9 R_PAREN STATEMENT
+
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    $default  reduce using rule 36 (FOR_PAR)
+
+    FOR_PAR    go to state 153
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR0      go to state 154
+    EXPR1      go to state 72
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 102
 
-   60 EXPR0: EXPR0 . COMMA EXPR1
-   99 EXPR4: L_PAREN EXPR0 . R_PAREN
+   22 IF_CONS: IF L_PAREN . EXPR0 R_PAREN $@1 STATEMENT $@2 ELSE_STATEMENT
 
-    R_PAREN  shift, and go to state 152
-    COMMA    shift, and go to state 119
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR0      go to state 155
+    EXPR1      go to state 72
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 103
 
-   62 EXPR1: LVAL . EQUAL EXPR1
-   63      | LVAL . PEQUAL EXPR1
-   64      | LVAL . MEQUAL EXPR1
-   65      | LVAL . SEQUAL EXPR1
-   66      | LVAL . BEQUAL EXPR1
-  100 EXPR4: LVAL . INCR
-  101      | LVAL . DECR
-  103      | LVAL .
-  107 LVAL: L_PAREN LVAL . R_PAREN
+   15 STATEMENT: L_BRACE R_BRACE .
 
-    R_PAREN  shift, and go to state 153
-    INCR     shift, and go to state 135
-    DECR     shift, and go to state 136
-    EQUAL    shift, and go to state 137
-    PEQUAL   shift, and go to state 138
-    MEQUAL   shift, and go to state 139
-    SEQUAL   shift, and go to state 140
-    BEQUAL   shift, and go to state 141
-
-    R_PAREN   [reduce using rule 103 (EXPR4)]
-    $default  reduce using rule 103 (EXPR4)
+    $default  reduce using rule 15 (STATEMENT)
 
 
 State 104
 
-  104 EXPR4: L_PAREN NUM_TYPE . R_PAREN
+    6 STATEMENT_BLOCK: STATEMENT_BLOCK . STATEMENT
+   14 STATEMENT: L_BRACE STATEMENT_BLOCK . R_BRACE
 
-    R_PAREN  shift, and go to state 154
+    RETURN       shift, and go to state 43
+    BREAK        shift, and go to state 44
+    UNSIGNED     shift, and go to state 4
+    SIGNED       shift, and go to state 5
+    DO           shift, and go to state 45
+    WHILE        shift, and go to state 46
+    FOR          shift, and go to state 47
+    IF           shift, and go to state 48
+    L_BRACE      shift, and go to state 49
+    R_BRACE      shift, and go to state 156
+    L_PAREN      shift, and go to state 50
+    SEMICOLON    shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    CHAR         shift, and go to state 57
+    FLOAT        shift, and go to state 7
+    INT          shift, and go to state 9
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    STATEMENT   go to state 119
+    IF_CONS     go to state 64
+    WHILE_LOOP  go to state 65
+    DO_WHILE    go to state 66
+    FOR_LOOP    go to state 67
+    FUNC_CALL   go to state 68
+    DEC0        go to state 69
+    CHR_TYPE    go to state 13
+    ARR         go to state 70
+    EXPR0       go to state 71
+    EXPR1       go to state 72
+    EXPR1G      go to state 73
+    EXPR1F      go to state 74
+    EXPR1E      go to state 75
+    EXPR1D      go to state 76
+    EXPR1C      go to state 77
+    EXPR1B      go to state 78
+    EXPR1A      go to state 79
+    EXPR2       go to state 80
+    EXPR3       go to state 81
+    EXPR3A      go to state 82
+    EXPR4       go to state 83
+    LVAL        go to state 84
+    NUM         go to state 85
+    NUM_TYPE    go to state 86
 
 
 State 105
 
-  107 LVAL: L_PAREN . LVAL R_PAREN
+   67 EXPR0: EXPR0 . COMMA EXPR1
+  106 EXPR4: L_PAREN EXPR0 . R_PAREN
 
-    L_PAREN     shift, and go to state 105
-    IDENTIFIER  shift, and go to state 106
-
-    ARR   go to state 68
-    LVAL  go to state 155
+    R_PAREN  shift, and go to state 157
+    COMMA    shift, and go to state 122
 
 
 State 106
 
-   58 ARR: IDENTIFIER . L_SQ_BRACE CONST_INT R_SQ_BRACE
-   59    | IDENTIFIER . L_SQ_BRACE EXPR0 R_SQ_BRACE
-  105 LVAL: IDENTIFIER .
+   69 EXPR1: LVAL . EQUAL EXPR1
+   70      | LVAL . PEQUAL EXPR1
+   71      | LVAL . MEQUAL EXPR1
+   72      | LVAL . SEQUAL EXPR1
+   73      | LVAL . BEQUAL EXPR1
+  107 EXPR4: LVAL . INCR
+  108      | LVAL . DECR
+  110      | LVAL .
+  114 LVAL: L_PAREN LVAL . R_PAREN
 
-    L_SQ_BRACE  shift, and go to state 113
+    R_PAREN  shift, and go to state 158
+    INCR     shift, and go to state 138
+    DECR     shift, and go to state 139
+    EQUAL    shift, and go to state 140
+    PEQUAL   shift, and go to state 141
+    MEQUAL   shift, and go to state 142
+    SEQUAL   shift, and go to state 143
+    BEQUAL   shift, and go to state 144
 
-    $default  reduce using rule 105 (LVAL)
+    R_PAREN   [reduce using rule 110 (EXPR4)]
+    $default  reduce using rule 110 (EXPR4)
 
 
 State 107
 
-   92 EXPR3A: INCR LVAL .
+  111 EXPR4: L_PAREN NUM_TYPE . R_PAREN
 
-    $default  reduce using rule 92 (EXPR3A)
+    R_PAREN  shift, and go to state 159
 
 
 State 108
 
-   93 EXPR3A: DECR LVAL .
+  114 LVAL: L_PAREN . LVAL R_PAREN
 
-    $default  reduce using rule 93 (EXPR3A)
+    L_PAREN     shift, and go to state 108
+    IDENTIFIER  shift, and go to state 109
+
+    ARR   go to state 70
+    LVAL  go to state 160
 
 
 State 109
 
-   94 EXPR3A: PLUS EXPR4 .
+   65 ARR: IDENTIFIER . L_SQ_BRACE CONST_INT R_SQ_BRACE
+   66    | IDENTIFIER . L_SQ_BRACE EXPR0 R_SQ_BRACE
+  112 LVAL: IDENTIFIER .
 
-    $default  reduce using rule 94 (EXPR3A)
+    L_SQ_BRACE  shift, and go to state 116
+
+    $default  reduce using rule 112 (LVAL)
 
 
 State 110
 
-  100 EXPR4: LVAL . INCR
-  101      | LVAL . DECR
-  103      | LVAL .
+   99 EXPR3A: INCR LVAL .
 
-    INCR  shift, and go to state 135
-    DECR  shift, and go to state 136
-
-    $default  reduce using rule 103 (EXPR4)
+    $default  reduce using rule 99 (EXPR3A)
 
 
 State 111
 
-   95 EXPR3A: MINUS EXPR4 .
+  100 EXPR3A: DECR LVAL .
 
-    $default  reduce using rule 95 (EXPR3A)
+    $default  reduce using rule 100 (EXPR3A)
 
 
 State 112
 
-   96 EXPR3A: BAND LVAL .
+  101 EXPR3A: PLUS EXPR4 .
 
-    $default  reduce using rule 96 (EXPR3A)
+    $default  reduce using rule 101 (EXPR3A)
 
 
 State 113
 
-   58 ARR: IDENTIFIER L_SQ_BRACE . CONST_INT R_SQ_BRACE
-   59    | IDENTIFIER L_SQ_BRACE . EXPR0 R_SQ_BRACE
+  107 EXPR4: LVAL . INCR
+  108      | LVAL . DECR
+  110      | LVAL .
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 156
-    CONST_CHAR   shift, and go to state 60
+    INCR  shift, and go to state 138
+    DECR  shift, and go to state 139
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR0      go to state 157
-    EXPR1      go to state 70
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
+    $default  reduce using rule 110 (EXPR4)
 
 
 State 114
 
-   41 FUNC_CALL: IDENTIFIER L_PAREN . FUNC_LIST R_PAREN
-   42          | IDENTIFIER L_PAREN . R_PAREN
+  102 EXPR3A: MINUS EXPR4 .
 
-    L_PAREN      shift, and go to state 49
-    R_PAREN      shift, and go to state 158
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 159
-    CONST_STR    shift, and go to state 160
-
-    FUNC_CALL  go to state 66
-    FUNC_LIST  go to state 161
-    ARR        go to state 68
-    EXPR1      go to state 162
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
+    $default  reduce using rule 102 (EXPR3A)
 
 
 State 115
 
-   34 FUNC_DEF: FUNC_DEC $@7 L_BRACE STATEMENT_BLOCK R_BRACE .
+  103 EXPR3A: BAND LVAL .
 
-    $default  reduce using rule 34 (FUNC_DEF)
+    $default  reduce using rule 103 (EXPR3A)
 
 
 State 116
+
+   65 ARR: IDENTIFIER L_SQ_BRACE . CONST_INT R_SQ_BRACE
+   66    | IDENTIFIER L_SQ_BRACE . EXPR0 R_SQ_BRACE
+
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 161
+    CONST_CHAR   shift, and go to state 61
+
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR0      go to state 162
+    EXPR1      go to state 72
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
+
+
+State 117
+
+   48 FUNC_CALL: IDENTIFIER L_PAREN . FUNC_LIST R_PAREN
+   49          | IDENTIFIER L_PAREN . R_PAREN
+
+    L_PAREN      shift, and go to state 50
+    R_PAREN      shift, and go to state 163
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 164
+    CONST_STR    shift, and go to state 165
+
+    FUNC_CALL  go to state 68
+    FUNC_LIST  go to state 166
+    ARR        go to state 70
+    EXPR1      go to state 167
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
+
+
+State 118
+
+   41 FUNC_DEF: FUNC_DEC $@10 L_BRACE STATEMENT_BLOCK R_BRACE .
+
+    $default  reduce using rule 41 (FUNC_DEF)
+
+
+State 119
 
     6 STATEMENT_BLOCK: STATEMENT_BLOCK STATEMENT .
 
     $default  reduce using rule 6 (STATEMENT_BLOCK)
 
 
-State 117
+State 120
 
     9 STATEMENT: DEC0 SEMICOLON .
 
     $default  reduce using rule 9 (STATEMENT)
 
 
-State 118
+State 121
 
     8 STATEMENT: EXPR0 SEMICOLON .
 
     $default  reduce using rule 8 (STATEMENT)
 
 
-State 119
-
-   60 EXPR0: EXPR0 COMMA . EXPR1
-
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
-
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR1      go to state 163
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
-
-
-State 120
-
-   68 EXPR1G: EXPR1G OR . EXPR1F
-
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
-
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR1F     go to state 164
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 110
-    NUM        go to state 83
-
-
-State 121
-
-   70 EXPR1F: EXPR1F AND . EXPR1E
-
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
-
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR1E     go to state 165
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 110
-    NUM        go to state 83
-
-
 State 122
 
-   72 EXPR1E: EXPR1E BOR . EXPR1D
+   67 EXPR0: EXPR0 COMMA . EXPR1
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR1D     go to state 166
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 110
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR1      go to state 168
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 123
 
-   74 EXPR1D: EXPR1D CARROT . EXPR1C
+   75 EXPR1G: EXPR1G OR . EXPR1F
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR1C     go to state 167
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 110
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR1F     go to state 169
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 113
+    NUM        go to state 85
 
 
 State 124
 
-   76 EXPR1C: EXPR1C BAND . EXPR1B
+   77 EXPR1F: EXPR1F AND . EXPR1E
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR1B     go to state 168
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 110
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR1E     go to state 170
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 113
+    NUM        go to state 85
 
 
 State 125
 
-   78 EXPR1B: EXPR1B EQUALITY . EXPR1A
+   79 EXPR1E: EXPR1E BOR . EXPR1D
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR1A     go to state 169
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 110
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR1D     go to state 171
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 113
+    NUM        go to state 85
 
 
 State 126
 
-   79 EXPR1B: EXPR1B NEQUAL . EXPR1A
+   81 EXPR1D: EXPR1D CARROT . EXPR1C
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR1A     go to state 170
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 110
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR1C     go to state 172
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 113
+    NUM        go to state 85
 
 
 State 127
 
-   81 EXPR1A: EXPR1A GREAT . EXPR2
+   83 EXPR1C: EXPR1C BAND . EXPR1B
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR2      go to state 171
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 110
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR1B     go to state 173
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 113
+    NUM        go to state 85
 
 
 State 128
 
-   82 EXPR1A: EXPR1A LESS . EXPR2
+   85 EXPR1B: EXPR1B EQUALITY . EXPR1A
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR2      go to state 172
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 110
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR1A     go to state 174
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 113
+    NUM        go to state 85
 
 
 State 129
 
-   83 EXPR1A: EXPR1A EGREAT . EXPR2
+   86 EXPR1B: EXPR1B NEQUAL . EXPR1A
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR2      go to state 173
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 110
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR1A     go to state 175
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 113
+    NUM        go to state 85
 
 
 State 130
 
-   84 EXPR1A: EXPR1A ELESS . EXPR2
+   88 EXPR1A: EXPR1A GREAT . EXPR2
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR2      go to state 174
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 110
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR2      go to state 176
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 113
+    NUM        go to state 85
 
 
 State 131
 
-   86 EXPR2: EXPR2 PLUS . EXPR3
+   89 EXPR1A: EXPR1A LESS . EXPR2
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR3      go to state 175
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 110
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR2      go to state 177
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 113
+    NUM        go to state 85
 
 
 State 132
 
-   87 EXPR2: EXPR2 MINUS . EXPR3
+   90 EXPR1A: EXPR1A EGREAT . EXPR2
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR3      go to state 176
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 110
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR2      go to state 178
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 113
+    NUM        go to state 85
 
 
 State 133
 
-   89 EXPR3: EXPR3 MULTIPLY . EXPR3A
+   91 EXPR1A: EXPR1A ELESS . EXPR2
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR3A     go to state 177
-    EXPR4      go to state 81
-    LVAL       go to state 110
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR2      go to state 179
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 113
+    NUM        go to state 85
 
 
 State 134
 
-   90 EXPR3: EXPR3 DIVIDE . EXPR3A
+   93 EXPR2: EXPR2 PLUS . EXPR3
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR3A     go to state 178
-    EXPR4      go to state 81
-    LVAL       go to state 110
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR3      go to state 180
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 113
+    NUM        go to state 85
 
 
 State 135
 
-  100 EXPR4: LVAL INCR .
+   94 EXPR2: EXPR2 MINUS . EXPR3
 
-    $default  reduce using rule 100 (EXPR4)
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR3      go to state 181
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 113
+    NUM        go to state 85
 
 
 State 136
 
-  101 EXPR4: LVAL DECR .
+   96 EXPR3: EXPR3 MULTIPLY . EXPR3A
 
-    $default  reduce using rule 101 (EXPR4)
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR3A     go to state 182
+    EXPR4      go to state 83
+    LVAL       go to state 113
+    NUM        go to state 85
 
 
 State 137
 
-   62 EXPR1: LVAL EQUAL . EXPR1
+   97 EXPR3: EXPR3 DIVIDE . EXPR3A
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR1      go to state 179
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR3A     go to state 183
+    EXPR4      go to state 83
+    LVAL       go to state 113
+    NUM        go to state 85
 
 
 State 138
 
-   63 EXPR1: LVAL PEQUAL . EXPR1
+  107 EXPR4: LVAL INCR .
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
-
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR1      go to state 180
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
+    $default  reduce using rule 107 (EXPR4)
 
 
 State 139
 
-   64 EXPR1: LVAL MEQUAL . EXPR1
+  108 EXPR4: LVAL DECR .
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
-
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR1      go to state 181
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
+    $default  reduce using rule 108 (EXPR4)
 
 
 State 140
 
-   65 EXPR1: LVAL SEQUAL . EXPR1
+   69 EXPR1: LVAL EQUAL . EXPR1
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR1      go to state 182
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR1      go to state 184
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 141
 
-   66 EXPR1: LVAL BEQUAL . EXPR1
+   70 EXPR1: LVAL PEQUAL . EXPR1
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR1      go to state 183
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR1      go to state 185
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 142
 
-   57 DEC_ARR: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE .
+   71 EXPR1: LVAL MEQUAL . EXPR1
 
-    $default  reduce using rule 57 (DEC_ARR)
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR1      go to state 186
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 143
 
-   54 DEC2: DEC_ARR EQUAL L_BRACE EXPR0 . R_BRACE
-   60 EXPR0: EXPR0 . COMMA EXPR1
+   72 EXPR1: LVAL SEQUAL . EXPR1
 
-    R_BRACE  shift, and go to state 184
-    COMMA    shift, and go to state 119
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR1      go to state 187
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 144
 
-   31 FUNC_DEC: NUM_TYPE IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN .
+   73 EXPR1: LVAL BEQUAL . EXPR1
 
-    $default  reduce using rule 31 (FUNC_DEC)
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR1      go to state 188
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 145
 
-   38 FUNC_PARAMS1: CHAR IDENTIFIER COMMA . FUNC_PARAMS1
+   64 DEC_ARR: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE .
 
-    UNSIGNED  shift, and go to state 4
-    SIGNED    shift, and go to state 5
-    CHAR      shift, and go to state 38
-    FLOAT     shift, and go to state 7
-    INT       shift, and go to state 9
-
-    FUNC_PARAMS1  go to state 185
-    NUM_TYPE      go to state 41
+    $default  reduce using rule 64 (DEC_ARR)
 
 
 State 146
 
-   37 FUNC_PARAMS1: NUM_TYPE IDENTIFIER COMMA . FUNC_PARAMS1
+   61 DEC2: DEC_ARR EQUAL L_BRACE EXPR0 . R_BRACE
+   67 EXPR0: EXPR0 . COMMA EXPR1
+
+    R_BRACE  shift, and go to state 189
+    COMMA    shift, and go to state 122
+
+
+State 147
+
+   38 FUNC_DEC: NUM_TYPE IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN .
+
+    $default  reduce using rule 38 (FUNC_DEC)
+
+
+State 148
+
+   45 FUNC_PARAMS1: CHAR IDENTIFIER COMMA . FUNC_PARAMS1
 
     UNSIGNED  shift, and go to state 4
     SIGNED    shift, and go to state 5
@@ -2493,777 +2561,674 @@ State 146
     FLOAT     shift, and go to state 7
     INT       shift, and go to state 9
 
-    FUNC_PARAMS1  go to state 186
+    FUNC_PARAMS1  go to state 190
     NUM_TYPE      go to state 41
-
-
-State 147
-
-   15 STATEMENT: RETURN EXPR1 SEMICOLON .
-
-    $default  reduce using rule 15 (STATEMENT)
-
-
-State 148
-
-   29 DO_WHILE: DO $@5 STATEMENT . WHILE L_PAREN EXPR0 R_PAREN $@6 SEMICOLON
-
-    WHILE  shift, and go to state 187
 
 
 State 149
 
-   26 WHILE_LOOP: WHILE $@3 L_PAREN . EXPR0 R_PAREN $@4 STATEMENT
+   44 FUNC_PARAMS1: NUM_TYPE IDENTIFIER COMMA . FUNC_PARAMS1
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    UNSIGNED  shift, and go to state 4
+    SIGNED    shift, and go to state 5
+    CHAR      shift, and go to state 38
+    FLOAT     shift, and go to state 7
+    INT       shift, and go to state 9
 
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR0      go to state 188
-    EXPR1      go to state 70
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
+    FUNC_PARAMS1  go to state 191
+    NUM_TYPE      go to state 41
 
 
 State 150
 
-   21 IF_CONS: IF L_PAREN EXPR0 . R_PAREN $@1 STATEMENT $@2 ELSE_STATEMENT
-   60 EXPR0: EXPR0 . COMMA EXPR1
+   16 STATEMENT: RETURN EXPR1 SEMICOLON .
 
-    R_PAREN  shift, and go to state 189
-    COMMA    shift, and go to state 119
+    $default  reduce using rule 16 (STATEMENT)
 
 
 State 151
 
-   13 STATEMENT: L_BRACE STATEMENT_BLOCK R_BRACE .
+   30 DO_WHILE: DO $@5 STATEMENT . WHILE L_PAREN EXPR0 R_PAREN $@6 SEMICOLON
 
-    $default  reduce using rule 13 (STATEMENT)
+    WHILE  shift, and go to state 192
 
 
 State 152
 
-   99 EXPR4: L_PAREN EXPR0 R_PAREN .
+   27 WHILE_LOOP: WHILE $@3 L_PAREN . EXPR0 R_PAREN $@4 STATEMENT
 
-    $default  reduce using rule 99 (EXPR4)
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR0      go to state 193
+    EXPR1      go to state 72
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 153
 
-  107 LVAL: L_PAREN LVAL R_PAREN .
+   34 FOR_LOOP: FOR L_PAREN FOR_PAR . $@7 SEMICOLON FOR_PAR $@8 SEMICOLON FOR_PAR $@9 R_PAREN STATEMENT
 
-    $default  reduce using rule 107 (LVAL)
+    $default  reduce using rule 31 ($@7)
+
+    $@7  go to state 194
 
 
 State 154
 
-  104 EXPR4: L_PAREN NUM_TYPE R_PAREN .
+   35 FOR_PAR: EXPR0 .
+   67 EXPR0: EXPR0 . COMMA EXPR1
 
-    $default  reduce using rule 104 (EXPR4)
+    COMMA  shift, and go to state 122
+
+    $default  reduce using rule 35 (FOR_PAR)
 
 
 State 155
 
-  107 LVAL: L_PAREN LVAL . R_PAREN
+   22 IF_CONS: IF L_PAREN EXPR0 . R_PAREN $@1 STATEMENT $@2 ELSE_STATEMENT
+   67 EXPR0: EXPR0 . COMMA EXPR1
 
-    R_PAREN  shift, and go to state 153
+    R_PAREN  shift, and go to state 195
+    COMMA    shift, and go to state 122
 
 
 State 156
 
-   58 ARR: IDENTIFIER L_SQ_BRACE CONST_INT . R_SQ_BRACE
-  109 NUM: CONST_INT .
+   14 STATEMENT: L_BRACE STATEMENT_BLOCK R_BRACE .
 
-    R_SQ_BRACE  shift, and go to state 190
-
-    R_SQ_BRACE  [reduce using rule 109 (NUM)]
-    $default    reduce using rule 109 (NUM)
+    $default  reduce using rule 14 (STATEMENT)
 
 
 State 157
 
-   59 ARR: IDENTIFIER L_SQ_BRACE EXPR0 . R_SQ_BRACE
-   60 EXPR0: EXPR0 . COMMA EXPR1
+  106 EXPR4: L_PAREN EXPR0 R_PAREN .
 
-    R_SQ_BRACE  shift, and go to state 191
-    COMMA       shift, and go to state 119
+    $default  reduce using rule 106 (EXPR4)
 
 
 State 158
 
-   42 FUNC_CALL: IDENTIFIER L_PAREN R_PAREN .
+  114 LVAL: L_PAREN LVAL R_PAREN .
 
-    $default  reduce using rule 42 (FUNC_CALL)
+    $default  reduce using rule 114 (LVAL)
 
 
 State 159
 
-   46 FUNC_LIST: CONST_CHAR . COMMA FUNC_LIST
-  110 NUM: CONST_CHAR .
+  111 EXPR4: L_PAREN NUM_TYPE R_PAREN .
 
-    COMMA  shift, and go to state 192
-
-    COMMA     [reduce using rule 110 (NUM)]
-    $default  reduce using rule 110 (NUM)
+    $default  reduce using rule 111 (EXPR4)
 
 
 State 160
 
-   44 FUNC_LIST: CONST_STR .
-   47          | CONST_STR . COMMA FUNC_LIST
+  114 LVAL: L_PAREN LVAL . R_PAREN
 
-    COMMA  shift, and go to state 193
-
-    $default  reduce using rule 44 (FUNC_LIST)
+    R_PAREN  shift, and go to state 158
 
 
 State 161
 
-   41 FUNC_CALL: IDENTIFIER L_PAREN FUNC_LIST . R_PAREN
+   65 ARR: IDENTIFIER L_SQ_BRACE CONST_INT . R_SQ_BRACE
+  116 NUM: CONST_INT .
 
-    R_PAREN  shift, and go to state 194
+    R_SQ_BRACE  shift, and go to state 196
+
+    R_SQ_BRACE  [reduce using rule 116 (NUM)]
+    $default    reduce using rule 116 (NUM)
 
 
 State 162
 
-   43 FUNC_LIST: EXPR1 .
-   45          | EXPR1 . COMMA FUNC_LIST
+   66 ARR: IDENTIFIER L_SQ_BRACE EXPR0 . R_SQ_BRACE
+   67 EXPR0: EXPR0 . COMMA EXPR1
 
-    COMMA  shift, and go to state 195
-
-    $default  reduce using rule 43 (FUNC_LIST)
+    R_SQ_BRACE  shift, and go to state 197
+    COMMA       shift, and go to state 122
 
 
 State 163
 
-   60 EXPR0: EXPR0 COMMA EXPR1 .
+   49 FUNC_CALL: IDENTIFIER L_PAREN R_PAREN .
 
-    $default  reduce using rule 60 (EXPR0)
+    $default  reduce using rule 49 (FUNC_CALL)
 
 
 State 164
 
-   68 EXPR1G: EXPR1G OR EXPR1F .
-   70 EXPR1F: EXPR1F . AND EXPR1E
+   53 FUNC_LIST: CONST_CHAR . COMMA FUNC_LIST
+  117 NUM: CONST_CHAR .
 
-    AND  shift, and go to state 121
+    COMMA  shift, and go to state 198
 
-    $default  reduce using rule 68 (EXPR1G)
+    COMMA     [reduce using rule 117 (NUM)]
+    $default  reduce using rule 117 (NUM)
 
 
 State 165
 
-   70 EXPR1F: EXPR1F AND EXPR1E .
-   72 EXPR1E: EXPR1E . BOR EXPR1D
+   51 FUNC_LIST: CONST_STR .
+   54          | CONST_STR . COMMA FUNC_LIST
 
-    BOR  shift, and go to state 122
+    COMMA  shift, and go to state 199
 
-    $default  reduce using rule 70 (EXPR1F)
+    $default  reduce using rule 51 (FUNC_LIST)
 
 
 State 166
 
-   72 EXPR1E: EXPR1E BOR EXPR1D .
-   74 EXPR1D: EXPR1D . CARROT EXPR1C
+   48 FUNC_CALL: IDENTIFIER L_PAREN FUNC_LIST . R_PAREN
 
-    CARROT  shift, and go to state 123
-
-    $default  reduce using rule 72 (EXPR1E)
+    R_PAREN  shift, and go to state 200
 
 
 State 167
 
-   74 EXPR1D: EXPR1D CARROT EXPR1C .
-   76 EXPR1C: EXPR1C . BAND EXPR1B
+   50 FUNC_LIST: EXPR1 .
+   52          | EXPR1 . COMMA FUNC_LIST
 
-    BAND  shift, and go to state 124
+    COMMA  shift, and go to state 201
 
-    $default  reduce using rule 74 (EXPR1D)
+    $default  reduce using rule 50 (FUNC_LIST)
 
 
 State 168
 
-   76 EXPR1C: EXPR1C BAND EXPR1B .
-   78 EXPR1B: EXPR1B . EQUALITY EXPR1A
-   79       | EXPR1B . NEQUAL EXPR1A
+   67 EXPR0: EXPR0 COMMA EXPR1 .
 
-    EQUALITY  shift, and go to state 125
-    NEQUAL    shift, and go to state 126
-
-    $default  reduce using rule 76 (EXPR1C)
+    $default  reduce using rule 67 (EXPR0)
 
 
 State 169
 
-   78 EXPR1B: EXPR1B EQUALITY EXPR1A .
-   81 EXPR1A: EXPR1A . GREAT EXPR2
-   82       | EXPR1A . LESS EXPR2
-   83       | EXPR1A . EGREAT EXPR2
-   84       | EXPR1A . ELESS EXPR2
+   75 EXPR1G: EXPR1G OR EXPR1F .
+   77 EXPR1F: EXPR1F . AND EXPR1E
 
-    GREAT   shift, and go to state 127
-    LESS    shift, and go to state 128
-    EGREAT  shift, and go to state 129
-    ELESS   shift, and go to state 130
+    AND  shift, and go to state 124
 
-    $default  reduce using rule 78 (EXPR1B)
+    $default  reduce using rule 75 (EXPR1G)
 
 
 State 170
 
-   79 EXPR1B: EXPR1B NEQUAL EXPR1A .
-   81 EXPR1A: EXPR1A . GREAT EXPR2
-   82       | EXPR1A . LESS EXPR2
-   83       | EXPR1A . EGREAT EXPR2
-   84       | EXPR1A . ELESS EXPR2
+   77 EXPR1F: EXPR1F AND EXPR1E .
+   79 EXPR1E: EXPR1E . BOR EXPR1D
 
-    GREAT   shift, and go to state 127
-    LESS    shift, and go to state 128
-    EGREAT  shift, and go to state 129
-    ELESS   shift, and go to state 130
+    BOR  shift, and go to state 125
 
-    $default  reduce using rule 79 (EXPR1B)
+    $default  reduce using rule 77 (EXPR1F)
 
 
 State 171
 
-   81 EXPR1A: EXPR1A GREAT EXPR2 .
-   86 EXPR2: EXPR2 . PLUS EXPR3
-   87      | EXPR2 . MINUS EXPR3
+   79 EXPR1E: EXPR1E BOR EXPR1D .
+   81 EXPR1D: EXPR1D . CARROT EXPR1C
 
-    PLUS   shift, and go to state 131
-    MINUS  shift, and go to state 132
+    CARROT  shift, and go to state 126
 
-    $default  reduce using rule 81 (EXPR1A)
+    $default  reduce using rule 79 (EXPR1E)
 
 
 State 172
 
-   82 EXPR1A: EXPR1A LESS EXPR2 .
-   86 EXPR2: EXPR2 . PLUS EXPR3
-   87      | EXPR2 . MINUS EXPR3
+   81 EXPR1D: EXPR1D CARROT EXPR1C .
+   83 EXPR1C: EXPR1C . BAND EXPR1B
 
-    PLUS   shift, and go to state 131
-    MINUS  shift, and go to state 132
+    BAND  shift, and go to state 127
 
-    $default  reduce using rule 82 (EXPR1A)
+    $default  reduce using rule 81 (EXPR1D)
 
 
 State 173
 
-   83 EXPR1A: EXPR1A EGREAT EXPR2 .
-   86 EXPR2: EXPR2 . PLUS EXPR3
-   87      | EXPR2 . MINUS EXPR3
+   83 EXPR1C: EXPR1C BAND EXPR1B .
+   85 EXPR1B: EXPR1B . EQUALITY EXPR1A
+   86       | EXPR1B . NEQUAL EXPR1A
 
-    PLUS   shift, and go to state 131
-    MINUS  shift, and go to state 132
+    EQUALITY  shift, and go to state 128
+    NEQUAL    shift, and go to state 129
 
-    $default  reduce using rule 83 (EXPR1A)
+    $default  reduce using rule 83 (EXPR1C)
 
 
 State 174
 
-   84 EXPR1A: EXPR1A ELESS EXPR2 .
-   86 EXPR2: EXPR2 . PLUS EXPR3
-   87      | EXPR2 . MINUS EXPR3
+   85 EXPR1B: EXPR1B EQUALITY EXPR1A .
+   88 EXPR1A: EXPR1A . GREAT EXPR2
+   89       | EXPR1A . LESS EXPR2
+   90       | EXPR1A . EGREAT EXPR2
+   91       | EXPR1A . ELESS EXPR2
 
-    PLUS   shift, and go to state 131
-    MINUS  shift, and go to state 132
+    GREAT   shift, and go to state 130
+    LESS    shift, and go to state 131
+    EGREAT  shift, and go to state 132
+    ELESS   shift, and go to state 133
 
-    $default  reduce using rule 84 (EXPR1A)
+    $default  reduce using rule 85 (EXPR1B)
 
 
 State 175
 
-   86 EXPR2: EXPR2 PLUS EXPR3 .
-   89 EXPR3: EXPR3 . MULTIPLY EXPR3A
-   90      | EXPR3 . DIVIDE EXPR3A
+   86 EXPR1B: EXPR1B NEQUAL EXPR1A .
+   88 EXPR1A: EXPR1A . GREAT EXPR2
+   89       | EXPR1A . LESS EXPR2
+   90       | EXPR1A . EGREAT EXPR2
+   91       | EXPR1A . ELESS EXPR2
 
-    MULTIPLY  shift, and go to state 133
-    DIVIDE    shift, and go to state 134
+    GREAT   shift, and go to state 130
+    LESS    shift, and go to state 131
+    EGREAT  shift, and go to state 132
+    ELESS   shift, and go to state 133
 
-    $default  reduce using rule 86 (EXPR2)
+    $default  reduce using rule 86 (EXPR1B)
 
 
 State 176
 
-   87 EXPR2: EXPR2 MINUS EXPR3 .
-   89 EXPR3: EXPR3 . MULTIPLY EXPR3A
-   90      | EXPR3 . DIVIDE EXPR3A
+   88 EXPR1A: EXPR1A GREAT EXPR2 .
+   93 EXPR2: EXPR2 . PLUS EXPR3
+   94      | EXPR2 . MINUS EXPR3
 
-    MULTIPLY  shift, and go to state 133
-    DIVIDE    shift, and go to state 134
+    PLUS   shift, and go to state 134
+    MINUS  shift, and go to state 135
 
-    $default  reduce using rule 87 (EXPR2)
+    $default  reduce using rule 88 (EXPR1A)
 
 
 State 177
 
-   89 EXPR3: EXPR3 MULTIPLY EXPR3A .
+   89 EXPR1A: EXPR1A LESS EXPR2 .
+   93 EXPR2: EXPR2 . PLUS EXPR3
+   94      | EXPR2 . MINUS EXPR3
 
-    $default  reduce using rule 89 (EXPR3)
+    PLUS   shift, and go to state 134
+    MINUS  shift, and go to state 135
+
+    $default  reduce using rule 89 (EXPR1A)
 
 
 State 178
 
-   90 EXPR3: EXPR3 DIVIDE EXPR3A .
+   90 EXPR1A: EXPR1A EGREAT EXPR2 .
+   93 EXPR2: EXPR2 . PLUS EXPR3
+   94      | EXPR2 . MINUS EXPR3
 
-    $default  reduce using rule 90 (EXPR3)
+    PLUS   shift, and go to state 134
+    MINUS  shift, and go to state 135
+
+    $default  reduce using rule 90 (EXPR1A)
 
 
 State 179
 
-   62 EXPR1: LVAL EQUAL EXPR1 .
+   91 EXPR1A: EXPR1A ELESS EXPR2 .
+   93 EXPR2: EXPR2 . PLUS EXPR3
+   94      | EXPR2 . MINUS EXPR3
 
-    $default  reduce using rule 62 (EXPR1)
+    PLUS   shift, and go to state 134
+    MINUS  shift, and go to state 135
+
+    $default  reduce using rule 91 (EXPR1A)
 
 
 State 180
 
-   63 EXPR1: LVAL PEQUAL EXPR1 .
+   93 EXPR2: EXPR2 PLUS EXPR3 .
+   96 EXPR3: EXPR3 . MULTIPLY EXPR3A
+   97      | EXPR3 . DIVIDE EXPR3A
 
-    $default  reduce using rule 63 (EXPR1)
+    MULTIPLY  shift, and go to state 136
+    DIVIDE    shift, and go to state 137
+
+    $default  reduce using rule 93 (EXPR2)
 
 
 State 181
 
-   64 EXPR1: LVAL MEQUAL EXPR1 .
+   94 EXPR2: EXPR2 MINUS EXPR3 .
+   96 EXPR3: EXPR3 . MULTIPLY EXPR3A
+   97      | EXPR3 . DIVIDE EXPR3A
 
-    $default  reduce using rule 64 (EXPR1)
+    MULTIPLY  shift, and go to state 136
+    DIVIDE    shift, and go to state 137
+
+    $default  reduce using rule 94 (EXPR2)
 
 
 State 182
 
-   65 EXPR1: LVAL SEQUAL EXPR1 .
+   96 EXPR3: EXPR3 MULTIPLY EXPR3A .
 
-    $default  reduce using rule 65 (EXPR1)
+    $default  reduce using rule 96 (EXPR3)
 
 
 State 183
 
-   66 EXPR1: LVAL BEQUAL EXPR1 .
+   97 EXPR3: EXPR3 DIVIDE EXPR3A .
 
-    $default  reduce using rule 66 (EXPR1)
+    $default  reduce using rule 97 (EXPR3)
 
 
 State 184
 
-   54 DEC2: DEC_ARR EQUAL L_BRACE EXPR0 R_BRACE .
+   69 EXPR1: LVAL EQUAL EXPR1 .
 
-    $default  reduce using rule 54 (DEC2)
+    $default  reduce using rule 69 (EXPR1)
 
 
 State 185
 
-   38 FUNC_PARAMS1: CHAR IDENTIFIER COMMA FUNC_PARAMS1 .
+   70 EXPR1: LVAL PEQUAL EXPR1 .
 
-    $default  reduce using rule 38 (FUNC_PARAMS1)
+    $default  reduce using rule 70 (EXPR1)
 
 
 State 186
 
-   37 FUNC_PARAMS1: NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1 .
+   71 EXPR1: LVAL MEQUAL EXPR1 .
 
-    $default  reduce using rule 37 (FUNC_PARAMS1)
+    $default  reduce using rule 71 (EXPR1)
 
 
 State 187
 
-   29 DO_WHILE: DO $@5 STATEMENT WHILE . L_PAREN EXPR0 R_PAREN $@6 SEMICOLON
+   72 EXPR1: LVAL SEQUAL EXPR1 .
 
-    L_PAREN  shift, and go to state 196
+    $default  reduce using rule 72 (EXPR1)
 
 
 State 188
 
-   26 WHILE_LOOP: WHILE $@3 L_PAREN EXPR0 . R_PAREN $@4 STATEMENT
-   60 EXPR0: EXPR0 . COMMA EXPR1
+   73 EXPR1: LVAL BEQUAL EXPR1 .
 
-    R_PAREN  shift, and go to state 197
-    COMMA    shift, and go to state 119
+    $default  reduce using rule 73 (EXPR1)
 
 
 State 189
 
-   21 IF_CONS: IF L_PAREN EXPR0 R_PAREN . $@1 STATEMENT $@2 ELSE_STATEMENT
+   61 DEC2: DEC_ARR EQUAL L_BRACE EXPR0 R_BRACE .
 
-    $default  reduce using rule 19 ($@1)
-
-    $@1  go to state 198
+    $default  reduce using rule 61 (DEC2)
 
 
 State 190
 
-   58 ARR: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE .
+   45 FUNC_PARAMS1: CHAR IDENTIFIER COMMA FUNC_PARAMS1 .
 
-    $default  reduce using rule 58 (ARR)
+    $default  reduce using rule 45 (FUNC_PARAMS1)
 
 
 State 191
 
-   59 ARR: IDENTIFIER L_SQ_BRACE EXPR0 R_SQ_BRACE .
+   44 FUNC_PARAMS1: NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1 .
 
-    $default  reduce using rule 59 (ARR)
+    $default  reduce using rule 44 (FUNC_PARAMS1)
 
 
 State 192
 
-   46 FUNC_LIST: CONST_CHAR COMMA . FUNC_LIST
+   30 DO_WHILE: DO $@5 STATEMENT WHILE . L_PAREN EXPR0 R_PAREN $@6 SEMICOLON
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 159
-    CONST_STR    shift, and go to state 160
-
-    FUNC_CALL  go to state 66
-    FUNC_LIST  go to state 199
-    ARR        go to state 68
-    EXPR1      go to state 162
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
+    L_PAREN  shift, and go to state 202
 
 
 State 193
 
-   47 FUNC_LIST: CONST_STR COMMA . FUNC_LIST
+   27 WHILE_LOOP: WHILE $@3 L_PAREN EXPR0 . R_PAREN $@4 STATEMENT
+   67 EXPR0: EXPR0 . COMMA EXPR1
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 159
-    CONST_STR    shift, and go to state 160
-
-    FUNC_CALL  go to state 66
-    FUNC_LIST  go to state 200
-    ARR        go to state 68
-    EXPR1      go to state 162
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
+    R_PAREN  shift, and go to state 203
+    COMMA    shift, and go to state 122
 
 
 State 194
 
-   41 FUNC_CALL: IDENTIFIER L_PAREN FUNC_LIST R_PAREN .
+   34 FOR_LOOP: FOR L_PAREN FOR_PAR $@7 . SEMICOLON FOR_PAR $@8 SEMICOLON FOR_PAR $@9 R_PAREN STATEMENT
 
-    $default  reduce using rule 41 (FUNC_CALL)
+    SEMICOLON  shift, and go to state 204
 
 
 State 195
 
-   45 FUNC_LIST: EXPR1 COMMA . FUNC_LIST
+   22 IF_CONS: IF L_PAREN EXPR0 R_PAREN . $@1 STATEMENT $@2 ELSE_STATEMENT
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 159
-    CONST_STR    shift, and go to state 160
+    $default  reduce using rule 20 ($@1)
 
-    FUNC_CALL  go to state 66
-    FUNC_LIST  go to state 201
-    ARR        go to state 68
-    EXPR1      go to state 162
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
+    $@1  go to state 205
 
 
 State 196
 
-   29 DO_WHILE: DO $@5 STATEMENT WHILE L_PAREN . EXPR0 R_PAREN $@6 SEMICOLON
+   65 ARR: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE .
 
-    L_PAREN      shift, and go to state 49
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
-
-    FUNC_CALL  go to state 66
-    ARR        go to state 68
-    EXPR0      go to state 202
-    EXPR1      go to state 70
-    EXPR1G     go to state 71
-    EXPR1F     go to state 72
-    EXPR1E     go to state 73
-    EXPR1D     go to state 74
-    EXPR1C     go to state 75
-    EXPR1B     go to state 76
-    EXPR1A     go to state 77
-    EXPR2      go to state 78
-    EXPR3      go to state 79
-    EXPR3A     go to state 80
-    EXPR4      go to state 81
-    LVAL       go to state 82
-    NUM        go to state 83
+    $default  reduce using rule 65 (ARR)
 
 
 State 197
 
-   26 WHILE_LOOP: WHILE $@3 L_PAREN EXPR0 R_PAREN . $@4 STATEMENT
+   66 ARR: IDENTIFIER L_SQ_BRACE EXPR0 R_SQ_BRACE .
 
-    $default  reduce using rule 25 ($@4)
-
-    $@4  go to state 203
+    $default  reduce using rule 66 (ARR)
 
 
 State 198
 
-   21 IF_CONS: IF L_PAREN EXPR0 R_PAREN $@1 . STATEMENT $@2 ELSE_STATEMENT
+   53 FUNC_LIST: CONST_CHAR COMMA . FUNC_LIST
 
-    RETURN       shift, and go to state 43
-    BREAK        shift, and go to state 44
-    UNSIGNED     shift, and go to state 4
-    SIGNED       shift, and go to state 5
-    DO           shift, and go to state 45
-    WHILE        shift, and go to state 46
-    IF           shift, and go to state 47
-    L_BRACE      shift, and go to state 48
-    L_PAREN      shift, and go to state 49
-    SEMICOLON    shift, and go to state 50
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    CHAR         shift, and go to state 56
-    FLOAT        shift, and go to state 7
-    INT          shift, and go to state 9
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 164
+    CONST_STR    shift, and go to state 165
 
-    STATEMENT   go to state 204
-    IF_CONS     go to state 63
-    WHILE_LOOP  go to state 64
-    DO_WHILE    go to state 65
-    FUNC_CALL   go to state 66
-    DEC0        go to state 67
-    CHR_TYPE    go to state 13
-    ARR         go to state 68
-    EXPR0       go to state 69
-    EXPR1       go to state 70
-    EXPR1G      go to state 71
-    EXPR1F      go to state 72
-    EXPR1E      go to state 73
-    EXPR1D      go to state 74
-    EXPR1C      go to state 75
-    EXPR1B      go to state 76
-    EXPR1A      go to state 77
-    EXPR2       go to state 78
-    EXPR3       go to state 79
-    EXPR3A      go to state 80
-    EXPR4       go to state 81
-    LVAL        go to state 82
-    NUM         go to state 83
-    NUM_TYPE    go to state 84
+    FUNC_CALL  go to state 68
+    FUNC_LIST  go to state 206
+    ARR        go to state 70
+    EXPR1      go to state 167
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 199
 
-   46 FUNC_LIST: CONST_CHAR COMMA FUNC_LIST .
+   54 FUNC_LIST: CONST_STR COMMA . FUNC_LIST
 
-    $default  reduce using rule 46 (FUNC_LIST)
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 164
+    CONST_STR    shift, and go to state 165
+
+    FUNC_CALL  go to state 68
+    FUNC_LIST  go to state 207
+    ARR        go to state 70
+    EXPR1      go to state 167
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 200
 
-   47 FUNC_LIST: CONST_STR COMMA FUNC_LIST .
+   48 FUNC_CALL: IDENTIFIER L_PAREN FUNC_LIST R_PAREN .
 
-    $default  reduce using rule 47 (FUNC_LIST)
+    $default  reduce using rule 48 (FUNC_CALL)
 
 
 State 201
 
-   45 FUNC_LIST: EXPR1 COMMA FUNC_LIST .
+   52 FUNC_LIST: EXPR1 COMMA . FUNC_LIST
 
-    $default  reduce using rule 45 (FUNC_LIST)
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 164
+    CONST_STR    shift, and go to state 165
+
+    FUNC_CALL  go to state 68
+    FUNC_LIST  go to state 208
+    ARR        go to state 70
+    EXPR1      go to state 167
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 202
 
-   29 DO_WHILE: DO $@5 STATEMENT WHILE L_PAREN EXPR0 . R_PAREN $@6 SEMICOLON
-   60 EXPR0: EXPR0 . COMMA EXPR1
+   30 DO_WHILE: DO $@5 STATEMENT WHILE L_PAREN . EXPR0 R_PAREN $@6 SEMICOLON
 
-    R_PAREN  shift, and go to state 205
-    COMMA    shift, and go to state 119
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR0      go to state 209
+    EXPR1      go to state 72
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 203
 
-   26 WHILE_LOOP: WHILE $@3 L_PAREN EXPR0 R_PAREN $@4 . STATEMENT
+   27 WHILE_LOOP: WHILE $@3 L_PAREN EXPR0 R_PAREN . $@4 STATEMENT
 
-    RETURN       shift, and go to state 43
-    BREAK        shift, and go to state 44
-    UNSIGNED     shift, and go to state 4
-    SIGNED       shift, and go to state 5
-    DO           shift, and go to state 45
-    WHILE        shift, and go to state 46
-    IF           shift, and go to state 47
-    L_BRACE      shift, and go to state 48
-    L_PAREN      shift, and go to state 49
-    SEMICOLON    shift, and go to state 50
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    CHAR         shift, and go to state 56
-    FLOAT        shift, and go to state 7
-    INT          shift, and go to state 9
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    $default  reduce using rule 26 ($@4)
 
-    STATEMENT   go to state 206
-    IF_CONS     go to state 63
-    WHILE_LOOP  go to state 64
-    DO_WHILE    go to state 65
-    FUNC_CALL   go to state 66
-    DEC0        go to state 67
-    CHR_TYPE    go to state 13
-    ARR         go to state 68
-    EXPR0       go to state 69
-    EXPR1       go to state 70
-    EXPR1G      go to state 71
-    EXPR1F      go to state 72
-    EXPR1E      go to state 73
-    EXPR1D      go to state 74
-    EXPR1C      go to state 75
-    EXPR1B      go to state 76
-    EXPR1A      go to state 77
-    EXPR2       go to state 78
-    EXPR3       go to state 79
-    EXPR3A      go to state 80
-    EXPR4       go to state 81
-    LVAL        go to state 82
-    NUM         go to state 83
-    NUM_TYPE    go to state 84
+    $@4  go to state 210
 
 
 State 204
 
-   21 IF_CONS: IF L_PAREN EXPR0 R_PAREN $@1 STATEMENT . $@2 ELSE_STATEMENT
+   34 FOR_LOOP: FOR L_PAREN FOR_PAR $@7 SEMICOLON . FOR_PAR $@8 SEMICOLON FOR_PAR $@9 R_PAREN STATEMENT
 
-    $default  reduce using rule 20 ($@2)
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
-    $@2  go to state 207
+    $default  reduce using rule 36 (FOR_PAR)
+
+    FOR_PAR    go to state 211
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR0      go to state 154
+    EXPR1      go to state 72
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
 
 
 State 205
 
-   29 DO_WHILE: DO $@5 STATEMENT WHILE L_PAREN EXPR0 R_PAREN . $@6 SEMICOLON
-
-    $default  reduce using rule 28 ($@6)
-
-    $@6  go to state 208
-
-
-State 206
-
-   26 WHILE_LOOP: WHILE $@3 L_PAREN EXPR0 R_PAREN $@4 STATEMENT .
-
-    $default  reduce using rule 26 (WHILE_LOOP)
-
-
-State 207
-
-   21 IF_CONS: IF L_PAREN EXPR0 R_PAREN $@1 STATEMENT $@2 . ELSE_STATEMENT
-
-    ELSE  shift, and go to state 209
-
-    ELSE      [reduce using rule 23 (ELSE_STATEMENT)]
-    $default  reduce using rule 23 (ELSE_STATEMENT)
-
-    ELSE_STATEMENT  go to state 210
-
-
-State 208
-
-   29 DO_WHILE: DO $@5 STATEMENT WHILE L_PAREN EXPR0 R_PAREN $@6 . SEMICOLON
-
-    SEMICOLON  shift, and go to state 211
-
-
-State 209
-
-   22 ELSE_STATEMENT: ELSE . STATEMENT
+   22 IF_CONS: IF L_PAREN EXPR0 R_PAREN $@1 . STATEMENT $@2 ELSE_STATEMENT
 
     RETURN       shift, and go to state 43
     BREAK        shift, and go to state 44
@@ -3271,65 +3236,382 @@ State 209
     SIGNED       shift, and go to state 5
     DO           shift, and go to state 45
     WHILE        shift, and go to state 46
-    IF           shift, and go to state 47
-    L_BRACE      shift, and go to state 48
-    L_PAREN      shift, and go to state 49
-    SEMICOLON    shift, and go to state 50
-    INCR         shift, and go to state 51
-    DECR         shift, and go to state 52
-    PLUS         shift, and go to state 53
-    MINUS        shift, and go to state 54
-    BAND         shift, and go to state 55
-    CHAR         shift, and go to state 56
+    FOR          shift, and go to state 47
+    IF           shift, and go to state 48
+    L_BRACE      shift, and go to state 49
+    L_PAREN      shift, and go to state 50
+    SEMICOLON    shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    CHAR         shift, and go to state 57
     FLOAT        shift, and go to state 7
     INT          shift, and go to state 9
-    IDENTIFIER   shift, and go to state 57
-    CONST_FLOAT  shift, and go to state 58
-    CONST_INT    shift, and go to state 59
-    CONST_CHAR   shift, and go to state 60
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
 
     STATEMENT   go to state 212
-    IF_CONS     go to state 63
-    WHILE_LOOP  go to state 64
-    DO_WHILE    go to state 65
-    FUNC_CALL   go to state 66
-    DEC0        go to state 67
+    IF_CONS     go to state 64
+    WHILE_LOOP  go to state 65
+    DO_WHILE    go to state 66
+    FOR_LOOP    go to state 67
+    FUNC_CALL   go to state 68
+    DEC0        go to state 69
     CHR_TYPE    go to state 13
-    ARR         go to state 68
-    EXPR0       go to state 69
-    EXPR1       go to state 70
-    EXPR1G      go to state 71
-    EXPR1F      go to state 72
-    EXPR1E      go to state 73
-    EXPR1D      go to state 74
-    EXPR1C      go to state 75
-    EXPR1B      go to state 76
-    EXPR1A      go to state 77
-    EXPR2       go to state 78
-    EXPR3       go to state 79
-    EXPR3A      go to state 80
-    EXPR4       go to state 81
-    LVAL        go to state 82
-    NUM         go to state 83
-    NUM_TYPE    go to state 84
+    ARR         go to state 70
+    EXPR0       go to state 71
+    EXPR1       go to state 72
+    EXPR1G      go to state 73
+    EXPR1F      go to state 74
+    EXPR1E      go to state 75
+    EXPR1D      go to state 76
+    EXPR1C      go to state 77
+    EXPR1B      go to state 78
+    EXPR1A      go to state 79
+    EXPR2       go to state 80
+    EXPR3       go to state 81
+    EXPR3A      go to state 82
+    EXPR4       go to state 83
+    LVAL        go to state 84
+    NUM         go to state 85
+    NUM_TYPE    go to state 86
+
+
+State 206
+
+   53 FUNC_LIST: CONST_CHAR COMMA FUNC_LIST .
+
+    $default  reduce using rule 53 (FUNC_LIST)
+
+
+State 207
+
+   54 FUNC_LIST: CONST_STR COMMA FUNC_LIST .
+
+    $default  reduce using rule 54 (FUNC_LIST)
+
+
+State 208
+
+   52 FUNC_LIST: EXPR1 COMMA FUNC_LIST .
+
+    $default  reduce using rule 52 (FUNC_LIST)
+
+
+State 209
+
+   30 DO_WHILE: DO $@5 STATEMENT WHILE L_PAREN EXPR0 . R_PAREN $@6 SEMICOLON
+   67 EXPR0: EXPR0 . COMMA EXPR1
+
+    R_PAREN  shift, and go to state 213
+    COMMA    shift, and go to state 122
 
 
 State 210
 
-   21 IF_CONS: IF L_PAREN EXPR0 R_PAREN $@1 STATEMENT $@2 ELSE_STATEMENT .
+   27 WHILE_LOOP: WHILE $@3 L_PAREN EXPR0 R_PAREN $@4 . STATEMENT
 
-    $default  reduce using rule 21 (IF_CONS)
+    RETURN       shift, and go to state 43
+    BREAK        shift, and go to state 44
+    UNSIGNED     shift, and go to state 4
+    SIGNED       shift, and go to state 5
+    DO           shift, and go to state 45
+    WHILE        shift, and go to state 46
+    FOR          shift, and go to state 47
+    IF           shift, and go to state 48
+    L_BRACE      shift, and go to state 49
+    L_PAREN      shift, and go to state 50
+    SEMICOLON    shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    CHAR         shift, and go to state 57
+    FLOAT        shift, and go to state 7
+    INT          shift, and go to state 9
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    STATEMENT   go to state 214
+    IF_CONS     go to state 64
+    WHILE_LOOP  go to state 65
+    DO_WHILE    go to state 66
+    FOR_LOOP    go to state 67
+    FUNC_CALL   go to state 68
+    DEC0        go to state 69
+    CHR_TYPE    go to state 13
+    ARR         go to state 70
+    EXPR0       go to state 71
+    EXPR1       go to state 72
+    EXPR1G      go to state 73
+    EXPR1F      go to state 74
+    EXPR1E      go to state 75
+    EXPR1D      go to state 76
+    EXPR1C      go to state 77
+    EXPR1B      go to state 78
+    EXPR1A      go to state 79
+    EXPR2       go to state 80
+    EXPR3       go to state 81
+    EXPR3A      go to state 82
+    EXPR4       go to state 83
+    LVAL        go to state 84
+    NUM         go to state 85
+    NUM_TYPE    go to state 86
 
 
 State 211
 
-   29 DO_WHILE: DO $@5 STATEMENT WHILE L_PAREN EXPR0 R_PAREN $@6 SEMICOLON .
+   34 FOR_LOOP: FOR L_PAREN FOR_PAR $@7 SEMICOLON FOR_PAR . $@8 SEMICOLON FOR_PAR $@9 R_PAREN STATEMENT
 
-    $default  reduce using rule 29 (DO_WHILE)
+    $default  reduce using rule 32 ($@8)
+
+    $@8  go to state 215
 
 
 State 212
 
-   22 ELSE_STATEMENT: ELSE STATEMENT .
+   22 IF_CONS: IF L_PAREN EXPR0 R_PAREN $@1 STATEMENT . $@2 ELSE_STATEMENT
 
-    $default  reduce using rule 22 (ELSE_STATEMENT)
+    $default  reduce using rule 21 ($@2)
+
+    $@2  go to state 216
+
+
+State 213
+
+   30 DO_WHILE: DO $@5 STATEMENT WHILE L_PAREN EXPR0 R_PAREN . $@6 SEMICOLON
+
+    $default  reduce using rule 29 ($@6)
+
+    $@6  go to state 217
+
+
+State 214
+
+   27 WHILE_LOOP: WHILE $@3 L_PAREN EXPR0 R_PAREN $@4 STATEMENT .
+
+    $default  reduce using rule 27 (WHILE_LOOP)
+
+
+State 215
+
+   34 FOR_LOOP: FOR L_PAREN FOR_PAR $@7 SEMICOLON FOR_PAR $@8 . SEMICOLON FOR_PAR $@9 R_PAREN STATEMENT
+
+    SEMICOLON  shift, and go to state 218
+
+
+State 216
+
+   22 IF_CONS: IF L_PAREN EXPR0 R_PAREN $@1 STATEMENT $@2 . ELSE_STATEMENT
+
+    ELSE  shift, and go to state 219
+
+    ELSE      [reduce using rule 24 (ELSE_STATEMENT)]
+    $default  reduce using rule 24 (ELSE_STATEMENT)
+
+    ELSE_STATEMENT  go to state 220
+
+
+State 217
+
+   30 DO_WHILE: DO $@5 STATEMENT WHILE L_PAREN EXPR0 R_PAREN $@6 . SEMICOLON
+
+    SEMICOLON  shift, and go to state 221
+
+
+State 218
+
+   34 FOR_LOOP: FOR L_PAREN FOR_PAR $@7 SEMICOLON FOR_PAR $@8 SEMICOLON . FOR_PAR $@9 R_PAREN STATEMENT
+
+    L_PAREN      shift, and go to state 50
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    $default  reduce using rule 36 (FOR_PAR)
+
+    FOR_PAR    go to state 222
+    FUNC_CALL  go to state 68
+    ARR        go to state 70
+    EXPR0      go to state 154
+    EXPR1      go to state 72
+    EXPR1G     go to state 73
+    EXPR1F     go to state 74
+    EXPR1E     go to state 75
+    EXPR1D     go to state 76
+    EXPR1C     go to state 77
+    EXPR1B     go to state 78
+    EXPR1A     go to state 79
+    EXPR2      go to state 80
+    EXPR3      go to state 81
+    EXPR3A     go to state 82
+    EXPR4      go to state 83
+    LVAL       go to state 84
+    NUM        go to state 85
+
+
+State 219
+
+   23 ELSE_STATEMENT: ELSE . STATEMENT
+
+    RETURN       shift, and go to state 43
+    BREAK        shift, and go to state 44
+    UNSIGNED     shift, and go to state 4
+    SIGNED       shift, and go to state 5
+    DO           shift, and go to state 45
+    WHILE        shift, and go to state 46
+    FOR          shift, and go to state 47
+    IF           shift, and go to state 48
+    L_BRACE      shift, and go to state 49
+    L_PAREN      shift, and go to state 50
+    SEMICOLON    shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    CHAR         shift, and go to state 57
+    FLOAT        shift, and go to state 7
+    INT          shift, and go to state 9
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    STATEMENT   go to state 223
+    IF_CONS     go to state 64
+    WHILE_LOOP  go to state 65
+    DO_WHILE    go to state 66
+    FOR_LOOP    go to state 67
+    FUNC_CALL   go to state 68
+    DEC0        go to state 69
+    CHR_TYPE    go to state 13
+    ARR         go to state 70
+    EXPR0       go to state 71
+    EXPR1       go to state 72
+    EXPR1G      go to state 73
+    EXPR1F      go to state 74
+    EXPR1E      go to state 75
+    EXPR1D      go to state 76
+    EXPR1C      go to state 77
+    EXPR1B      go to state 78
+    EXPR1A      go to state 79
+    EXPR2       go to state 80
+    EXPR3       go to state 81
+    EXPR3A      go to state 82
+    EXPR4       go to state 83
+    LVAL        go to state 84
+    NUM         go to state 85
+    NUM_TYPE    go to state 86
+
+
+State 220
+
+   22 IF_CONS: IF L_PAREN EXPR0 R_PAREN $@1 STATEMENT $@2 ELSE_STATEMENT .
+
+    $default  reduce using rule 22 (IF_CONS)
+
+
+State 221
+
+   30 DO_WHILE: DO $@5 STATEMENT WHILE L_PAREN EXPR0 R_PAREN $@6 SEMICOLON .
+
+    $default  reduce using rule 30 (DO_WHILE)
+
+
+State 222
+
+   34 FOR_LOOP: FOR L_PAREN FOR_PAR $@7 SEMICOLON FOR_PAR $@8 SEMICOLON FOR_PAR . $@9 R_PAREN STATEMENT
+
+    $default  reduce using rule 33 ($@9)
+
+    $@9  go to state 224
+
+
+State 223
+
+   23 ELSE_STATEMENT: ELSE STATEMENT .
+
+    $default  reduce using rule 23 (ELSE_STATEMENT)
+
+
+State 224
+
+   34 FOR_LOOP: FOR L_PAREN FOR_PAR $@7 SEMICOLON FOR_PAR $@8 SEMICOLON FOR_PAR $@9 . R_PAREN STATEMENT
+
+    R_PAREN  shift, and go to state 225
+
+
+State 225
+
+   34 FOR_LOOP: FOR L_PAREN FOR_PAR $@7 SEMICOLON FOR_PAR $@8 SEMICOLON FOR_PAR $@9 R_PAREN . STATEMENT
+
+    RETURN       shift, and go to state 43
+    BREAK        shift, and go to state 44
+    UNSIGNED     shift, and go to state 4
+    SIGNED       shift, and go to state 5
+    DO           shift, and go to state 45
+    WHILE        shift, and go to state 46
+    FOR          shift, and go to state 47
+    IF           shift, and go to state 48
+    L_BRACE      shift, and go to state 49
+    L_PAREN      shift, and go to state 50
+    SEMICOLON    shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    PLUS         shift, and go to state 54
+    MINUS        shift, and go to state 55
+    BAND         shift, and go to state 56
+    CHAR         shift, and go to state 57
+    FLOAT        shift, and go to state 7
+    INT          shift, and go to state 9
+    IDENTIFIER   shift, and go to state 58
+    CONST_FLOAT  shift, and go to state 59
+    CONST_INT    shift, and go to state 60
+    CONST_CHAR   shift, and go to state 61
+
+    STATEMENT   go to state 226
+    IF_CONS     go to state 64
+    WHILE_LOOP  go to state 65
+    DO_WHILE    go to state 66
+    FOR_LOOP    go to state 67
+    FUNC_CALL   go to state 68
+    DEC0        go to state 69
+    CHR_TYPE    go to state 13
+    ARR         go to state 70
+    EXPR0       go to state 71
+    EXPR1       go to state 72
+    EXPR1G      go to state 73
+    EXPR1F      go to state 74
+    EXPR1E      go to state 75
+    EXPR1D      go to state 76
+    EXPR1C      go to state 77
+    EXPR1B      go to state 78
+    EXPR1A      go to state 79
+    EXPR2       go to state 80
+    EXPR3       go to state 81
+    EXPR3A      go to state 82
+    EXPR4       go to state 83
+    LVAL        go to state 84
+    NUM         go to state 85
+    NUM_TYPE    go to state 86
+
+
+State 226
+
+   34 FOR_LOOP: FOR L_PAREN FOR_PAR $@7 SEMICOLON FOR_PAR $@8 SEMICOLON FOR_PAR $@9 R_PAREN STATEMENT .
+
+    $default  reduce using rule 34 (FOR_LOOP)

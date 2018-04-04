@@ -33,7 +33,7 @@
 %token <val> CONST_FLOAT CONST_INT
 %token <val2> CONST_CHAR CONST_STR
 %type <pair> NUM_TYPE DEC2 DEC_ARR LVAL ARR
-%type <pair> NUM EXPR0 EXPR1 EXPR1G EXPR1F EXPR1E EXPR1D EXPR1C EXPR1B EXPR1A EXPR2 EXPR3 EXPR3A EXPR4 FUNC_CALL
+%type <pair> NUM EXPR0 EXPR1 EXPR1G EXPR1F EXPR1E EXPR1D EXPR1C EXPR1B EXPR1A EXPR2 EXPR3 EXPR3A EXPR4 FUNC_CALL FOR_PAR
 %type <lval> FUNC_DEC FUNC_DEF
 %{
 	#include "lib.h"
@@ -58,7 +58,7 @@
 		char idr_name[30];
 	}idr_stack[20];
 	int idr_stack_top = -1;
-
+	int numParams = 0;
 
 	
 	char return_type[20];
@@ -74,11 +74,14 @@
   char lpStack[20][10];
   int lptop = -1;
 
-	int linenum_stack[30];
-	int labelCount = 0;
-	void addToThreeCode(char * cd){
-		++basic_code_len;
-		strcpy(basic_code[basic_code_len],cd);
+  char forLab1[10], forLab2[10];
+
+  int linenum_stack[30];
+  int labelCount = 0;
+  void addToThreeCode(char *cd)
+  {
+	  ++basic_code_len;
+	  strcpy(basic_code[basic_code_len], cd);
 	}
 	char * useLabel(){
 		char *result = malloc(200*sizeof(char));
@@ -151,6 +154,7 @@ STATEMENT
 	: EXPR0 SEMICOLON {}
 	| DEC0 SEMICOLON
 	| IF_CONS
+	| FOR_LOOP
 	| WHILE_LOOP
 	| DO_WHILE
 	| L_BRACE STATEMENT_BLOCK R_BRACE
@@ -280,10 +284,63 @@ DO_WHILE
 		}
 	}
 	;
+	//FOR LOOP
 
-// Function Declarations/Definitions
-FUNC_DEC
-	: CHAR IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {
+	FOR_LOOP
+		: FOR L_PAREN FOR_PAR
+	{
+		char tempCode[200];
+		sprintf(tempCode, "%s : \n", useLabel());
+		addToThreeCode(tempCode);
+		strcpy(forLab1, curLabel());
+	}
+
+	SEMICOLON FOR_PAR
+	{
+		char tempCode[200];
+		sprintf(tempCode, "if %s == 1 goto ", $6.id_or_const);
+		
+
+		addToThreeCode(tempCode);
+		addToStack(basic_code_len);
+		sprintf(tempCode, "goto ");
+		addToThreeCode(tempCode);
+		addToStack(basic_code_len);
+		sprintf(tempCode, "%s : \n", useLabel());
+		addToThreeCode(tempCode);
+		addToLpStack(curLabel());
+	}
+
+	SEMICOLON FOR_PAR
+	{
+		char tempCode[200];
+		sprintf(tempCode, "goto %s\n", forLab1);
+		addToThreeCode(tempCode);
+		sprintf(tempCode, "%s : \n", useLabel());
+		addToThreeCode(tempCode);
+		backPatch(curLabel(), 2);
+	}
+
+	R_PAREN STATEMENT
+	{
+		char *t = (char *)malloc(sizeof(char) * 10);
+		t = popLpStack();
+		char tempCode[200];
+		sprintf(tempCode, "goto %s\n", t);
+		addToThreeCode(tempCode);
+		sprintf(tempCode, "%s : \n", useLabel());
+		addToThreeCode(tempCode);
+		backPatch(curLabel(), 1);
+	};
+	FOR_PAR
+		: EXPR0	{strcpy($$.id_or_const, $1.id_or_const);}
+		|	{strcpy($$.id_or_const, "1");}
+		;
+
+	// Function Declarations/Definitions
+	FUNC_DEC
+		: CHAR IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
+	{
 		strcpy(return_type, $1);
 		struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
 		t = give_scope_struct($2);
@@ -396,7 +453,10 @@ FUNC_CALL
 		char *tempCode = malloc(sizeof(char) * 200);
 		sprintf(tempCode, "refparam result\n");
 		addToThreeCode(tempCode);
-		strcpy($$.id_or_const,"result");
+		strcpy($$.id_or_const, "result");
+		sprintf(tempCode, "call %s, %d\n", $1, numParams);
+		addToThreeCode(tempCode);
+		numParams = 0;
 	}
 	| IDENTIFIER L_PAREN R_PAREN	{
 		struct table_entry *temp = (struct table_entry *)malloc(sizeof(struct table_entry));
@@ -421,30 +481,35 @@ FUNC_LIST
 		char *tempCode = malloc(sizeof(char) * 200);
 		sprintf(tempCode,"refparam %s\n",$1.id_or_const);
 		addToThreeCode(tempCode);
+		++numParams;
 	}
 	| CONST_STR {
 		strcpy(func_call[++func_call_param].datatype, "char*");
 		char *tempCode = malloc(sizeof(char) * 200);
 		sprintf(tempCode, "refparam %s\n", $1);
 		addToThreeCode(tempCode);
+		++numParams;
 	}
 	| EXPR1 COMMA FUNC_LIST	{
 		strcpy(func_call[++func_call_param].datatype, $1.dtype);
 		char *tempCode = malloc(sizeof(char) * 200);
 		sprintf(tempCode, "refparam %s\n", $1.id_or_const);
 		addToThreeCode(tempCode);
+		++numParams;
 	}
 	| CONST_CHAR COMMA FUNC_LIST {
 		strcpy(func_call[++func_call_param].datatype, "char");
 		char *tempCode = malloc(sizeof(char) * 200);
 		sprintf(tempCode, "refparam %s\n", $1);
 		addToThreeCode(tempCode);
+		++numParams;
 	}
 	| CONST_STR COMMA FUNC_LIST {
 		strcpy(func_call[++func_call_param].datatype, "char*");
 		char *tempCode = malloc(sizeof(char) * 200);
 		sprintf(tempCode, "refparam %s\n", $1);
 		addToThreeCode(tempCode);
+		++numParams;
 	}
 	;
 
@@ -514,6 +579,14 @@ ARR
 			printf("Not an array at line %d\n",line);
 		}
 	 }
+	 char *tempCode = malloc(sizeof(char) * 200);
+	 sprintf(tempCode, "t%d = addr(%s);\n",temp_num++,$1);
+	 addToThreeCode(tempCode);
+	 sprintf(tempCode, "t%d = addr(4 * %.0f);\n", temp_num++,$3);
+	 addToThreeCode(tempCode);
+	 sprintf(tempCode, "t%d = t%d[t%d];\n", temp_num++, temp_num-2,temp_num-3);
+	 addToThreeCode(tempCode);
+	 sprintf($$.id_or_const, "t%d",(temp_num-1));
 	}
 	| IDENTIFIER L_SQ_BRACE EXPR0 R_SQ_BRACE {
 			char tempo[256];
