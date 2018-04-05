@@ -696,13 +696,29 @@ EXPRESSION1
 	}
 	;
 EXPRESSION1G
-	: EXPRESSION1G OR EXPRESSION1F {
+	: EXPRESSION1G {
+
+	sprintf(t_reg, "t%d", temp_num);
+	temp_num++;
+	char tempCode[200];
+	sprintf(tempCode, "%s = %s == 1\n", t_reg, $1.id_or_const);
+	addToThreeCode(tempCode);
+	sprintf(tempCode, "if %s == 1 then goto ", t_reg);
+	addToThreeCode(tempCode);
+	addToStack(basic_code_len);
+
+	}
+	
+	OR EXPRESSION1F {
 		strcpy($$.dtype,"int");
-		sprintf($$.id_or_const, "t%d", temp_num);
+		sprintf($$.id_or_const, "%s", t_reg);
 		char tempCode[200];
-		sprintf(tempCode, "%s = %s || %s;\n", $$.id_or_const, $1.id_or_const, $3.id_or_const);
+
+		sprintf(tempCode, "%s = %s == 1\n", t_reg, $4.id_or_const);
 		addToThreeCode(tempCode);
-		temp_num++;
+		sprintf(tempCode, "%s : \n", useLabel());
+		addToThreeCode(tempCode);
+		backPatch(curLabel(), 1);
 	}
 	| EXPRESSION1F {
 		strcpy($$.dtype, $1.dtype);
