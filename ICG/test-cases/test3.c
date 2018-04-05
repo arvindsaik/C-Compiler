@@ -1,19 +1,17 @@
 #include <stdio.h>
+// 1. Function Definition
+// 2. Function Call
 
-int sum(int a, float b)
+float sum(float a, float b)
 {
   return a + b;
 }
 
-int func1(float a, float c)
-{
-	return 3;
-}
 int main()
 {
-	int a;
-	float b;
+  float a;
+  float b;
 
-  a = sum(2.5, 3);
-  b = func1(2, 2.5);
+  a = sum(2.3, 3.5);
+  b = 3.4 * 4.3 + a * 20;
 }

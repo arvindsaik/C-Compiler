@@ -1,33 +1,20 @@
-func begin sum
-t0 = a + b;
-return t0 ;
-func end
 func begin main
-t1 = addr(c);
-t2 = 4 * 0;
-t3 = t1[t2];
-t4 = t3 + 1;
-a = t4;
-a = 0;
+t0 = a < 10;
+if t0 == 1 goto Label_0
+goto Label_4
 Label_0 : 
-t7 = a < 5;
-if t7 == 1 goto Label_2
-goto Label_6
-Label_1 : 
 a = a + 1; 
-goto Label_0
-Label_2 : 
-t8 = b + 1;
-b = t8;
-Label_3 : 
-t10 = b > 10.900000;
-if t10 == 1 goto Label_4
-goto Label_5
-Label_4 : 
+t1 = b < 2;
+if t1 == 1 goto Label_1
+goto Label_2
+Label_1 : 
 b = b + 1; 
 goto Label_3
+Label_2 : 
+b = b - 1; 
+Label_3 : 
+goto Label_5
+Label_4 : 
+a = a - 1; 
 Label_5 : 
-goto Label_1
-Label_6 : 
-a = 0;
 func end
