@@ -1,7 +1,7 @@
 %token RETURN BREAK
 %token UNSIGNED SIGNED
-%token DO WHILE FOR IF ELSE CASE DEFAULT
-%token L_BRACE R_BRACE L_SQ_BRACE R_SQ_BRACE L_PAREN R_PAREN DOT
+%token DO WHILE FOR IF ELSE CASE DEFAULT CARROT
+%token LEFT_FLOWER RIGHT_FLOWER LEFT_SQUARE_BRACKET RIGHT_SQUARE_BRACKET LEFT_PARENTHESIS RIGHT_PARENTHESIS DOT
 %token SEMICOLON COLON
 %token INCR DECR
 %token NOT BNOT
@@ -12,7 +12,7 @@
 %left GREAT LESS EGREAT ELESS
 %left EQUALITY NEQUAL
 %left BAND
-%left CARROT
+%left CARRAYOT
 %left BOR
 %left AND
 %left OR
@@ -32,9 +32,9 @@
 %token <lval> IDENTIFIER 
 %token <val> CONST_FLOAT CONST_INT
 %token <val2> CONST_CHAR CONST_STR
-%type <pair> NUM_TYPE DEC2 DEC_ARR LVAL ARR
-%type <pair> NUM EXPR0 EXPR1 EXPR1G EXPR1F EXPR1E EXPR1D EXPR1C EXPR1B EXPR1A EXPR2 EXPR3 EXPR3A EXPR4 FUNC_CALL FOR_PAR
-%type <lval> FUNC_DEC FUNC_DEF
+%type <pair> NUMBER_TYPE DECLARATION2 DEC_ARRAY LVALUE ARRAY
+%type <pair> NUM EXPRESSION0 EXPRESSION1 EXPRESSION1G EXPRESSION1F EXPRESSION1E EXPRESSION1D EXPRESSION1C EXPRESSION1B EXPRESSION1A EXPRESSION2 EXPRESSION3 EXPRESSION3A EXPRESSION4 FUNCTION_CALL FOR_PARAMETER
+%type <lval> FUNCTION_DECLARATION FUNC_DEF
 %{
 	#include "lib.h"
 	#include <stdlib.h>
@@ -138,8 +138,8 @@
 // Start symbol, everything allowed outside main
 
 START
-	: START DEC0 SEMICOLON 
-	| START FUNC_DEC SEMICOLON
+	: START DECLARATION0 SEMICOLON 
+	| START FUNCTION_DECLARATION SEMICOLON
 	| START FUNC_DEF
 	| SEMICOLON
 	|
@@ -151,15 +151,15 @@ STATEMENT_BLOCK
 	| STATEMENT
 	;
 STATEMENT
-	: EXPR0 SEMICOLON {}
-	| DEC0 SEMICOLON
-	| IF_CONS
+	: EXPRESSION0 SEMICOLON {}
+	| DECLARATION0 SEMICOLON
+	| IF_CONDITION
 	| FOR_LOOP
 	| WHILE_LOOP
 	| DO_WHILE
-	| L_BRACE STATEMENT_BLOCK R_BRACE
-	| L_BRACE R_BRACE
-	| RETURN EXPR1 SEMICOLON { 
+	| LEFT_FLOWER STATEMENT_BLOCK RIGHT_FLOWER
+	| LEFT_FLOWER RIGHT_FLOWER
+	| RETURN EXPRESSION1 SEMICOLON { 
 		if(strcmp(return_type, $2.dtype)!=0){
 			printf("Return type is not correct at line: %d.\n", line);
 		}
@@ -185,8 +185,8 @@ STATEMENT
 	| SEMICOLON {};
 
 	// If construct
-IF_CONS
-	: IF L_PAREN EXPR0 R_PAREN {
+IF_CONDITION
+	: IF LEFT_PARENTHESIS EXPRESSION0 RIGHT_PARENTHESIS {
 		char tempCode[200];
 		if (strcmp($3.dtype, "int") != 0)
 		{
@@ -235,7 +235,7 @@ ELSE_STATEMENT
     	addToLpStack(curLabel());
     }
     
-    L_PAREN EXPR0 R_PAREN {
+    LEFT_PARENTHESIS EXPRESSION0 RIGHT_PARENTHESIS {
 		char *tempCode = malloc(sizeof(char) * 200);
 		sprintf(tempCode, "if %s == 1 goto %s\ngoto ", $4.id_or_const, nextLabel());
 		addToThreeCode(tempCode);
@@ -272,7 +272,7 @@ DO_WHILE
     addToLpStack(curLabel());
   }
   
-  STATEMENT WHILE L_PAREN EXPR0 R_PAREN {
+  STATEMENT WHILE LEFT_PARENTHESIS EXPRESSION0 RIGHT_PARENTHESIS {
   	char *tempCode = malloc(sizeof(char)*200);
   	sprintf(tempCode, "if %s == 1 goto %s\n", $6.id_or_const, popLpStack());
 	addToThreeCode(tempCode);
@@ -287,7 +287,7 @@ DO_WHILE
 	//FOR LOOP
 
 	FOR_LOOP
-		: FOR L_PAREN FOR_PAR
+		: FOR LEFT_PARENTHESIS FOR_PARAMETER
 	{
 		char tempCode[200];
 		sprintf(tempCode, "%s : \n", useLabel());
@@ -295,7 +295,7 @@ DO_WHILE
 		strcpy(forLab1, curLabel());
 	}
 
-	SEMICOLON FOR_PAR
+	SEMICOLON FOR_PARAMETER
 	{
 		char tempCode[200];
 		sprintf(tempCode, "if %s == 1 goto ", $6.id_or_const);
@@ -311,7 +311,7 @@ DO_WHILE
 		addToLpStack(curLabel());
 	}
 
-	SEMICOLON FOR_PAR
+	SEMICOLON FOR_PARAMETER
 	{
 		char tempCode[200];
 		sprintf(tempCode, "goto %s\n", forLab1);
@@ -321,7 +321,7 @@ DO_WHILE
 		backPatch(curLabel(), 2);
 	}
 
-	R_PAREN STATEMENT
+	RIGHT_PARENTHESIS STATEMENT
 	{
 		char *t = (char *)malloc(sizeof(char) * 10);
 		t = popLpStack();
@@ -332,14 +332,14 @@ DO_WHILE
 		addToThreeCode(tempCode);
 		backPatch(curLabel(), 1);
 	};
-	FOR_PAR
-		: EXPR0	{strcpy($$.id_or_const, $1.id_or_const);}
+	FOR_PARAMETER
+		: EXPRESSION0	{strcpy($$.id_or_const, $1.id_or_const);}
 		|	{strcpy($$.id_or_const, "1");}
 		;
 
 	// Function Declarations/Definitions
-	FUNC_DEC
-		: CHAR IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN
+	FUNCTION_DECLARATION
+		: CHAR IDENTIFIER LEFT_PARENTHESIS FUNC_PARAMS RIGHT_PARENTHESIS
 	{
 		strcpy(return_type, $1);
 		struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
@@ -352,7 +352,7 @@ DO_WHILE
 		num_params=-1;
 		strcpy($$,$2);
 	}
-	| NUM_TYPE IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {
+	| NUMBER_TYPE IDENTIFIER LEFT_PARENTHESIS FUNC_PARAMS RIGHT_PARENTHESIS {
 		strcpy(return_type, $1.dtype);
 		struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
 		t = give_scope_struct($2);
@@ -365,7 +365,7 @@ DO_WHILE
 		num_params=-1;
 		strcpy($$,$2);
 	}
-	| VOID IDENTIFIER L_PAREN FUNC_PARAMS R_PAREN {
+	| VOID IDENTIFIER LEFT_PARENTHESIS FUNC_PARAMS RIGHT_PARENTHESIS {
 		strcpy(return_type, $1);
 		struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
 		t = give_scope_struct($2);
@@ -379,11 +379,11 @@ DO_WHILE
 	}
 	;
 FUNC_DEF
-	: FUNC_DEC {
+	: FUNCTION_DECLARATION {
 		char *tempCode = malloc(sizeof(char) * 200);
 		sprintf(tempCode,"func begin %s\n",$1);
 		addToThreeCode(tempCode);
-	} L_BRACE STATEMENT_BLOCK R_BRACE	{
+	} LEFT_FLOWER STATEMENT_BLOCK RIGHT_FLOWER	{
 		char *tempCode = malloc(sizeof(char) * 200);
 		sprintf(tempCode, "func end\n");
 		addToThreeCode(tempCode);
@@ -394,7 +394,7 @@ FUNC_PARAMS
 	|
 	;
 FUNC_PARAMS1
-	: NUM_TYPE IDENTIFIER COMMA FUNC_PARAMS1 {
+	: NUMBER_TYPE IDENTIFIER COMMA FUNC_PARAMS1 {
 		strcpy(temp[++num_params].datatype, $1.dtype);
 		st[++top] = brack_num+1;
 		install_symbol($2, $1.dtype, st, top,-1, return_type, temp, num_params, 0);	
@@ -407,7 +407,7 @@ FUNC_PARAMS1
 		top--;
 	}
 
-	| NUM_TYPE IDENTIFIER {
+	| NUMBER_TYPE IDENTIFIER {
 		strcpy(temp[++num_params].datatype, $1.dtype);
 		st[++top] = brack_num+1;
 		install_symbol($2, $1.dtype, st, top,-1, return_type, temp, num_params, 0);	
@@ -420,8 +420,8 @@ FUNC_PARAMS1
 		top--;
 	}
 	;
-FUNC_CALL
-: IDENTIFIER L_PAREN FUNC_LIST R_PAREN	{
+FUNCTION_CALL
+: IDENTIFIER LEFT_PARENTHESIS FUNCTION_LIST RIGHT_PARENTHESIS	{
 		struct table_entry *temp = (struct table_entry *)malloc(sizeof(struct table_entry));
 		temp = give_scope_struct($1);
 		if(temp!=NULL && temp->is_func==1 && strcmp("printf", $1)!=0 && ((temp->num_params)==func_call_param))
@@ -458,7 +458,7 @@ FUNC_CALL
 		addToThreeCode(tempCode);
 		numParams = 0;
 	}
-	| IDENTIFIER L_PAREN R_PAREN	{
+	| IDENTIFIER LEFT_PARENTHESIS RIGHT_PARENTHESIS	{
 		struct table_entry *temp = (struct table_entry *)malloc(sizeof(struct table_entry));
 		temp = give_scope_struct($1);
 		if(temp!=NULL && temp->is_func==1 && strcmp("printf", $1)!=0 && ((temp->num_params)==func_call_param))
@@ -475,8 +475,8 @@ FUNC_CALL
 			strcpy($$.dtype, temp->return_type);
 	}
 	;
-FUNC_LIST
-	: EXPR1	{
+FUNCTION_LIST
+	: EXPRESSION1	{
 		strcpy(func_call[++func_call_param].datatype, $1.dtype);
 		char *tempCode = malloc(sizeof(char) * 200);
 		sprintf(tempCode,"refparam %s\n",$1.id_or_const);
@@ -490,21 +490,21 @@ FUNC_LIST
 		addToThreeCode(tempCode);
 		++numParams;
 	}
-	| EXPR1 COMMA FUNC_LIST	{
+	| EXPRESSION1 COMMA FUNCTION_LIST	{
 		strcpy(func_call[++func_call_param].datatype, $1.dtype);
 		char *tempCode = malloc(sizeof(char) * 200);
 		sprintf(tempCode, "refparam %s\n", $1.id_or_const);
 		addToThreeCode(tempCode);
 		++numParams;
 	}
-	| CONST_CHAR COMMA FUNC_LIST {
+	| CONST_CHAR COMMA FUNCTION_LIST {
 		strcpy(func_call[++func_call_param].datatype, "char");
 		char *tempCode = malloc(sizeof(char) * 200);
 		sprintf(tempCode, "refparam %s\n", $1);
 		addToThreeCode(tempCode);
 		++numParams;
 	}
-	| CONST_STR COMMA FUNC_LIST {
+	| CONST_STR COMMA FUNCTION_LIST {
 		strcpy(func_call[++func_call_param].datatype, "char*");
 		char *tempCode = malloc(sizeof(char) * 200);
 		sprintf(tempCode, "refparam %s\n", $1);
@@ -514,18 +514,18 @@ FUNC_LIST
 	;
 
 // Variable Declarations
-DEC0
-	: NUM_TYPE DEC1
-	| CHR_TYPE DEC1
+DECLARATION0
+	: NUMBER_TYPE DECLARATION1
+	| CHR_TYPE DECLARATION1
 	;
 CHR_TYPE
 	: CHAR {strcpy(id, $1);} // added so that char comes in type in symbol table
-DEC1
-	: DEC1 COMMA DEC2
-	| DEC2
+DECLARATION1
+	: DECLARATION1 COMMA DECLARATION2
+	| DECLARATION2
 	;
-DEC2
-	: IDENTIFIER EQUAL EXPR1 {
+DECLARATION2
+	: IDENTIFIER EQUAL EXPRESSION1 {
 		struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
 		t = give_scope_struct($1);
 		if(t==NULL || (t!=NULL && t->is_func!=1) )
@@ -535,9 +535,12 @@ DEC2
 		{
 			printf("There exists a function with same name at line : %d.\n", line);
 		}
+		char *tempCode = malloc(sizeof(char)*200);
+		sprintf(tempCode,"%s = %s;\n",$1,$3.id_or_const);
+		addToThreeCode(tempCode);
 	}
-	| DEC_ARR EQUAL L_BRACE EXPR0 R_BRACE {}
-	| DEC_ARR {}
+	| DEC_ARRAY EQUAL LEFT_FLOWER EXPRESSION0 RIGHT_FLOWER {}
+	| DEC_ARRAY {}
 	| IDENTIFIER {
 		struct table_entry *t = (struct table_entry *)malloc(sizeof(struct table_entry));
 		t = give_scope_struct($1);
@@ -552,8 +555,8 @@ DEC2
 
 
 // Arrays
-DEC_ARR
-	: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE {
+DEC_ARRAY
+	: IDENTIFIER LEFT_SQUARE_BRACKET CONST_INT RIGHT_SQUARE_BRACKET {
 		install_symbol($1, id, st, top,$3, return_type, temp, num_params, 0);
 		if($3<=0){
 			printf("Illegal size of array.\n"); 
@@ -561,8 +564,8 @@ DEC_ARR
 		}
 	}
 	;
-ARR
-	: IDENTIFIER L_SQ_BRACE CONST_INT R_SQ_BRACE {
+ARRAY
+	: IDENTIFIER LEFT_SQUARE_BRACKET CONST_INT RIGHT_SQUARE_BRACKET {
 	 char tempo[256];
 	 strcpy(tempo,$1);
 	 if(check_scope(tempo) == 0){
@@ -588,7 +591,7 @@ ARR
 	 addToThreeCode(tempCode);
 	 sprintf($$.id_or_const, "t%d",(temp_num-1));
 	}
-	| IDENTIFIER L_SQ_BRACE EXPR0 R_SQ_BRACE {
+	| IDENTIFIER LEFT_SQUARE_BRACKET EXPRESSION0 RIGHT_SQUARE_BRACKET {
 			char tempo[256];
 			strcpy(tempo,$1);
 
@@ -607,17 +610,17 @@ ARR
 	;
 
 // Expressions
-EXPR0
-	: EXPR0 COMMA EXPR1 {
+EXPRESSION0
+	: EXPRESSION0 COMMA EXPRESSION1 {
 		strcpy($$.dtype,"int");
 	}
-	| EXPR1 {
+	| EXPRESSION1 {
 		strcpy($$.dtype,$1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 	}
 	;
-EXPR1
-	: LVAL EQUAL EXPR1 {
+EXPRESSION1
+	: LVALUE EQUAL EXPRESSION1 {
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype); 
 			sprintf($$.id_or_const,"t%d",temp_num);		
@@ -631,7 +634,7 @@ EXPR1
 			strcpy($$.dtype,$1.dtype);
 		} 
 	}
-	| LVAL PEQUAL EXPR1 {
+	| LVALUE PEQUAL EXPRESSION1 {
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype);
 			sprintf($$.id_or_const, "t%d", temp_num);
@@ -645,7 +648,7 @@ EXPR1
 			strcpy($$.dtype,$1.dtype);
 		}
 	}
-	| LVAL MEQUAL EXPR1 {
+	| LVALUE MEQUAL EXPRESSION1 {
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype);
 			sprintf($$.id_or_const, "t%d", temp_num);
@@ -659,7 +662,7 @@ EXPR1
 			strcpy($$.dtype,$1.dtype);
 		}
 	}
-	| LVAL SEQUAL EXPR1 {
+	| LVALUE SEQUAL EXPRESSION1 {
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype);
 			sprintf($$.id_or_const, "t%d", temp_num);
@@ -673,7 +676,7 @@ EXPR1
 			strcpy($$.dtype,$1.dtype);
 		}
 	}
-	| LVAL BEQUAL EXPR1 {
+	| LVALUE BEQUAL EXPRESSION1 {
 		if(strcmp($1.dtype,$3.dtype) == 0 || strcmp(ret_type($1.dtype, $3.dtype), $1.dtype)==0) {
 			strcpy($$.dtype,$1.dtype);
 			sprintf($$.id_or_const, "t%d", temp_num);
@@ -687,13 +690,13 @@ EXPR1
 			strcpy($$.dtype,$1.dtype);
 		}
 	}
-	| EXPR1G {
+	| EXPRESSION1G {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 	}
 	;
-EXPR1G
-	: EXPR1G OR EXPR1F {
+EXPRESSION1G
+	: EXPRESSION1G OR EXPRESSION1F {
 		strcpy($$.dtype,"int");
 		sprintf($$.id_or_const, "t%d", temp_num);
 		char tempCode[200];
@@ -701,13 +704,13 @@ EXPR1G
 		addToThreeCode(tempCode);
 		temp_num++;
 	}
-	| EXPR1F {
+	| EXPRESSION1F {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 	}
 	;
-EXPR1F
-	: EXPR1F AND EXPR1E {
+EXPRESSION1F
+	: EXPRESSION1F AND EXPRESSION1E {
 		strcpy($$.dtype,"int");
 		sprintf($$.id_or_const, "t%d", temp_num);
 		char tempCode[200];
@@ -715,14 +718,14 @@ EXPR1F
 		addToThreeCode(tempCode);
 		temp_num++;
 	}
-	| EXPR1E {
+	| EXPRESSION1E {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 	
 	}
 	;
-EXPR1E
-	: EXPR1E BOR EXPR1D {
+EXPRESSION1E
+	: EXPRESSION1E BOR EXPRESSION1D {
 		strcpy($$.dtype,"int");
 		sprintf($$.id_or_const, "t%d", temp_num);
 		
@@ -731,13 +734,13 @@ EXPR1E
 		addToThreeCode(tempCode);
 		temp_num++;
 	}
-	| EXPR1D {
+	| EXPRESSION1D {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 	}
 	;
-EXPR1D
-	: EXPR1D CARROT EXPR1C {
+EXPRESSION1D
+	: EXPRESSION1D CARRAYOT EXPRESSION1C {
 		strcpy($$.dtype,"int");
 		sprintf($$.id_or_const, "t%d", temp_num);
 		
@@ -745,26 +748,26 @@ EXPR1D
 		sprintf(tempCode, "%s = %s ^ %s;\n", $$.id_or_const, $1.id_or_const, $3.id_or_const);
 		temp_num++;
 	}
-	| EXPR1C {
+	| EXPRESSION1C {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 	}
 	;
-EXPR1C
-	: EXPR1C BAND EXPR1B {
+EXPRESSION1C
+	: EXPRESSION1C BAND EXPRESSION1B {
 		strcpy($$.dtype,"int");
 		sprintf($$.id_or_const, "t%d", temp_num);
 		char tempCode[200];
 		sprintf(tempCode, "%s = %s & %s;\n", $$.id_or_const, $1.id_or_const, $3.id_or_const);
 		temp_num++;
 	}
-	| EXPR1B {
+	| EXPRESSION1B {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 	}
 	;
-EXPR1B
-	: EXPR1B EQUALITY EXPR1A {
+EXPRESSION1B
+	: EXPRESSION1B EQUALITY EXPRESSION1A {
 		strcpy($$.dtype,"int");
 		sprintf($$.id_or_const, "t%d", temp_num);
 		char tempCode[200];
@@ -772,7 +775,7 @@ EXPR1B
 		addToThreeCode(tempCode);
 		temp_num++;
 	}
-	| EXPR1B NEQUAL EXPR1A {
+	| EXPRESSION1B NEQUAL EXPRESSION1A {
 		strcpy($$.dtype,"int");
 		sprintf($$.id_or_const, "t%d", temp_num);
 		
@@ -781,13 +784,13 @@ EXPR1B
 		addToThreeCode(tempCode);
 		temp_num++;
 	}
-	| EXPR1A {
+	| EXPRESSION1A {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 	}
 	;
-EXPR1A
-	: EXPR1A GREAT EXPR2 {
+EXPRESSION1A
+	: EXPRESSION1A GREAT EXPRESSION2 {
 		strcpy($$.dtype,"int");
 		sprintf($$.id_or_const, "t%d", temp_num);
 		
@@ -796,7 +799,7 @@ EXPR1A
 		addToThreeCode(tempCode);
 		temp_num++;
 	}
-	| EXPR1A LESS EXPR2 {
+	| EXPRESSION1A LESS EXPRESSION2 {
 		strcpy($$.dtype,"int");
 		sprintf($$.id_or_const, "t%d", temp_num);
 		
@@ -806,7 +809,7 @@ EXPR1A
 		temp_num++;
 	}
 	
-	| EXPR1A EGREAT EXPR2 {
+	| EXPRESSION1A EGREAT EXPRESSION2 {
 		strcpy($$.dtype,"int");
 		sprintf($$.id_or_const, "t%d", temp_num);
 		
@@ -816,7 +819,7 @@ EXPR1A
 		temp_num++;
 	}
 	
-	| EXPR1A ELESS EXPR2 {
+	| EXPRESSION1A ELESS EXPRESSION2 {
 		strcpy($$.dtype,"int");sprintf($$.id_or_const, "t%d", temp_num);
 		
 		char tempCode[200];
@@ -825,13 +828,13 @@ EXPR1A
 		temp_num++;
 	}
 	
-	| EXPR2 {
+	| EXPRESSION2 {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 	}
 	;
-EXPR2
-	: EXPR2 PLUS EXPR3 {
+EXPRESSION2
+	: EXPRESSION2 PLUS EXPRESSION3 {
 		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
 		sprintf($$.id_or_const, "t%d", temp_num);
 		char tempCode[200];
@@ -839,7 +842,7 @@ EXPR2
 		addToThreeCode(tempCode);
 		temp_num++;
 	}
-	| EXPR2 MINUS EXPR3 {
+	| EXPRESSION2 MINUS EXPRESSION3 {
 		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
 		sprintf($$.id_or_const, "t%d", temp_num);
 		char tempCode[200];
@@ -847,13 +850,13 @@ EXPR2
 		addToThreeCode(tempCode);
 		temp_num++;
 	}
-	| EXPR3 {
+	| EXPRESSION3 {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 	}
 	;
-EXPR3
-	: EXPR3 MULTIPLY EXPR3A {
+EXPRESSION3
+	: EXPRESSION3 MULTIPLY EXPRESSION3A {
 		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
 		sprintf($$.id_or_const, "t%d", temp_num);
 		char tempCode[200];
@@ -861,7 +864,7 @@ EXPR3
 		addToThreeCode(tempCode);
 		temp_num++;
 	}
-	| EXPR3 DIVIDE EXPR3A {
+	| EXPRESSION3 DIVIDE EXPRESSION3A {
 		strcpy($$.dtype,ret_type($1.dtype,$3.dtype));
 		sprintf($$.id_or_const, "t%d", temp_num);
 		char tempCode[200];
@@ -869,60 +872,60 @@ EXPR3
 		addToThreeCode(tempCode);
 		temp_num++;
 	}
-	| EXPR3A {
+	| EXPRESSION3A {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 	}
 	;
-EXPR3A
-	: INCR LVAL {
+EXPRESSION3A
+	: INCR LVALUE {
 		strcpy($$.dtype, $2.dtype);
 		strcpy($$.id_or_const,$2.id_or_const);
 		char *tempCode = malloc(200 * sizeof(char));
 		sprintf(tempCode, "%s = %s + 1; \n", $2.id_or_const, $2.id_or_const);
 		addToThreeCode(tempCode);
 	}
-	| DECR LVAL {
+	| DECR LVALUE {
 		strcpy($$.dtype, $2.dtype);
 		strcpy($$.id_or_const,$2.id_or_const);
 		char *tempCode = malloc(200 * sizeof(char));
 		sprintf(tempCode, "%s = %s - 1; \n", $2.id_or_const, $2.id_or_const);
 		addToThreeCode(tempCode);
 	}
-	| PLUS EXPR4 {
+	| PLUS EXPRESSION4 {
 		strcpy($$.dtype, $2.dtype);
 		strcpy($$.id_or_const,$2.id_or_const);
 	}
-	| MINUS EXPR4 {
+	| MINUS EXPRESSION4 {
 		strcpy($$.dtype, $2.dtype);
 		strcpy($$.id_or_const,$2.id_or_const);
 	}
-	| BAND LVAL {
+	| BAND LVALUE {
 		strcpy($$.dtype, $2.dtype);
 		strcpy($$.id_or_const,$2.id_or_const);
 	}
-	| FUNC_CALL {
+	| FUNCTION_CALL {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 	}
-	| EXPR4 {
+	| EXPRESSION4 {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 	}
 	;
-EXPR4
-	: L_PAREN EXPR0 R_PAREN {
+EXPRESSION4
+	: LEFT_PARENTHESIS EXPRESSION0 RIGHT_PARENTHESIS {
 		strcpy($$.dtype, $2.dtype);
 		strcpy($$.id_or_const,$2.id_or_const);
 	}
-	| LVAL INCR {
+	| LVALUE INCR {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 		char * tempCode = malloc(200*sizeof(char));
 		sprintf(tempCode, "%s = %s + 1; \n", $1.id_or_const, $1.id_or_const);
 		addToThreeCode(tempCode);
 	}
-	| LVAL DECR {
+	| LVALUE DECR {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 		char *tempCode = malloc(200 * sizeof(char));
@@ -933,17 +936,17 @@ EXPR4
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 	}
-	| LVAL {
+	| LVALUE {
 		strcpy($$.dtype, $1.dtype);
 		strcpy($$.id_or_const,$1.id_or_const);
 	}
-	| L_PAREN NUM_TYPE R_PAREN {
+	| LEFT_PARENTHESIS NUMBER_TYPE RIGHT_PARENTHESIS {
 		strcpy($$.dtype, $2.dtype);
 		strcpy($$.id_or_const,$2.id_or_const);
 	}
 	;
 
-LVAL
+LVALUE
 	: IDENTIFIER {
 		sprintf($$.dtype,"%s",get_datatype($1,st,top));
 		// printf("%s : %d here \n",$1,get_arr_dim($1,st,top));
@@ -963,10 +966,10 @@ LVAL
 			printf("Array identifier cannot be used without subscript at line %d\n",line);
 		}
 	}
-	| ARR {
+	| ARRAY {
 		strcpy($$.dtype, $1.dtype);
 	}
-	| L_PAREN LVAL R_PAREN {
+	| LEFT_PARENTHESIS LVALUE RIGHT_PARENTHESIS {
 		strcpy($$.dtype, $2.dtype);
 	}
 	;
@@ -988,7 +991,7 @@ NUM
 		char temp[20]; 
 	}
 	;
-NUM_TYPE
+NUMBER_TYPE
 	: INT {
 		strcpy(id, $1); 
 		strcpy($$.dtype, $1);

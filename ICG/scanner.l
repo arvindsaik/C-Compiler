@@ -27,7 +27,7 @@ identifier [a-zA-Z_][a-zA-Z0-9_]*
 	{
 		//depth[depth_top++]=line;
     brack_num++;st[++top] = brack_num;
-		return L_BRACE;
+		return LEFT_FLOWER;
 	}
 }
 "}" {
@@ -39,7 +39,7 @@ identifier [a-zA-Z_][a-zA-Z0-9_]*
 		//{
 		//	--depth_top;
       --top;
-			return R_BRACE;
+			return RIGHT_FLOWER;
 		//}
 	}
 }
@@ -96,10 +96,10 @@ identifier [a-zA-Z_][a-zA-Z0-9_]*
 "&" {CHECK return BAND;}
 
 
-"[" CHECK return L_SQ_BRACE;
-"]" CHECK return R_SQ_BRACE;
-"(" CHECK return L_PAREN;
-")" CHECK return R_PAREN;
+"[" CHECK return LEFT_SQUARE_BRACKET;
+"]" CHECK return RIGHT_SQUARE_BRACKET;
+"(" CHECK return LEFT_PARENTHESIS;
+")" CHECK return RIGHT_PARENTHESIS;
 "," CHECK return COMMA;
 ";" CHECK return SEMICOLON;
 ":" CHECK return COLON;

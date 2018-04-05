@@ -874,7 +874,7 @@ YY_RULE_SETUP
 	{
 		//depth[depth_top++]=line;
     brack_num++;st[++top] = brack_num;
-		return L_BRACE;
+		return LEFT_FLOWER;
 	}
 }
 	YY_BREAK
@@ -890,7 +890,7 @@ YY_RULE_SETUP
 		//{
 		//	--depth_top;
       --top;
-			return R_BRACE;
+			return RIGHT_FLOWER;
 		//}
 	}
 }
@@ -1113,22 +1113,22 @@ YY_RULE_SETUP
 case 50:
 YY_RULE_SETUP
 #line 99 "scanner.l"
-CHECK return L_SQ_BRACE;
+CHECK return LEFT_SQUARE_BRACKET;
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
 #line 100 "scanner.l"
-CHECK return R_SQ_BRACE;
+CHECK return RIGHT_SQUARE_BRACKET;
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
 #line 101 "scanner.l"
-CHECK return L_PAREN;
+CHECK return LEFT_PARENTHESIS;
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
 #line 102 "scanner.l"
-CHECK return R_PAREN;
+CHECK return RIGHT_PARENTHESIS;
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
